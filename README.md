@@ -37,6 +37,47 @@ do this using Xtendroid:
 getMyTextView.text = "some text" // use the getter for lazy-loading
 ```
 
+Do you find the AsyncTask boilerplate code too messy? Try the BgTask class:
+```xtend
+val progressBar = new ProgressDialog(...)
+new BgTask<String>.runInBg([|
+   // this bit runs in the background
+   var retVal = fetchSomethingFromSomewhere()
+   // need to update progress?
+   runOnUiThread[ progressBar.value = 10 ]
+   retVal
+],[result|
+   // this runs in the UI thread
+   toast("Got back: " + result)
+]
+)
+```
+
+If you are using SharedPreferences, and you have a PreferenceActivity to allow the user to change app settings, then the BaseSettings class and @Preference annotation makes it super-easy to access the settings in your Activity:
+
+Create a Settings class:
+```xtend
+class Settings extends BasePreferences {
+   @Preference boolean enabled = true
+   @Preference String authToken = ""
+
+   // convenience method to get instance
+   def static Settings getSettings(Context context) {
+      return getPreferences(context, typeof(Settings)) as Settings
+   }
+}
+```
+
+Now you can use the Settings class in any Activity:
+```xtend
+import static extension Settings.*
+
+// in onCreate
+if (settings.enabled) {
+   // do stuff
+}
+```
+
 Do you have a list of POJO's that you want to display inside a ListView? The BeanAdapter makes this super easy!
 
 row_user.xml:
@@ -74,4 +115,10 @@ Getting Started
 Git clone this repository and import it using Eclipse. Add it as a library project to your Xtend project. Now you can use it as shown in the examples above.
 
 More documentation coming soon.
+
+Xtend
+-----
+
+For more about Xtend, see http://xtend-lang.org
+
 
