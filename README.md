@@ -1,4 +1,77 @@
 Xtendroid
 =========
 
-Android library for productive Android development using Xtend
+Xtendroid is an Android library that combines the power of Xtend with some utility classes/annotations for productive Android development. With Xtendroid, you can spend a lot less time writing boilerplate code and benefit from the tooling support provided by the Xtend framework. Xtendroid is based on the convention-over-configuration philosophy, so resources in Android map automatically to Java getters and setters by name (CamelCase to resource_name mapping).
+
+Examples
+--------
+
+If you display toasts often, you know that typing out Toast.makeText... is a pain, and it's not easy to add it to a base class, since Activities may extends multiple base classes (like ListActivity, FragmentActivity, etc.) Here's the easy way using Xtendroid:
+
+```xtend
+import static extension com.tobykurien.xtendroid.utils.AlertUtils.*
+
+// elsewhere
+toast("My message")
+
+// or in a fragment
+activity.toast("My message")
+```
+
+Want to access a view in your Activity? Instead of
+
+```java
+TextView myTextView;
+
+// elsewhere
+myTextView = (TextView) findViewById(R.id.my_text_view);
+myTextView.setText("some text");
+```
+
+do this using Xtendroid:
+
+```xtend
+@AndroidView TextView myTextView // maps to R.id.my_text_view
+
+// elsewhere
+getMyTextView.text = "some text" // use the getter for lazy-loading
+```
+
+Do you have a list of POJO's that you want to display inside a ListView? The BeanAdapter makes this super easy!
+
+row_user.xml:
+```xml
+<LinearLayout ... >
+ <TextView android:id="@+id/first_name" .../>
+ <TextView android:id="@+id/last_name" .../>
+ <ImageView android:id="@+id/avatar" .../>
+</LinearLayout>
+```
+
+The POJO:
+```xtend
+class User {
+  @Property String firstName
+  @Property String lastName
+  @Property Bitmap avatar
+}
+```
+
+The Activity:
+```xtend
+@AndroidView ListView userList // maps to R.id.user_list
+
+// in onCreate
+var adapter = new BeanAdapter(this, R.layout.row_user, typeof(User))
+getUserList.adapter = adapter
+```
+
+And there's more, documentation coming soon. For an example of a project that uses this library, see the Webapps project http://github.com/tobykurien/webapps
+
+Getting Started
+----------------
+
+Git clone this repository and import it using Eclipse. Add it as a library project to your Xtend project. Now you can use it as shown in the examples above.
+
+More documentation coming soon.
+
