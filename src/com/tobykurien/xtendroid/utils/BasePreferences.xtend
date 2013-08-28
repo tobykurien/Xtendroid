@@ -1,13 +1,9 @@
 package com.tobykurien.xtendroid.utils
 
-import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentActivity
 import java.util.HashMap
-import com.tobykurien.xtendroid.annotations.Preference
 
 /**
  * A base class for easy access to SharedPreferences. Implements caching of
@@ -17,26 +13,40 @@ import com.tobykurien.xtendroid.annotations.Preference
 class BasePreferences {
    protected SharedPreferences pref
    protected static val cache = new HashMap<String, BasePreferences>
-   
-   protected new(SharedPreferences preferences) {
+
+   protected new() {
+   }
+
+   static def BasePreferences getPreferences(Context context, Class subclass) {
+      if(cache.keySet.length > 5) cache.clear // avoid memory leaks by clearing often
+      if (cache.get(context.toString()) == null) {
+         val preferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext())
+         cache.put(context.toString(), newInstance(subclass, preferences))
+      }
+
+      cache.get(context.toString())
+   }
+
+   def private setPref(SharedPreferences preferences) {
       pref = preferences
    }
 
-   static def BasePreferences getPreferences(Activity activity) {
-      getPreferences(activity) 
-   }
+   def static newInstance(Class cls, SharedPreferences preferences) {
+      var BasePreferences instance
 
-   static def BasePreferences getPreferences(Fragment fragment) {
-      getPreferences(fragment.activity)
-   }
-   
-   static def BasePreferences getPreferences(Context context) {
-      if (cache.keySet.length > 5) cache.clear // avoid memory leaks by clearing often
-      if (cache.get(context.toString()) == null) {
-         val preferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext())
-         cache.put(context.toString(), new BasePreferences(preferences))         
+      if (!typeof(BasePreferences).isAssignableFrom(cls))
+         throw new IllegalArgumentException(
+            "Singleton: getInstance: Class " + cls.getName() + " is not a subclass of AbstractSingleton?.");
+            
+      try {
+         instance = cls.newInstance() as BasePreferences;
+      } catch (Exception ex) {
+         throw new IllegalStateException(
+            "Singleton: getInstance: Could not instantiate object for " + cls.getName() + ": " + ex.getMessage(), ex);
       }
       
-      cache.get(context.toString())
+      instance.setPref(preferences)
+      return instance;
    }
+
 }
