@@ -44,7 +44,7 @@ new BgTask<String>.runInBg([|
    // this bit runs in the background
    var retVal = fetchSomethingFromSomewhere()
    // need to update progress?
-   runOnUiThread[ progressBar.value = 10 ]
+   runOnUiThread[| progressBar.progress = 10 ]
    retVal
 ],[result|
    // this runs in the UI thread
