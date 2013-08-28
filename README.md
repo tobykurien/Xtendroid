@@ -103,7 +103,8 @@ The Activity:
 @AndroidView ListView userList // maps to R.id.user_list
 
 // in onCreate
-var adapter = new BeanAdapter(this, R.layout.row_user, typeof(User))
+var List<User> data = getUsers // load the POJO's
+var adapter = new BeanAdapter<User>(this, R.layout.row_user, data)
 getUserList.adapter = adapter
 ```
 
