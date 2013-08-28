@@ -52,7 +52,7 @@ new BgTask<String>.runInBg([|
 ])
 ```
 
-If you are using SharedPreferences, and you have a PreferenceActivity to allow the user to change app settings, then the BaseSettings class and @Preference annotation makes it super-easy to access the settings in your Activity:
+If you are using SharedPreferences, and you have a PreferenceActivity to allow the user to change app settings, then the BasePreferences class and @Preference annotation makes it super-easy to access the settings in your Activity:
 
 Create a Settings class:
 ```xtend
@@ -114,7 +114,7 @@ Getting Started
 
 Git clone this repository and import it using Eclipse. Add it as a library project to your Xtend project. Now you can use it as shown in the examples above.
 
-More documentation coming soon.
+More documentation coming soon. This project is in early alpha stage, so expect changes as it matures. Feel free to fork and send me pull requests.
 
 Xtend
 -----
