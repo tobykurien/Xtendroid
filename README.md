@@ -49,8 +49,7 @@ new BgTask<String>.runInBg([|
 ],[result|
    // this runs in the UI thread
    toast("Got back: " + result)
-]
-)
+])
 ```
 
 If you are using SharedPreferences, and you have a PreferenceActivity to allow the user to change app settings, then the BaseSettings class and @Preference annotation makes it super-easy to access the settings in your Activity:
@@ -58,8 +57,8 @@ If you are using SharedPreferences, and you have a PreferenceActivity to allow t
 Create a Settings class:
 ```xtend
 class Settings extends BasePreferences {
-   @Preference boolean enabled = true
-   @Preference String authToken = ""
+   @Preference boolean enabled = true // maps to preference "enabled"
+   @Preference String authToken = ""  // maps to preference "auth_token"
 
    // convenience method to get instance
    def static Settings getSettings(Context context) {
@@ -75,6 +74,7 @@ import static extension Settings.*
 // in onCreate
 if (settings.enabled) {
    // do stuff
+   settings.authToken = "new auth token"
 }
 ```
 
@@ -107,7 +107,7 @@ var adapter = new BeanAdapter(this, R.layout.row_user, typeof(User))
 getUserList.adapter = adapter
 ```
 
-And there's more, documentation coming soon. For an example of a project that uses this library, see the Webapps project http://github.com/tobykurien/webapps
+For an example of a project that uses this library, see the Webapps project http://github.com/tobykurien/webapps
 
 Getting Started
 ----------------
