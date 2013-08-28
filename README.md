@@ -6,7 +6,7 @@ Xtendroid is an Android library that combines the power of Xtend with some utili
 Examples
 --------
 
-If you display toasts often, you know that typing out Toast.makeText... is a pain, and it's not easy to add it to a base class, since Activities may extends multiple base classes (like ListActivity, FragmentActivity, etc.) Here's the easy way using Xtendroid:
+If you display toasts often, you know that typing out Toast.makeText... is a pain, and it's not easy to add it to a base class, since Activities may extend multiple base classes (like ListActivity, FragmentActivity, etc.) Here's the easy way using Xtendroid:
 
 ```xtend
 import static extension com.tobykurien.xtendroid.utils.AlertUtils.*
@@ -42,13 +42,13 @@ Do you find the AsyncTask boilerplate code too messy? Try the BgTask class:
 val progressBar = new ProgressDialog(...)
 new BgTask<String>.runInBg([|
    // this bit runs in the background
-   var retVal = fetchSomethingFromSomewhere()
+   var retVal = fetchStringFromSomewhere()
    // need to update progress?
    runOnUiThread[| progressBar.progress = 10 ]
    retVal
 ],[result|
    // this runs in the UI thread
-   toast("Got back: " + result)
+   toast("Got back: " + result) // How cool is this?
 ])
 ```
 
@@ -71,10 +71,9 @@ Now you can use the Settings class in any Activity:
 ```xtend
 import static extension Settings.*
 
-// in onCreate
+// elsewhere
 if (settings.enabled) {
-   // do stuff
-   settings.authToken = "new auth token"
+   settings.authToken = "new auth token" // How cool is this?
 }
 ```
 
@@ -103,8 +102,8 @@ The Activity:
 @AndroidView ListView userList // maps to R.id.user_list
 
 // in onCreate
-var List<User> data = getUsers // load the POJO's
-var adapter = new BeanAdapter<User>(this, R.layout.row_user, data)
+var List<User> users = getUsers(...) // load the POJO's
+var adapter = new BeanAdapter<User>(this, R.layout.row_user, users)
 getUserList.adapter = adapter
 ```
 
