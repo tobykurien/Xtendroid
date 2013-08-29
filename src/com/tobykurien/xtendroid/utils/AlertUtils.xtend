@@ -1,11 +1,14 @@
 package com.tobykurien.xtendroid.utils
 
+import android.R
+import android.app.AlertDialog
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
+import android.support.v4.app.Fragment
 import android.support.v4.app.NotificationCompat
 import android.widget.Toast
+import org.eclipse.xtext.xbase.lib.Functions.Function0
 
 class AlertUtils {
 
@@ -33,4 +36,19 @@ class AlertUtils {
    def static toast(Context context, String message) {
       Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
    }
+   
+   def static toast(Fragment fragment, String message) {
+      toast(fragment.activity, message)
+   }
+   
+   def static confirm(Context context, String message, Function0<Void> confirmed) {
+      new AlertDialog.Builder(context)
+         .setMessage(message)
+         .setPositiveButton(R.string.ok, [a,b| confirmed.apply ])
+         .create.show
+   }
+   
+   def static confirm(Fragment fragment, String message, Function0<Void> confirmed) {
+      confirm(fragment.activity, message, confirmed)
+   }   
 }
