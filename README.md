@@ -119,6 +119,93 @@ var adapter = new BeanAdapter<User>(this, R.layout.row_user, users)
 getUserList.adapter = adapter
 ```
 
+Database
+--------
+
+Database handling is made much easier thanks to the aBatis project - a fork of this project is included in Xtendroid with some syntactic sugar provided by the BaseDbService class for Xtend. Let's look at typical usage:
+
+Create a POJO for some data you want to store:
+```xtend
+class User {
+  @Property String firstName
+  @Property String lastName
+  @Property int age
+  
+  def toString() {
+      firstName + " " + lastName
+  }
+}
+```
+
+Create some sql in res/values folder, e.g. sqlmaps.xml:
+```xml
+<resources>
+    <string name="dbInitialize">
+        create table users (
+           id integer primary key,
+           firstName text not null,
+           lastName text not null,
+           age number
+        );
+    </string>
+
+    <string name="dbGetUsers">
+      select * from users
+      order by lastName asc
+    </string>
+        
+    <string name="dbGetUser">
+      select * from users
+      where id = #id#
+    </string>
+</resources>
+```
+Note that the column names in the db are exactly the same as the field names in the POJO. The special string name "dbInitialize" is used the first time the db is created, thereafter onUpgrade() is called for newer versions.
+
+Create a DbService class you will use to interact with the database:
+```xtend
+class DbService extends BaseDbService {
+   protected new(Context context) {
+      super(context, "mydatabase", 1) // mydatabase.db is created with version 1
+   }
+
+   // convenience method for syntactic sugar
+   def static getDb(Context context) {
+      return new DbService(context)
+   }   
+}
+```
+Note that DbService ultimately extends android.database.sqlite.SQLiteOpenHelper, so you can use your normal Android database code too.
+
+Now you are ready to play! Here are some example usages:
+```xtend
+import static extension DbService.*
+
+// get all users
+var users = db.executeForBeanList(R.string.dbGetUsers, null, typeof(User))
+users.forEach [user|
+   Log.d("db", "Got user: " + user)
+]
+
+// insert a record
+var johnId = db.insert("users", #{
+   'firstName' -> 'John',
+   'lastName' -> 'Doe',
+   'age' -> 43
+})
+
+// get back this user
+var john = db.executeForBean(R.string.dbGetUser, 
+   #{'id' -> johnId}, typeof(User))
+toast("Hi " + john)   
+
+// update this user
+db.update("users", #{'lastName' -> 'Smith'}, johnId)
+
+// delete this user
+db.delete("users", johnId) 
+```
+
 Samples
 -------
 
