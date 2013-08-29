@@ -5,6 +5,7 @@ import android.app.Dialog
 import android.support.v4.app.Fragment
 import android.view.View
 import android.widget.Button
+import android.widget.ListView
 import android.widget.Spinner
 import android.widget.TextView
 import java.util.HashMap
@@ -58,6 +59,10 @@ class ViewUtils {
 
    def static TextView getTextView(View v, int tvResId) {
       v.findViewById(tvResId) as TextView
+   }
+
+   def static ListView getListView(View v, int tvResId) {
+      v.findViewById(tvResId) as ListView
    }
 
    def static Button getButton(View v, int btnResId) {

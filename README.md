@@ -16,9 +16,6 @@ import static extension com.tobykurien.xtendroid.utils.AlertUtils.*
 
 // elsewhere
 toast("My message")
-
-// or in a fragment
-activity.toast("My message")
 ```
 
 Android view resources
@@ -49,11 +46,11 @@ Background tasks using AsyncTask
 Do you find the AsyncTask boilerplate code too messy? Try the BgTask class:
 ```xtend
 val progressBar = new ProgressDialog(...)
+
 new BgTask<String>.runInBg([|
-   // this bit runs in the background
+   // this bit runs in a background thread
    var retVal = fetchStringFromSomewhere()
-   // need to update progress?
-   runOnUiThread[| progressBar.progress = 10 ]
+   runOnUiThread[| progressBar.progress = 10 ] // update UI
    retVal
 ],[result|
    // this runs in the UI thread
