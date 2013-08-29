@@ -4,7 +4,10 @@ Xtendroid
 Xtendroid is an Android library that combines the power of Xtend with some utility classes/annotations for productive Android development. With Xtendroid, you can spend a lot less time writing boilerplate code and benefit from the tooling support provided by the Xtend framework. Xtendroid is based on the convention-over-configuration philosophy, so resources in Android map automatically to Java getters and setters by name (CamelCase to resource_name mapping).
 
 Examples
---------
+========
+
+Toasts
+------
 
 If you display toasts often, you know that typing out Toast.makeText... is a pain, and it's not easy to add it to a base class, since Activities may extend multiple base classes (like ListActivity, FragmentActivity, etc.) Here's the easy way using Xtendroid:
 
@@ -17,6 +20,9 @@ toast("My message")
 // or in a fragment
 activity.toast("My message")
 ```
+
+Android view resources
+----------------------
 
 Want to access a view in your Activity? Instead of
 
@@ -37,6 +43,9 @@ do this using Xtendroid:
 getMyTextView.text = "some text" // use the getter for lazy-loading
 ```
 
+Background tasks using AsyncTask
+--------------------------------
+
 Do you find the AsyncTask boilerplate code too messy? Try the BgTask class:
 ```xtend
 val progressBar = new ProgressDialog(...)
@@ -51,6 +60,9 @@ new BgTask<String>.runInBg([|
    toast("Got back: " + result) // How cool is this?
 ])
 ```
+
+Shared Preferences
+------------------
 
 If you are using SharedPreferences, and you have a PreferenceActivity to allow the user to change app settings, then the BasePreferences class and @Preference annotation makes it super-easy to access the settings in your Activity:
 
@@ -76,6 +88,9 @@ if (settings.enabled) {
    settings.authToken = "new auth token" // How cool is this?
 }
 ```
+
+Generic list adapter
+--------------------
 
 Do you have a list of POJO's that you want to display inside a ListView? The BeanAdapter makes this super easy!
 
@@ -107,17 +122,20 @@ var adapter = new BeanAdapter<User>(this, R.layout.row_user, users)
 getUserList.adapter = adapter
 ```
 
+Samples
+-------
+
 For an example of a project that uses this library, see the Webapps project http://github.com/tobykurien/webapps
 
 Getting Started
-----------------
+===============
 
 Git clone this repository and import it using Eclipse. Add it as a library project to your Xtend project. Now you can use it as shown in the examples above.
 
 More documentation coming soon. This project is in early alpha stage, so expect changes as it matures. Feel free to fork and send me pull requests.
 
 Xtend
------
+=====
 
 For more about Xtend, see http://xtend-lang.org
 
