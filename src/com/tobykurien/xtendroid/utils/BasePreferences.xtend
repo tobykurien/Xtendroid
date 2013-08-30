@@ -36,13 +36,13 @@ class BasePreferences {
 
       if (!typeof(BasePreferences).isAssignableFrom(cls))
          throw new IllegalArgumentException(
-            "Singleton: getInstance: Class " + cls.getName() + " is not a subclass of AbstractSingleton?.");
+            "BasePreferences: Class " + cls.getName() + " is not a subclass of BasePreferences?");
             
       try {
          instance = cls.newInstance() as BasePreferences;
       } catch (Exception ex) {
          throw new IllegalStateException(
-            "Singleton: getInstance: Could not instantiate object for " + cls.getName() + ": " + ex.getMessage(), ex);
+            "BasePreferences: Could not instantiate object (no default constructor?) for " + cls.getName() + ": " + ex.getMessage(), ex);
       }
       
       instance.setPref(preferences)

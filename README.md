@@ -137,7 +137,7 @@ class User {
 }
 ```
 
-Create some sql in res/values folder, e.g. sqlmaps.xml:
+Create some SQL strings in res/values folder, e.g. in sqlmaps.xml:
 ```xml
 <resources>
     <string name="dbInitialize">
@@ -160,7 +160,7 @@ Create some sql in res/values folder, e.g. sqlmaps.xml:
     </string>
 </resources>
 ```
-Note that the column names in the db are exactly the same as the field names in the POJO. The special string name "dbInitialize" is used the first time the db is created, thereafter onUpgrade() is called for newer versions.
+Note that the column names in the database are exactly the same as the field names in the POJO. The special string name "dbInitialize" is used the first time the db is created, thereafter onUpgrade() is called on the DbService class for newer versions.
 
 Create a DbService class you will use to interact with the database:
 ```xtend
