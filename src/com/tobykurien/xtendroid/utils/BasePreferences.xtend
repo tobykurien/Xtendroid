@@ -49,4 +49,7 @@ class BasePreferences {
       return instance;
    }
 
+   def static clearCache() {
+      cache.clear
+   } 
 }
