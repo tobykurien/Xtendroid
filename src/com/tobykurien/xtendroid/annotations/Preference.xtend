@@ -18,7 +18,7 @@ class PreferenceProcessor extends AbstractFieldProcessor {
 
    override doTransform(MutableFieldDeclaration field, extension TransformationContext context) {
       // add synthetic init-method
-      var getter = if(field.type == Boolean) "is" else "get"
+      var getter = if(field.type.simpleName.equalsIgnoreCase("Boolean")) "is" else "get"
       field.declaringType.addMethod(getter + field.simpleName.upperCaseFirst) [
          visibility = Visibility::PUBLIC
          returnType = field.type
