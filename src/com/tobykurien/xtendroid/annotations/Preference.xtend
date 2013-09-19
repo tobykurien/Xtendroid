@@ -36,10 +36,11 @@ class PreferenceProcessor extends AbstractFieldProcessor {
       field.declaringType.addMethod("set" + field.simpleName.upperCaseFirst) [
          visibility = Visibility::PUBLIC
          returnType = context.primitiveBoolean
+         addParameter("value", field.type)
          val methodName = "put" + field.type.prefMethodName
          body = [
             '''
-               pref.edit().«methodName»("«Utils.toResourceName(field.simpleName)»", «field.simpleName»).commit();
+               pref.edit().«methodName»("«Utils.toResourceName(field.simpleName)»", value).commit();
                return true;
             ''']
       ]
