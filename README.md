@@ -40,6 +40,20 @@ do this using Xtendroid:
 getMyTextView.text = "some text" // use the getter for lazy-loading
 ```
 
+in a Fragment, things get slightly trickier:
+```xtend
+@AndroidFragment class MyFragment extends Fragment {
+   @AndroidView TextView myTextView // maps to R.id.my_text_view
+}
+```
+
+The reference to the R class could be missing if you have not used it anywhere in
+your Activity or Fragment, in which case you can specifiy it as follows:
+
+```xtend
+   val r = R // field declaration to import and reference correct R class
+```
+
 Background tasks using AsyncTask
 --------------------------------
 
