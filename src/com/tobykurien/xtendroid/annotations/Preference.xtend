@@ -17,6 +17,9 @@ annotation Preference {
 class PreferenceProcessor extends AbstractFieldProcessor {
 
    override doTransform(MutableFieldDeclaration field, extension TransformationContext context) {
+      if (field.initializer == null)
+         field.addError("A Preference field must have an initializer.")
+
       // add synthetic init-method
       var getter = if(field.type.simpleName.equalsIgnoreCase("Boolean")) "is" else "get"
       field.declaringType.addMethod(getter + field.simpleName.upperCaseFirst) [
