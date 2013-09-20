@@ -31,7 +31,7 @@ myTextView = (TextView) findViewById(R.id.my_text_view);
 myTextView.setText("some text");
 ```
 
-do this using Xtendroid:
+do this using Xtendroid in an Activity:
 
 ```xtend
 @AndroidView TextView myTextView // maps to R.id.my_text_view
@@ -40,7 +40,7 @@ do this using Xtendroid:
 getMyTextView.text = "some text" // use the getter for lazy-loading
 ```
 
-in a Fragment, things get slightly trickier:
+in a Fragment, add the @AndroidFragment annotation:
 ```xtend
 @AndroidFragment class MyFragment extends Fragment {
    @AndroidView TextView myTextView // maps to R.id.my_text_view
@@ -48,8 +48,7 @@ in a Fragment, things get slightly trickier:
 ```
 
 The reference to the R class could be missing if you have not used it anywhere in
-your Activity or Fragment, in which case you can specifiy it as follows:
-
+your Activity or Fragment, in which case you can specify it as follows:
 ```xtend
    val r = R // field declaration to import and reference correct R class
 ```
