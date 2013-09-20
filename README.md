@@ -37,7 +37,7 @@ do this using Xtendroid in an Activity:
 @AndroidView TextView myTextView // maps to R.id.my_text_view
 
 // elsewhere
-getMyTextView.text = "some text" // use the getter for lazy-loading
+myTextView.text = "some text" // uses a getter for lazy-loading
 ```
 
 in a Fragment, add the @AndroidFragment annotation:

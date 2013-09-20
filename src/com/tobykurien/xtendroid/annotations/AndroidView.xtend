@@ -14,8 +14,11 @@ annotation AndroidView {
 class AndroidViewProcessor extends AbstractFieldProcessor {
 
    override doTransform(MutableFieldDeclaration field, extension TransformationContext context) {
+      val fieldName = field.simpleName
+      field.simpleName = "_" + fieldName
+      
       // add synthetic init-method
-      field.declaringType.addMethod('_init_' + field.simpleName) [
+      field.declaringType.addMethod('_init_' + fieldName) [
          visibility = Visibility::PRIVATE
          returnType = field.type
          val rclass = "R"
@@ -23,21 +26,27 @@ class AndroidViewProcessor extends AbstractFieldProcessor {
          // this automatically removes the expression as the field’s initializer
          body = [
             '''
-               return («field.type») findViewById(«rclass».id.«field.simpleName.toResourceName»);
+               return («field.type») findViewById(«rclass».id.«fieldName.toResourceName»);
             '''
          ]
       ]
 
       // add a getter method which lazily initializes the field
-      field.declaringType.addMethod('get' + field.simpleName.upperCaseFirst) [
+      field.declaringType.addMethod('get' + fieldName.upperCaseFirst) [
          returnType = field.type
          body = [
             '''
                if («field.simpleName»==null)
-               «field.simpleName» = _init_«field.simpleName»();
+               «field.simpleName» = _init_«fieldName»();
                return «field.simpleName»;
             ''']
       ]
+      
+      field.declaringType.addField(field.simpleName) [
+         visibility = Visibility::PRIVATE
+         type = field.type
+      ]
+      field.remove
    }
 
 }
