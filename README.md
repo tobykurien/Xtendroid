@@ -18,6 +18,24 @@ import static extension com.tobykurien.xtendroid.utils.AlertUtils.*
 toast("My message")
 ```
 
+Where is the reference to the Context object? It is implicit, thanks to Xtend:
+
+```xtend
+// this:
+toast(context, "My message")
+
+// is equivalent to:
+context.toast("My message")
+
+// which, in an Activity is the same as:
+this.toast("My message")
+
+// But "this" is implicit, so we can shorten it to:
+toast("My message")
+```
+
+The above magic, as well as the mix-in style ability of the "import static extension" of Xtend, is used to great effect in Xtendroid.
+
 Android view resources
 ----------------------
 
@@ -57,17 +75,30 @@ Background tasks using AsyncTask
 --------------------------------
 
 Do you find the AsyncTask boilerplate code too messy? Try the BgTask class:
+
+```xtend
+new BgTask<String>.runInBg([|
+   // this bit runs in a background thread
+   return getSomeString()
+],[result|
+   // this runs in the UI thread
+   toast("Got back: " + result) // note how toast() works here too!
+])
+```
+
+ProgressDialog is also handled automatically when using this syntax:
+
 ```xtend
 val progressBar = new ProgressDialog(...)
 
-new BgTask<String>.runInBg([|
-   // this bit runs in a background thread
+new BgTask<String>.runInBgWithProgress(progressBar, [|
+   // this bit runs in a background thread, progressDialog automatically displayed
    var retVal = fetchStringFromSomewhere()
    runOnUiThread[| progressBar.progress = 10 ] // update UI
    retVal
 ],[result|
-   // this runs in the UI thread
-   toast("Got back: " + result) // How cool is this?
+   // this runs in the UI thread, progressDialog automatically dismissed afterwards
+   toast("Got back: " + result)
 ])
 ```
 
@@ -82,7 +113,17 @@ class Settings extends BasePreferences {
    @Preference boolean enabled = true // maps to preference "enabled"
    @Preference String authToken = ""  // maps to preference "auth_token"
 
-   // convenience method to get instance
+   /** 
+    * convenience method to get instance:
+    *   var s = Settings.getSettings(context)
+    *   s.XXX()
+    * can be shortened as (using import static extension):
+    *   context.getSettings().XXX()
+    * which can further be shortened in an Activity or other context as:
+    *   getSettings().XXX()
+    * which can be shortened further as:
+    *   settings.XXX 
+    */
    def static Settings getSettings(Context context) {
       return getPreferences(context, typeof(Settings)) as Settings
    }
@@ -104,7 +145,7 @@ Generic list adapter
 
 Do you have a list of POJO's that you want to display inside a ListView? The BeanAdapter makes this super easy!
 
-row_user.xml:
+Layout for each row - row_user.xml:
 ```xml
 <LinearLayout ... >
  <TextView android:id="@+id/first_name" .../>
@@ -113,7 +154,7 @@ row_user.xml:
 </LinearLayout>
 ```
 
-The POJO:
+Java bean containing the data (fields map by name to the layout above):
 ```xtend
 class User {
   @Property String firstName
@@ -127,9 +168,9 @@ The Activity:
 @AndroidView ListView userList // maps to R.id.user_list
 
 // in onCreate
-var List<User> users = getUsers(...) // load the POJO's
+var List<User> users = getUsers(...) // load the POJO's from somewhere
 var adapter = new BeanAdapter<User>(this, R.layout.row_user, users)
-getUserList.adapter = adapter
+userList.adapter = adapter
 ```
 
 Database
@@ -173,7 +214,7 @@ Create some SQL strings in res/values folder, e.g. in sqlmaps.xml:
     </string>
 </resources>
 ```
-Note that the column names in the database are exactly the same as the field names in the POJO. The special string name "dbInitialize" is used the first time the db is created, thereafter onUpgrade() is called on the DbService class for newer versions.
+Note that the column names in the database are exactly the same as the field names in the POJO. The special string name "dbInitialize" is used the first time the db is created, thereafter onUpgrade() is called on the DbService class for newer versions. If you need to migrate between database versions, just implement onUpgrade().
 
 Create a DbService class you will use to interact with the database:
 ```xtend
@@ -182,7 +223,7 @@ class DbService extends BaseDbService {
       super(context, "mydatabase", 1) // mydatabase.db is created with version 1
    }
 
-   // convenience method for syntactic sugar
+   // convenience method for syntactic sugar (as per above example of Settings class)
    def static getDb(Context context) {
       return new DbService(context)
    }   
