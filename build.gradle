@@ -1,0 +1,28 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.5.+'
+    }
+}
+
+apply plugin: 'android-library'
+
+android {
+  compileSdkVersion 18
+  buildToolsVersion '18.1'
+
+  dependencies {
+      compile fileTree(dir: 'libs', includes: ['*.jar'])
+  }
+
+  sourceSets {
+    main {
+      manifest.srcFile 'AndroidManifest.xml'
+      java.srcDirs = ['src', 'xtend-gen']
+      res.srcDirs = ['res']
+    }
+  }
+}
+
