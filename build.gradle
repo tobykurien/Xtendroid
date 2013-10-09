@@ -15,6 +15,7 @@ android {
 
   dependencies {
       compile fileTree(dir: 'libs', includes: ['*.jar'])
+      compile fileTree(dir: 'libs-gradle', includes: ['*.jar'])
   }
 
   sourceSets {
