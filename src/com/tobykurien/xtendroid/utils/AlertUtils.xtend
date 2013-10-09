@@ -45,6 +45,7 @@ class AlertUtils {
       new AlertDialog.Builder(context)
          .setMessage(message)
          .setPositiveButton(R.string.ok, [a,b| confirmed.apply ])
+         .setNegativeButton(R.string.cancel, [a,b| a.dismiss ])
          .create.show
    }
    
