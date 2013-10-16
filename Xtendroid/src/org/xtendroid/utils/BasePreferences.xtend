@@ -17,7 +17,7 @@ class BasePreferences {
    protected new() {
    }
 
-   static def BasePreferences getPreferences(Context context, Class subclass) {
+   static def BasePreferences getPreferences(Context context, Class<?> subclass) {
       if(cache.keySet.length > 5) cache.clear // avoid memory leaks by clearing often
       if (cache.get(context.toString()) == null) {
          val preferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext())
@@ -31,7 +31,7 @@ class BasePreferences {
       pref = preferences
    }
 
-   def static newInstance(Class cls, SharedPreferences preferences) {
+   def static newInstance(Class<?> cls, SharedPreferences preferences) {
       var BasePreferences instance
 
       if (!typeof(BasePreferences).isAssignableFrom(cls))
