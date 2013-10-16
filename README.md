@@ -12,7 +12,7 @@ Toasts
 If you display toasts often, you know that typing out Toast.makeText... is a pain, and it's not easy to add it to a base class, since Activities may extend multiple base classes (like ListActivity, FragmentActivity, etc.) Here's the easy way using Xtendroid:
 
 ```xtend
-import static extension com.tobykurien.xtendroid.utils.AlertUtils.*
+import static extension org.xtendroid.utils.AlertUtils.*
 
 // elsewhere
 toast("My message")
@@ -276,5 +276,3 @@ Xtend
 =====
 
 For more about Xtend, see http://xtend-lang.org
-
-
