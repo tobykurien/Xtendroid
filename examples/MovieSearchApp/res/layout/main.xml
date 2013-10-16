@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+    
+    <EditText android:id="@+id/search_edit_text" 
+        android:text="@string/search"
+        android:layout_width="fill_parent" 
+        android:layout_height="wrap_content" 
+    />
+    
+    <RadioGroup
+        android:id="@+id/search_radio_group"
+          android:layout_width="fill_parent"
+          android:layout_height="wrap_content"
+          android:orientation="vertical">
+        <RadioButton 
+            android:id="@+id/movie_search_radio_button"
+            android:checked="true"
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content"
+            android:text="@string/movies" />
+        <RadioButton 
+            android:id="@+id/people_search_radio_button"
+            android:checked="false"
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content"
+            android:text="@string/people" />
+    </RadioGroup>
+    
+    <TextView 
+        android:id="@+id/search_type_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#ffffff" 
+        android:text="@string/movies"
+    />
+    
+    <Button 
+        android:id="@+id/search_button" 
+        android:text="@string/search"
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" 
+    />
+    
+</LinearLayout>
