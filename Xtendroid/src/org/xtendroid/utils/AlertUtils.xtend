@@ -41,6 +41,14 @@ class AlertUtils {
       toast(fragment.activity, message)
    }
    
+   def static toastLong(Context context, String message) {
+      Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+   }
+   
+   def static toastLong(Fragment fragment, String message) {
+      toastLong(fragment.activity, message)
+   }
+   
    def static confirm(Context context, String message, Function0<Void> confirmed) {
       new AlertDialog.Builder(context)
          .setMessage(message)

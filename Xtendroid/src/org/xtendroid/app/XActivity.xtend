@@ -13,6 +13,8 @@ import org.w3c.dom.Element
 import org.xtendroid.utils.NamingUtils
 
 import static extension org.xtendroid.utils.XmlUtils.*
+import java.lang.annotation.Target
+import java.lang.annotation.ElementType
 
 /**
  * An active annotation for Android activities.
@@ -27,6 +29,7 @@ import static extension org.xtendroid.utils.XmlUtils.*
  * and help by the IDE to implement the needed methods.
  */
 @Active(XActivityProcessor)
+@Target(ElementType.TYPE)
 annotation XActivity {
    String value
 }
@@ -57,13 +60,33 @@ class XActivityProcessor extends AbstractClassProcessor {
       //TODO check for Activity super type
       annotatedClass.implementedInterfaces = annotatedClass.implementedInterfaces + #[callBacksType.newTypeReference]
       
+      
       // create onCreate if not present
       if (annotatedClass.findDeclaredMethod("onCreate", Bundle.newTypeReference()) == null) {
+         // prepare @OnCreate methods
+         val onCreateAnnotation = OnCreate.newTypeReference.type
+         val onCreateMethods = annotatedClass.declaredMethods.filter[annotations.exists[annotationTypeDeclaration==onCreateAnnotation]]
+         for (m : onCreateMethods) {
+            if (m.parameters.empty) {
+               m.addParameter("savedInstanceState", Bundle.newTypeReference)
+            } else {
+               if (m.parameters.size > 1) {
+                  m.parameters.get(1).addError("Methods annotated with @OnCreate might only have zero or one parameter.")
+               } else {
+                  if (m.parameters.head.type != Bundle.newTypeReference) {
+                     m.parameters.head.addError("The single parameter type must be of type Bundle.")
+                  }
+               }
+            }
+         }
          annotatedClass.addMethod("onCreate") [
             addParameter("savedInstanceState", Bundle.newTypeReference)
             body = ['''
                super.onCreate(savedInstanceState);
                setContentView(R.layout.«viewFileName»);
+               «FOR method : onCreateMethods»
+                  «method.simpleName»(savedInstanceState);
+               «ENDFOR»
             ''']
          ]
       }

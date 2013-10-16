@@ -17,7 +17,15 @@ import static extension org.xtendroid.utils.XmlUtils.*
 /**
  * An annotation that generates accessor methods to Android string resources.
  * 
- * 
+ * <p>It uses java's @link{java.text.MessageFormat} in the values and the accessor methods will sport typed parameters according to the placeholders.
+ * For example, given a strings.xml like this : </p>
+ * <code>
+ *    &lt;string name="my_key"&gt;Hello {0}, today is {1,date}&lt;/string&gt;
+ * </code>
+ * <p>Will result in a method signature:</p>
+ * <code>
+ *   def String getMyKey(String arg1, Date arg2) {...} 
+ * </code>
  */
 @Active(XResourcesProcessor)
 annotation XResources {}
