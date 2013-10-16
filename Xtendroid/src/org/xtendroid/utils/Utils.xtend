@@ -1,35 +1,16 @@
 package org.xtendroid.utils
 
-import java.lang.reflect.Method
-
-class Utils {
-   /**
-    * Convert Java bean getter name into resource name format, i.e.
-    * getFirstName -> first_name
-    * isToast -> toast
-    */   
-   def static toResourceName(Method m) {
-      var name = m.name
-      if (m.name.startsWith("get")) {
-         name = m.name.substring(3)
-      } else if (m.name.startsWith("is")) {
-         name = m.name.substring(2)
-      }
-      toResourceName(name)
-   }
-
-   /**
-    * Convert from Java-style camel case to resource-style lowercase with underscores, e.g.
-    * FirstName -> first_name
-    */   
-   def static toResourceName(String name) {
-      name.replaceAll("(?=[\\p{Lu}])","_").toLowerCase().replaceAll("^_","");
-   }
+/**
+ * @deprecated Use NamingUtils instead 
+ */
+@Deprecated
+class Utils extends NamingUtils {
    
    /**
-    * Uppercase first letter for using a resource as getter/setter
+    * @deprecated use StringExtensions.toFirstUpper instead 
     */
-   def static upperCaseFirst(String str) {
-      Character.toUpperCase(str.charAt(0)) + str.substring(1)
+   @Deprecated
+   def static upperCaseFirst(String s) {
+      s.toFirstUpper
    }
 }
