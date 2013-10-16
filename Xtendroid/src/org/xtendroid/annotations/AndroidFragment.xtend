@@ -14,7 +14,8 @@ annotation AndroidFragment {
 class FragmentProcessor extends AbstractClassProcessor {
 
    override doTransform(MutableClassDeclaration clazz, extension TransformationContext context) {
-      clazz.addMethod("findViewById") [
+      var exists = clazz.declaredMethods.exists[m| m.simpleName == "findViewById"]
+      if (!exists) clazz.addMethod("findViewById") [
          visibility = Visibility::PUBLIC
          addParameter("resId", primitiveInt)
          returnType = typeof(View).newTypeReference

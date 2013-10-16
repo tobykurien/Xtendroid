@@ -58,13 +58,6 @@ do this using Xtendroid in an Activity:
 myTextView.text = "some text" // uses a getter for lazy-loading
 ```
 
-in a Fragment, add the @AndroidFragment annotation:
-```xtend
-@AndroidFragment class MyFragment extends Fragment {
-   @AndroidView TextView myTextView // maps to R.id.my_text_view
-}
-```
-
 The reference to the R class could be missing if you have not used it anywhere in
 your Activity or Fragment, in which case you can specify it as follows:
 ```xtend

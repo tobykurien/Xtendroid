@@ -1,5 +1,7 @@
 package org.xtendroid.annotations
 
+import android.support.v4.app.Fragment
+import android.view.View
 import org.eclipse.xtend.lib.macro.AbstractFieldProcessor
 import org.eclipse.xtend.lib.macro.Active
 import org.eclipse.xtend.lib.macro.TransformationContext
@@ -17,6 +19,25 @@ class AndroidViewProcessor extends AbstractFieldProcessor {
    override doTransform(MutableFieldDeclaration field, extension TransformationContext context) {
       val fieldName = field.simpleName
       field.simpleName = "_" + fieldName
+      
+      val fragmentType = android.app.Fragment?.newTypeReference
+      val supportFragmentType = Fragment?.newTypeReference
+      
+      if (fragmentType != null && fragmentType.type.isAssignableFrom(field.declaringType) ||
+            supportFragmentType != null && supportFragmentType.type.isAssignableFrom(field.declaringType)) {
+         // for fragments, add a findViewById method
+         var exists = field.declaringType.declaredMethods.exists[m| m.simpleName == "findViewById"]
+         if (!exists) field.declaringType.addMethod("findViewById") [
+            visibility = Visibility::PUBLIC
+            addParameter("resId", primitiveInt)
+            returnType = typeof(View).newTypeReference
+            body = [
+               '''
+                  return getView().findViewById(resId);
+               '''
+            ]
+         ]
+      }      
       
       // add synthetic init-method
       field.declaringType.addMethod('_init_' + fieldName) [
