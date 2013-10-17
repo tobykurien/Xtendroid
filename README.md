@@ -103,8 +103,8 @@ If you are using SharedPreferences, and you have a PreferenceActivity to allow t
 Create a Settings class:
 ```xtend
 class Settings extends BasePreferences {
-   @Preference boolean enabled = true // maps to preference "enabled"
-   @Preference String authToken = ""  // maps to preference "auth_token"
+   @AndroidPreference boolean enabled = true // maps to preference "enabled"
+   @AndroidPreference String authToken = ""  // maps to preference "auth_token"
 
    /** 
     * convenience method to get instance:

@@ -10,11 +10,11 @@ import org.xtendroid.utils.Utils
 
 import static extension org.xtendroid.utils.Utils.*
 
-@Active(typeof(PreferenceProcessor))
-annotation Preference {
+@Active(typeof(AndroidPreferenceProcessor))
+annotation AndroidPreference {
 }
 
-class PreferenceProcessor extends AbstractFieldProcessor {
+class AndroidPreferenceProcessor extends AbstractFieldProcessor {
 
    override doTransform(MutableFieldDeclaration field, extension TransformationContext context) {
       if (field.initializer == null)
