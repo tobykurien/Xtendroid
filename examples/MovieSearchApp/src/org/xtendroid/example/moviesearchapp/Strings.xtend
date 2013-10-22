@@ -1,6 +1,6 @@
 package org.xtendroid.example.moviesearchapp
 
-import org.xtendroid.content.res.XResources
+import org.xtendroid.content.res.AndroidResources
 
-@XResources class Strings {
+@AndroidResources class Strings {
 }

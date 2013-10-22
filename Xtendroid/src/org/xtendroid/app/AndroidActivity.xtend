@@ -28,13 +28,13 @@ import java.lang.annotation.ElementType
  * It also derives a synthetic interfaces containing all 'onclick' methods declared in the XML file. Users will get feedback by the compiler
  * and help by the IDE to implement the needed methods.
  */
-@Active(XActivityProcessor)
+@Active(AndroidActivityProcessor)
 @Target(ElementType.TYPE)
-annotation XActivity {
+annotation AndroidActivity {
    String value
 }
 
-class XActivityProcessor extends AbstractClassProcessor {
+class AndroidActivityProcessor extends AbstractClassProcessor {
    
    override doRegisterGlobals(ClassDeclaration annotatedClass, extension RegisterGlobalsContext context) {
       context.registerInterface(annotatedClass.qualifiedName+"_CallBacks")
@@ -120,7 +120,7 @@ class XActivityProcessor extends AbstractClassProcessor {
    
    def String getValue(MutableClassDeclaration annotatedClass, extension TransformationContext context) {
       val value = annotatedClass.annotations.findFirst[
-         annotationTypeDeclaration==XActivity.newTypeReference.type
+         annotationTypeDeclaration==AndroidActivity.newTypeReference.type
       ].getValue("value") as String
       return value
    }

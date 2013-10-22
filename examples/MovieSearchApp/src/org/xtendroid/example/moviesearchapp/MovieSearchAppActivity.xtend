@@ -2,14 +2,14 @@ package org.xtendroid.example.moviesearchapp
 
 import android.widget.EditText
 import org.xtendroid.app.OnCreate
-import org.xtendroid.app.XActivity
 
 import static extension org.xtendroid.utils.AlertUtils.*
+import org.xtendroid.app.AndroidActivity
 
 /**
  * This activity covers what is described in http://www.javacodegeeks.com/2010/10/android-full-app-part-1-main-activity.html
  */
-@XActivity("main") class MovieSearchAppActivity {
+@AndroidActivity("main") class MovieSearchAppActivity {
    
    val Strings strings = [|resources]
    

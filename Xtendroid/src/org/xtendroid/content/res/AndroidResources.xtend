@@ -27,10 +27,10 @@ import static extension org.xtendroid.utils.XmlUtils.*
  *   def String getMyKey(String arg1, Date arg2) {...} 
  * </code>
  */
-@Active(XResourcesProcessor)
-annotation XResources {}
+@Active(AndroidResourcesProcessor)
+annotation AndroidResources {}
 
-class XResourcesProcessor extends AbstractClassProcessor {
+class AndroidResourcesProcessor extends AbstractClassProcessor {
 
    override doTransform(MutableClassDeclaration annotatedClass, extension TransformationContext context) {
       val resourcesType = Resources.newTypeReference
