@@ -69,7 +69,7 @@ class AndroidResourcesProcessor extends AbstractClassProcessor {
                            default: string
                         })
                   ]
-                  docComment = value+"-"+formats.size+"-"+formats
+                  docComment = "Default value : '"+value+"'"
                   if (formats.empty) {
                      body = [
                         '''
@@ -79,7 +79,7 @@ class AndroidResourcesProcessor extends AbstractClassProcessor {
                      val params = parameters
                      body = [
                         '''
-                           return String.format(this.getResources().getString(R.string.«name»),«params.map[simpleName].join(',')»);
+                           return «toJavaCode(MessageFormat.newTypeReference)».format(this.getResources().getString(R.string.«name»),«params.map[simpleName].join(',')»);
                         ''']
                   }
                ]

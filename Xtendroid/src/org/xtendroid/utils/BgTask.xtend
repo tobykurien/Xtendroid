@@ -7,7 +7,7 @@ import org.eclipse.xtext.xbase.lib.Functions.Function0
 
 /**
  * Convenience class to run tasks in the background using AsyncTask.
- * The generic paramater is the type of the result from the background task to 
+ * The generic parameter is the type of the result from the background task to 
  * be passed into the UI task. To run progress updates, etc. from the background
  * closure, simply use runOnUiThread, e.g.: 
  *    runOnUiThread [| progressBar.setValue(progress) ]
