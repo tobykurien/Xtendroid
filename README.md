@@ -15,7 +15,8 @@ If you display toasts often, you know that typing out Toast.makeText... is a pai
 import static extension org.xtendroid.utils.AlertUtils.*
 
 // elsewhere
-toast("My message")
+toast("My short message")
+toastLong(“This message displays for longer”)
 ```
 
 Where is the reference to the Context object? It is implicit, thanks to Xtend:
@@ -55,7 +56,7 @@ do this using Xtendroid in an Activity:
 @AndroidView TextView myTextView // maps to R.id.my_text_view
 
 // elsewhere
-myTextView.text = "some text" // uses a getter for lazy-loading
+myTextView.text = "some text" // uses a getter for lazy-loading the actual view
 ```
 
 The reference to the R class could be missing if you have not used it anywhere in
@@ -136,7 +137,7 @@ if (settings.enabled) {
 Generic list adapter
 --------------------
 
-Do you have a list of POJO's that you want to display inside a ListView? The BeanAdapter makes this super easy!
+Do you have a list of Java beans that you want to display inside a ListView? The BeanAdapter makes this super easy!
 
 Layout for each row - row_user.xml:
 ```xml
@@ -161,7 +162,7 @@ The Activity:
 @AndroidView ListView userList // maps to R.id.user_list
 
 // in onCreate
-var List<User> users = getUsers(...) // load the POJO's from somewhere
+var List<User> users = getUsers(...) // load the beans from somewhere
 var adapter = new BeanAdapter<User>(this, R.layout.row_user, users)
 userList.adapter = adapter
 ```
@@ -171,7 +172,7 @@ Database
 
 Database handling is made much easier thanks to the aBatis project - a fork of this project is included in Xtendroid with some syntactic sugar provided by the BaseDbService class for Xtend. Let's look at typical usage:
 
-Create a POJO for some data you want to store:
+Create a bean for some data you want to store:
 ```xtend
 class User {
   @Property String firstName
@@ -207,7 +208,7 @@ Create some SQL strings in res/values folder, e.g. in sqlmaps.xml:
     </string>
 </resources>
 ```
-Note that the column names in the database are exactly the same as the field names in the POJO. The special string name "dbInitialize" is used the first time the db is created, thereafter onUpgrade() is called on the DbService class for newer versions. If you need to migrate between database versions, just implement onUpgrade().
+Note that the column names in the database are exactly the same as the field names in the bean. The special string name "dbInitialize" is used the first time the db is created, thereafter onUpgrade() is called on the DbService class for newer versions. If you need to migrate between database versions, just implement onUpgrade().
 
 Create a DbService class you will use to interact with the database:
 ```xtend
@@ -224,7 +225,7 @@ class DbService extends BaseDbService {
 ```
 Note that DbService ultimately extends android.database.sqlite.SQLiteOpenHelper, so you can use your normal Android database code too.
 
-Now you are ready to play! Here are some example usages:
+Now you are ready to play! Here are some examples:
 ```xtend
 import static extension DbService.*
 
