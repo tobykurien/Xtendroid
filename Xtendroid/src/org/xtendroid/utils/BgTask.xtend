@@ -26,11 +26,7 @@ class BgTask<R> extends AsyncTask<Void, Void, R> {
       bgFunction = bg
       uiFunction = ui
       if(pd != null && !pd.showing) pd.show()
-      try {
-         execute()
-      } finally {
-         dismissProgress
-      }
+      execute()
    }
 
    override protected doInBackground(Void... arg0) {
