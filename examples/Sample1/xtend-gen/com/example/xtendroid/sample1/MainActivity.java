@@ -128,25 +128,25 @@ public class MainActivity extends Activity {
   }
   
   private TextView _init_mainQuote() {
-    return (\ufffd\ufffdfield.type\ufffd\ufffd) findViewById(\ufffd\ufffdrclass\ufffd\ufffd.id.\ufffd\ufffdfieldName.toResourceName\ufffd\ufffd);
+    return (TextView) findViewById(R.id.main_quote);
   }
   
   public TextView getMainQuote() {
-    if (\ufffd\ufffdfield.simpleName\ufffd\ufffd==null)
-    \ufffd\ufffdfield.simpleName\ufffd\ufffd = _init_\ufffd\ufffdfieldName\ufffd\ufffd();
-    return \ufffd\ufffdfield.simpleName\ufffd\ufffd;
+    if (_mainQuote==null)
+    _mainQuote = _init_mainQuote();
+    return _mainQuote;
   }
   
   private TextView _mainQuote;
   
   private Button _init_mainLoadQuote() {
-    return (\ufffd\ufffdfield.type\ufffd\ufffd) findViewById(\ufffd\ufffdrclass\ufffd\ufffd.id.\ufffd\ufffdfieldName.toResourceName\ufffd\ufffd);
+    return (Button) findViewById(R.id.main_load_quote);
   }
   
   public Button getMainLoadQuote() {
-    if (\ufffd\ufffdfield.simpleName\ufffd\ufffd==null)
-    \ufffd\ufffdfield.simpleName\ufffd\ufffd = _init_\ufffd\ufffdfieldName\ufffd\ufffd();
-    return \ufffd\ufffdfield.simpleName\ufffd\ufffd;
+    if (_mainLoadQuote==null)
+    _mainLoadQuote = _init_mainLoadQuote();
+    return _mainLoadQuote;
   }
   
   private Button _mainLoadQuote;
