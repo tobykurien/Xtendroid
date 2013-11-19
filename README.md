@@ -16,7 +16,7 @@ import static extension org.xtendroid.utils.AlertUtils.*
 
 // elsewhere
 toast("My short message")
-toastLong(“This message displays for longer”)
+toastLong("This message displays for longer")
 ```
 
 Where is the reference to the Context object? It is implicit, thanks to Xtend:
@@ -257,16 +257,21 @@ db.delete("users", johnId)
 Samples
 -------
 
-For an example of a project that uses this library, see the Webapps project http://github.com/tobykurien/webapps
+There are several examples in the examples folder: https://github.com/tobykurien/Xtendroid/tree/master/examples
+
+For an example of a live project that uses this library, see the Webapps project https://github.com/tobykurien/webapps
 
 Getting Started
 ===============
 
-Git clone this repository and import it using Eclipse. Add it as a library project to your Xtend project. Now you can use it as shown in the examples above.
-
-More documentation coming soon. This project is in early alpha stage, so expect changes as it matures. Feel free to fork and send me pull requests.
+- Git clone this repository and import it using Eclipse. 
+- Add it as a library project to your Xtend project.
+- If you are using an existing or new Android project:
+-- Right-click on your project -> Properties -> Java Build Path 
+-- Click Libraries -> Add library -> Xtend Library
+- Now you can use it as shown in the examples above.
 
 Xtend
 =====
 
-For more about Xtend, see http://xtend-lang.org
+For more about the Xtend language, see http://xtend-lang.org
