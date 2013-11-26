@@ -13,16 +13,16 @@ import org.eclipse.xtext.xbase.lib.Functions.Function0
  *    runOnUiThread [| progressBar.setValue(progress) ]
  */
 class BgTask<R> extends AsyncTask<Void, Void, R> {
-   var Function0<R> bgFunction
-   var Function1<R, void> uiFunction
+   var ()=>R bgFunction
+   var (R)=>void uiFunction
    var ProgressDialog pd
 
-   def runInBgWithProgress(ProgressDialog pdialog, Function0<R> bg, Function1<R, void> ui) {
+   def runInBgWithProgress(ProgressDialog pdialog, ()=>R bg, (R)=>void ui) {
       pd = pdialog
       runInBg(bg, ui)
    }
 
-   def runInBg(Function0<R> bg, Function1<R, Void> ui) {
+   def runInBg(()=>R bg, (R)=>void ui) {
       bgFunction = bg
       uiFunction = ui
       if(pd != null && !pd.showing) pd.show()
