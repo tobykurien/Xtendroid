@@ -3,6 +3,7 @@ package com.example.xtendroid.sample1
 import android.app.Activity
 import android.app.ProgressDialog
 import android.os.Bundle
+import android.text.Html
 import android.widget.Button
 import android.widget.TextView
 import java.io.ByteArrayOutputStream
@@ -12,7 +13,6 @@ import org.xtendroid.annotations.AndroidView
 import org.xtendroid.utils.BgTask
 
 import static extension org.xtendroid.utils.AlertUtils.*
-import android.text.Html
 
 /**
  * Sample 1 - simple sample to show the usage of basic UI helpers as well as 
@@ -43,7 +43,6 @@ class MainActivity extends Activity {
             }
          ],[result|
             mainQuote.text = Html.fromHtml(result)
-            null // this function returns a Void (not used), so return null
          ])
       ])
    }

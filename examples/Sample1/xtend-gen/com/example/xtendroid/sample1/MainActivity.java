@@ -17,7 +17,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.Functions.Function0;
-import org.eclipse.xtext.xbase.lib.Functions.Function1;
+import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 import org.xtendroid.utils.AlertUtils;
 import org.xtendroid.utils.BgTask;
 
@@ -68,16 +68,11 @@ public class MainActivity extends Activity {
             return _xtrycatchfinallyexpression;
           }
         };
-        final Function1<String,Void> _function_1 = new Function1<String,Void>() {
-          public Void apply(final String result) {
-            Void _xblockexpression = null;
-            {
-              TextView _mainQuote = MainActivity.this.getMainQuote();
-              Spanned _fromHtml = Html.fromHtml(result);
-              _mainQuote.setText(_fromHtml);
-              _xblockexpression = (null);
-            }
-            return _xblockexpression;
+        final Procedure1<String> _function_1 = new Procedure1<String>() {
+          public void apply(final String result) {
+            TextView _mainQuote = MainActivity.this.getMainQuote();
+            Spanned _fromHtml = Html.fromHtml(result);
+            _mainQuote.setText(_fromHtml);
           }
         };
         _bgTask.runInBgWithProgress(pd, _function, _function_1);
