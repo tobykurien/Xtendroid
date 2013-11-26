@@ -14,10 +14,10 @@ import org.eclipse.xtext.xbase.lib.Functions.Function0
  */
 class BgTask<R> extends AsyncTask<Void, Void, R> {
    var Function0<R> bgFunction
-   var Function1<R, Void> uiFunction
+   var Function1<R, void> uiFunction
    var ProgressDialog pd
 
-   def runInBgWithProgress(ProgressDialog pdialog, Function0<R> bg, Function1<R, Void> ui) {
+   def runInBgWithProgress(ProgressDialog pdialog, Function0<R> bg, Function1<R, void> ui) {
       pd = pdialog
       runInBg(bg, ui)
    }
