@@ -53,6 +53,8 @@ class AndroidActivityProcessor extends AbstractClassProcessor {
          return;
       }
       
+      val packageResource = getPackageNameForResourceClass(annotatedClass.qualifiedName)
+      
       // add 'extends Activity' if necessary
       if (annotatedClass.extendedClass == Object.newTypeReference()) {
          annotatedClass.extendedClass = Activity.newTypeReference
@@ -83,7 +85,7 @@ class AndroidActivityProcessor extends AbstractClassProcessor {
             addParameter("savedInstanceState", Bundle.newTypeReference)
             body = ['''
                super.onCreate(savedInstanceState);
-               setContentView(R.layout.«viewFileName»);
+               setContentView(«packageResource»R.layout.«viewFileName»);
                «FOR method : onCreateMethods»
                   «method.simpleName»(savedInstanceState);
                «ENDFOR»
@@ -103,7 +105,7 @@ class AndroidActivityProcessor extends AbstractClassProcessor {
             annotatedClass.addMethod('get'+name.toFirstUpper) [
                returnType = fieldType
                body = ['''
-                  return («toJavaCode(fieldType)») findViewById(R.id.«id»);
+                  return («toJavaCode(fieldType)») findViewById(«packageResource»R.id.«id»);
                ''']
             ]
          }
@@ -155,5 +157,24 @@ class AndroidActivityProcessor extends AbstractClassProcessor {
          return id.substring(5)
       }
       return null
+   }
+   
+   def String getPackageNameForResourceClass(String packageName) {
+      if (packageName == null || packageName == "") 
+         return ""
+    
+      try {
+         // let's try to load the R class
+         Class.forName(packageName + ".R") 
+          
+         return packageName + "."
+      } catch (ClassNotFoundException exception) {
+         // R class not found, trying on parent 
+         val lastDotPosition = packageName.lastIndexOf('.')
+         if (lastDotPosition < 0) 
+            return "";
+    
+         return getPackageNameForResourceClass(packageName.substring(0, lastDotPosition));
+      }
    }
 }
