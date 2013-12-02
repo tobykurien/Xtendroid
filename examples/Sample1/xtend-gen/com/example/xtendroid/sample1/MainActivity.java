@@ -23,7 +23,8 @@ import org.xtendroid.utils.BgTask;
 
 /**
  * Sample 1 - simple sample to show the usage of basic UI helpers as well as
- * asynchronous processing
+ * asynchronous processing. This example fetches a random quote from the internet
+ * when a button is pressed, and displays it in a TextView.
  */
 @SuppressWarnings("all")
 public class MainActivity extends Activity {
@@ -41,7 +42,7 @@ public class MainActivity extends Activity {
           public String apply() {
             String _xtrycatchfinallyexpression = null;
             try {
-              String _data = MainActivity.this.getData("http://www.iheartquotes.com/api/v1/random");
+              String _data = MainActivity.getData("http://www.iheartquotes.com/api/v1/random");
               _xtrycatchfinallyexpression = _data;
             } catch (final Throwable _t) {
               if (_t instanceof Exception) {
@@ -82,26 +83,26 @@ public class MainActivity extends Activity {
   }
   
   /**
-   * Get data from the internet
+   * Utility function to get data from the internet. In production code,
+   * you should rather use something like the Volley library.
    * 
    * @param url
    * @return
    * @throws IOException
    */
-  public String getData(final String url) {
+  public static String getData(final String url) {
     try {
       URL _uRL = new URL(url);
-      URL u = _uRL;
-      URLConnection _openConnection = u.openConnection();
+      URLConnection _openConnection = _uRL.openConnection();
       HttpURLConnection c = ((HttpURLConnection) _openConnection);
       c.connect();
       int _responseCode = c.getResponseCode();
       boolean _equals = (_responseCode == HttpURLConnection.HTTP_OK);
       if (_equals) {
-        InputStream is = c.getInputStream();
-        int oneChar = 0;
         ByteArrayOutputStream _byteArrayOutputStream = new ByteArrayOutputStream();
         ByteArrayOutputStream os = _byteArrayOutputStream;
+        InputStream is = c.getInputStream();
+        int oneChar = 0;
         int _read = is.read();
         int _oneChar = oneChar = _read;
         boolean _greaterThan = (_oneChar > 0);
@@ -114,6 +115,7 @@ public class MainActivity extends Activity {
           _while = _greaterThan_1;
         }
         is.close();
+        os.close();
         return os.toString();
       }
       return null;

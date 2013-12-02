@@ -13,10 +13,12 @@ import org.xtendroid.annotations.AndroidView
 import org.xtendroid.utils.BgTask
 
 import static extension org.xtendroid.utils.AlertUtils.*
+import org.xtendroid.app.AndroidActivity
 
 /**
  * Sample 1 - simple sample to show the usage of basic UI helpers as well as 
- * asynchronous processing
+ * asynchronous processing. This example fetches a random quote from the internet
+ * when a button is pressed, and displays it in a TextView.
  */
 class MainActivity extends Activity {
    @AndroidView TextView mainQuote // loads from R.id.main_quote
@@ -48,30 +50,31 @@ class MainActivity extends Activity {
    }
 
    /**
-    * Get data from the internet
+    * Utility function to get data from the internet. In production code, 
+    * you should rather use something like the Volley library.
     *
     * @param url
     * @return
     * @throws IOException
     */
-   def String getData(String url) {
+   def static String getData(String url) {
       // connect to the URL
-      var u = new URL(url)
-      var c = u.openConnection() as HttpURLConnection
-      c.connect()
+      var c = new URL(url).openConnection as HttpURLConnection
+      c.connect
       
-      if (c.getResponseCode() == HttpURLConnection.HTTP_OK) {
+      if (c.responseCode == HttpURLConnection.HTTP_OK) {
          // read data into a buffer
-         var is = c.getInputStream()
+         var os = new ByteArrayOutputStream
+         var is = c.inputStream
          var int oneChar
-         var os = new ByteArrayOutputStream()
-         while ((oneChar = is.read()) > 0) {
+         while ((oneChar = is.read) > 0) {
             os.write(oneChar)
          }
-         is.close()
+         is.close
+         os.close
          
          // return the data as a String
-         return os.toString()
+         return os.toString
       }
 
       return null
