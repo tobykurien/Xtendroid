@@ -2,8 +2,7 @@ package org.xtendroid.utils
 
 import android.app.ProgressDialog
 import android.os.AsyncTask
-import org.eclipse.xtext.xbase.lib.Functions.Function1
-import org.eclipse.xtext.xbase.lib.Functions.Function0
+import android.os.Build
 
 /**
  * Convenience class to run tasks in the background using AsyncTask.
@@ -26,7 +25,13 @@ class BgTask<R> extends AsyncTask<Void, Void, R> {
       bgFunction = bg
       uiFunction = ui
       if(pd != null && !pd.showing) pd.show()
-      execute()
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+         // newer versions of Android use a single thread, rather default to multiple threads
+        executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
+      } else {
+         // older versions of Android already use a thread pool
+        execute
+      }
    }
 
    override protected doInBackground(Void... arg0) {
