@@ -264,8 +264,21 @@ For an example of a live project that uses this library, see the Webapps project
 Getting Started
 ===============
 
+Method 1:
+---------
+- Download the latest release from https://github.com/tobykurien/Xtendroid/releases
+- Copy the JAR file into your Android project's `libs` folder
+- If you are using an existing or new Android project:
+-- Right-click on your project -> Properties -> Java Build Path 
+-- Click Libraries -> Add library -> Xtend Library
+- Now you can use it as shown in the examples above.
+
+
+Method 2:
+---------
 - Git clone this repository and import it using Eclipse. 
-- Add it as a library project to your Xtend project.
+- Add it as a library project to your Android project:
+-- Right-click your project -> Properties -> Android -> (Library) Add -> Xtendroid
 - If you are using an existing or new Android project:
 -- Right-click on your project -> Properties -> Java Build Path 
 -- Click Libraries -> Add library -> Xtend Library
