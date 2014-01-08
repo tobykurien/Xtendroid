@@ -19,8 +19,8 @@ import java.lang.annotation.ElementType
 /**
  * An active annotation for Android activities.
  * 
- * It takes one argument value, which is the simple name of the associated view file.
- * e.g. for layout/main_view.xml, the simple name would be "main_view".
+ * It takes one argument layout, which is the resource identifier of the associated view file.
+ * e.g. for layout/main_view.xml, the simple name would be "R.id.main_view".
  * 
  * It automatically declares typed local fields for all members declared within that XML layout, that is each member
  * with an @id/name attribute will be accessible from within the annotated classes without further ado.
@@ -31,7 +31,7 @@ import java.lang.annotation.ElementType
 @Active(AndroidActivityProcessor)
 @Target(ElementType.TYPE)
 annotation AndroidActivity {
-   String value
+   int layout
 }
 
 class AndroidActivityProcessor extends AbstractClassProcessor {
@@ -42,7 +42,9 @@ class AndroidActivityProcessor extends AbstractClassProcessor {
    
    override doTransform(MutableClassDeclaration annotatedClass, extension TransformationContext context) {
       val callBacksType = findInterface(annotatedClass.qualifiedName+"_CallBacks")
-      val viewFileName = getValue(annotatedClass, context)
+      val layoutResourceID = getValue(annotatedClass, context)
+       
+      val viewFileName = layoutResourceID.substring(layoutResourceID.lastIndexOf('.') + 1)
       if (viewFileName == null) {
          return;
       }
@@ -83,7 +85,7 @@ class AndroidActivityProcessor extends AbstractClassProcessor {
             addParameter("savedInstanceState", Bundle.newTypeReference)
             body = ['''
                super.onCreate(savedInstanceState);
-               setContentView(R.layout.«viewFileName»);
+               setContentView(«layoutResourceID»);
                «FOR method : onCreateMethods»
                   «method.simpleName»(savedInstanceState);
                «ENDFOR»
@@ -121,8 +123,11 @@ class AndroidActivityProcessor extends AbstractClassProcessor {
    def String getValue(MutableClassDeclaration annotatedClass, extension TransformationContext context) {
       val value = annotatedClass.annotations.findFirst[
          annotationTypeDeclaration==AndroidActivity.newTypeReference.type
-      ].getValue("value") as String
-      return value
+      ].getExpression("layout")
+      
+      if (value == null) return null
+      
+      return value.toString
    }
      
    def getFieldType(Element e) {
