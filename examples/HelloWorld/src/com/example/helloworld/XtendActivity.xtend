@@ -6,6 +6,7 @@ import android.view.Gravity
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.Toast
+import static extension org.xtendroid.utils.AlertUtils.*
 
 class XtendActivity extends Activity {
 
@@ -16,7 +17,7 @@ class XtendActivity extends Activity {
          addView(new Button(this) => [
             text = "Say Hello!"
             onClickListener = [
-               Toast.makeText(context, "Hello from Xtend!", Toast.LENGTH_LONG).show()
+               toastLong("Hello from Xtend!")
             ]
          ])
       ]
