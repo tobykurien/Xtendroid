@@ -303,7 +303,7 @@ Getting Started
 
 Method 1:
 ---------
-- Download the latest release from https://github.com/tobykurien/Xtendroid/releases
+- Download the latest release from https://github.com/tobykurien/Xtendroid/releases or https://github.com/tobykurien/Xtendroid/tree/master/Xtendroid/release
 - Copy the JAR file into your Android project's `libs` folder
 - If you are using an existing or new Android project:
 -- Right-click on your project -> Properties -> Java Build Path 
