@@ -39,33 +39,8 @@ public class MainActivity extends Activity {
         BgTask<String> _bgTask = new BgTask<String>();
         final Function0<String> _function = new Function0<String>() {
           public String apply() {
-            String _xtrycatchfinallyexpression = null;
-            try {
-              String _data = MainActivity.getData("http://www.iheartquotes.com/api/v1/random");
-              _xtrycatchfinallyexpression = _data;
-            } catch (final Throwable _t) {
-              if (_t instanceof Exception) {
-                final Exception e = (Exception)_t;
-                String _xblockexpression = null;
-                {
-                  final Runnable _function = new Runnable() {
-                    public void run() {
-                      String _message = e.getMessage();
-                      String _plus = ("Error: " + _message);
-                      AlertUtils.toast(MainActivity.this, _plus);
-                    }
-                  };
-                  MainActivity.this.runOnUiThread(_function);
-                  String _message = e.getMessage();
-                  String _plus = ("ERROR: " + _message);
-                  _xblockexpression = (_plus);
-                }
-                _xtrycatchfinallyexpression = _xblockexpression;
-              } else {
-                throw Exceptions.sneakyThrow(_t);
-              }
-            }
-            return _xtrycatchfinallyexpression;
+            String _data = MainActivity.getData("http://www.iheartquotes.com/api/v1/random");
+            return _data;
           }
         };
         final Procedure1<String> _function_1 = new Procedure1<String>() {
@@ -75,7 +50,19 @@ public class MainActivity extends Activity {
             _mainQuote.setText(_fromHtml);
           }
         };
-        _bgTask.runInBgWithProgress(pd, _function, _function_1);
+        final Procedure1<Exception> _function_2 = new Procedure1<Exception>() {
+          public void apply(final Exception error) {
+            final Runnable _function = new Runnable() {
+              public void run() {
+                String _message = error.getMessage();
+                String _plus = ("Error: " + _message);
+                AlertUtils.toast(MainActivity.this, _plus);
+              }
+            };
+            MainActivity.this.runOnUiThread(_function);
+          }
+        };
+        _bgTask.runInBgWithProgress(pd, _function, _function_1, _function_2);
       }
     };
     _mainLoadQuote.setOnClickListener(_function);

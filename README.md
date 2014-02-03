@@ -115,6 +115,24 @@ new BgTask<String>.runInBgWithProgress(progressBar, [|
 ])
 ```
 
+Handling errors in a background task is made easy: you can simply pass a third lambda function that will be executed if an error occurs during the background task:
+
+```xtend
+new BgTask<String>.runInBg([|
+   // this runs in the background thread
+   fetchStringFromSomewhere()
+],[result|
+   // this runs in the UI thread
+   toast("Got back: " + result)
+],[error|
+   // this runs in the UI thread
+   toast("Oops, this went wrong: " + error.message)
+)
+```
+
+Since Honeycomb, Android has defaulted to using a single thread for all AsyncTasks, because too many developers were writing non-thread-safe code. BgTask changes that, so that multiple AsyncTasks will run simultaneously using the THREAD_POOL_EXECUTOR, so be careful to write thread-safe code.
+
+
 Shared Preferences
 ------------------
 
