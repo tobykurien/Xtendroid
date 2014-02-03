@@ -8,6 +8,7 @@ import android.text.Spanned;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import com.example.xtendroid.sample1.MainActivity_CallBacks;
 import com.example.xtendroid.sample1.R;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -17,19 +18,23 @@ import java.net.URLConnection;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.Functions.Function0;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
+import org.xtendroid.app.AndroidActivity;
+import org.xtendroid.app.OnCreate;
 import org.xtendroid.utils.AlertUtils;
 import org.xtendroid.utils.BgTask;
 
 /**
- * Sample 1 - simple sample to show the usage of basic UI helpers as well as
+ * Sample 2 - simple sample to show the usage of basic UI helpers as well as
  * asynchronous processing. This example fetches a random quote from the internet
- * when a button is pressed, and displays it in a TextView.
+ * when a button is pressed, and displays it in a TextView. Unlike Sample 1,
+ * this example uses the @AndroidActivity annotation rather than individual
+ * @AndroidView annotations.
  */
+@AndroidActivity(layout = R.layout.activity_main)
 @SuppressWarnings("all")
-public class MainActivity extends Activity {
-  protected void onCreate(final Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    this.setContentView(R.layout.activity_main);
+public class MainActivity extends Activity implements MainActivity_CallBacks {
+  @OnCreate
+  public void init(final Bundle savedInstanceState) {
     Button _mainLoadQuote = this.getMainLoadQuote();
     final View.OnClickListener _function = new View.OnClickListener() {
       public void onClick(final View it) {
@@ -52,14 +57,9 @@ public class MainActivity extends Activity {
         };
         final Procedure1<Exception> _function_2 = new Procedure1<Exception>() {
           public void apply(final Exception error) {
-            final Runnable _function = new Runnable() {
-              public void run() {
-                String _message = error.getMessage();
-                String _plus = ("Error: " + _message);
-                AlertUtils.toast(MainActivity.this, _plus);
-              }
-            };
-            MainActivity.this.runOnUiThread(_function);
+            String _message = error.getMessage();
+            String _plus = ("Error: " + _message);
+            AlertUtils.toast(MainActivity.this, _plus);
           }
         };
         _bgTask.runInBgWithProgress(pd, _function, _function_1, _function_2);
@@ -110,27 +110,17 @@ public class MainActivity extends Activity {
     }
   }
   
-  private TextView _init_mainQuote() {
-    return (TextView) findViewById(R.id.main_quote);
+  public void onCreate(final Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
+    init(savedInstanceState);
   }
   
   public TextView getMainQuote() {
-    if (_mainQuote==null)
-    _mainQuote = _init_mainQuote();
-    return _mainQuote;
-  }
-  
-  private TextView _mainQuote;
-  
-  private Button _init_mainLoadQuote() {
-    return (Button) findViewById(R.id.main_load_quote);
+    return (TextView) findViewById(R.id.main_quote);
   }
   
   public Button getMainLoadQuote() {
-    if (_mainLoadQuote==null)
-    _mainLoadQuote = _init_mainLoadQuote();
-    return _mainLoadQuote;
+    return (Button) findViewById(R.id.main_load_quote);
   }
-  
-  private Button _mainLoadQuote;
 }

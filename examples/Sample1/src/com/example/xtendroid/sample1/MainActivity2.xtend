@@ -35,15 +35,14 @@ import org.xtendroid.app.OnCreate
          
          // load quote in the background
          new BgTask<String>.runInBgWithProgress(pd,[|
-            try { 
-               getData('http://www.iheartquotes.com/api/v1/random')               
-            } catch (Exception e) {
-               // handle errors by toasting it
-               runOnUiThread [| toast("Error: " + e.message) ]
-               "ERROR: " + e.message // return error as well
-            }
+            // get the data in the background
+            getData('http://www.iheartquotes.com/api/v1/random')               
          ],[result|
+            // update the UI with new data
             mainQuote.text = Html.fromHtml(result)
+         ],[error|
+            // handle any errors by toasting it
+            toast("Error: " + error.message)
          ])
       ])
    }

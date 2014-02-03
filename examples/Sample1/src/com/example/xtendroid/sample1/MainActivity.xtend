@@ -36,12 +36,14 @@ class MainActivity extends Activity {
          
          // load quote in the background
          new BgTask<String>.runInBgWithProgress(pd,[|
+            // get the data in the background
             getData('http://www.iheartquotes.com/api/v1/random')               
          ],[result|
+            // update the UI with new data
             mainQuote.text = Html.fromHtml(result)
          ],[error|
-            // handle errors by toasting it
-            runOnUiThread [| toast("Error: " + error.message) ]
+            // handle any errors by toasting it
+            toast("Error: " + error.message)
          ])
       ])
    }
