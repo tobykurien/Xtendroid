@@ -67,7 +67,7 @@ your Activity or Fragment, in which case you can specify it as follows:
 
 You can also bind all the controls in an Activity layout file to the code automatically 
 by using the @AndroidActivity annotation, as follows:
-```
+```xtend
 @AndroidActivity(layout=R.layout.my_activity) class MyActivity {
 
   @OnCreate
@@ -78,7 +78,8 @@ by using the @AndroidActivity annotation, as follows:
 }
 
 ```
-Here, you specify the layout resource, and Xtendroid will automatically parse the layout file and create getters for all the controls within the layout. This will be immediately accessible in the IDE (you will see the controls in your outline view). It will also auto-generate the onCreate() method if it doesn't exist, and load the layout into the Activity. Finally, it will look for any method with the ```@OnCreate``` annotation, and call them within the ```onCreate()```  method.
+
+Here, you specify the layout resource using the ```@AndroidActivity``` annotation, and Xtendroid will automatically parse the layout file and create getters for all the controls within the layout. This will be immediately accessible in the IDE (you will see the controls in your outline view and code-complete list). It will also auto-generate the ```onCreate()``` method if it doesn't exist, extend from ```Activity``` class, and load the layout into the Activity. Finally, it will look for any method with the ```@OnCreate``` annotation, and call them within the ```onCreate()``` method once the controls are ready to be accessed.
 
 View this video of how this works and how well it integrates with the IDE: http://vimeo.com/77024959
 
