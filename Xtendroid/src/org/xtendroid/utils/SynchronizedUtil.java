@@ -8,7 +8,7 @@ import org.eclipse.xtext.xbase.lib.Procedures;
  * 
  *    import static org.xtendroid.utils.SynchonizedUtil.*
  * 
- *    synchr(obj) [
+ *    sync(obj) [
  *       // do stuff
  *    ]
  * 
