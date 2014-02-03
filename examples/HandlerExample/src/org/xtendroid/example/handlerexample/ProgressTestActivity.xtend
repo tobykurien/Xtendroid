@@ -1,11 +1,12 @@
 package org.xtendroid.example.handlerexample
 
-import org.xtendroid.app.AndroidActivity
 import android.view.View
+import org.xtendroid.app.AndroidActivity
 
-@AndroidActivity("main") class HandlerExampleActivity {
+@AndroidActivity(layout=R.layout.main) class ProgressTestActivity {
 
    override startProgress(View element) {
+      // Using Thread for demo, never use Thread in production code
       new Thread(
          [ |
             for (i : 1 .. 10) {
@@ -61,7 +62,7 @@ public class ProgressTestActivity extends Activity {
     new Thread(runnable).start();
   }
 
-  // Simulating something timeconsuming
+  // Simulating something time consuming
   private void doFakeWork() {
     try {
       Thread.sleep(2000);
