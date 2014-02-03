@@ -65,6 +65,24 @@ your Activity or Fragment, in which case you can specify it as follows:
    val r = R // field declaration to import and reference correct R class
 ```
 
+You can also bind all the controls in an Activity layout file to the code automatically 
+by using the @AndroidActivity annotation, as follows:
+```
+@AndroidActivity(layout=R.layout.my_activity) class MyActivity {
+
+  @OnCreate
+  def init(Bundle savedInstanceState) {
+    myTextView.text = "some text"
+  }
+
+}
+
+```
+Here, you specify the layout resource, and Xtendroid will automatically parse the layout file and create getters for all the controls within the layout. This will be immediately accessible in the IDE (you will see the controls in your outline view). It will also auto-generate the onCreate() method if it doesn't exist, and load the layout into the Activity. Finally, it will look for any method with the ```@OnCreate``` annotation, and call them within the ```onCreate()```  method.
+
+View this video of how this works and how well it integrates with the IDE: http://vimeo.com/77024959
+
+
 Background tasks using AsyncTask
 --------------------------------
 

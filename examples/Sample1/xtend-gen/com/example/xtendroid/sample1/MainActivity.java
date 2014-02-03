@@ -6,10 +6,9 @@ import android.os.Bundle;
 import android.text.Html;
 import android.text.Spanned;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
-import com.example.xtendroid.sample1.R.layout;
+import com.example.xtendroid.sample1.R;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -30,9 +29,9 @@ import org.xtendroid.utils.BgTask;
 public class MainActivity extends Activity {
   protected void onCreate(final Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    this.setContentView(layout.activity_main);
+    this.setContentView(R.layout.activity_main);
     Button _mainLoadQuote = this.getMainLoadQuote();
-    final OnClickListener _function = new OnClickListener() {
+    final View.OnClickListener _function = new View.OnClickListener() {
       public void onClick(final View it) {
         ProgressDialog _progressDialog = new ProgressDialog(MainActivity.this);
         final ProgressDialog pd = _progressDialog;

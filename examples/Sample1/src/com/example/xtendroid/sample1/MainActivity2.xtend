@@ -1,0 +1,81 @@
+package com.example.xtendroid.sample1
+
+import android.app.Activity
+import android.app.ProgressDialog
+import android.os.Bundle
+import android.text.Html
+import android.widget.Button
+import android.widget.TextView
+import java.io.ByteArrayOutputStream
+import java.net.HttpURLConnection
+import java.net.URL
+import org.xtendroid.annotations.AndroidView
+import org.xtendroid.utils.BgTask
+
+import static extension org.xtendroid.utils.AlertUtils.*
+import org.xtendroid.app.AndroidActivity
+import org.xtendroid.app.OnCreate
+
+/**
+ * Sample 2 - simple sample to show the usage of basic UI helpers as well as 
+ * asynchronous processing. This example fetches a random quote from the internet
+ * when a button is pressed, and displays it in a TextView. Unlike Sample 1, 
+ * this example uses the @AndroidActivity annotation rather than individual
+ * @AndroidView annotations.
+ */
+@AndroidActivity(layout=R.layout.activity_main) class MainActivity {
+
+   @OnCreate
+   def init(Bundle savedInstanceState) {
+      // set up the button to load quotes
+      mainLoadQuote.setOnClickListener([
+         // show progress
+         val pd = new ProgressDialog(this)
+         pd.message = "Loading quote..."
+         
+         // load quote in the background
+         new BgTask<String>.runInBgWithProgress(pd,[|
+            try { 
+               getData('http://www.iheartquotes.com/api/v1/random')               
+            } catch (Exception e) {
+               // handle errors by toasting it
+               runOnUiThread [| toast("Error: " + e.message) ]
+               "ERROR: " + e.message // return error as well
+            }
+         ],[result|
+            mainQuote.text = Html.fromHtml(result)
+         ])
+      ])
+   }
+
+   /**
+    * Utility function to get data from the internet. In production code, 
+    * you should rather use something like the Volley library.
+    *
+    * @param url
+    * @return
+    * @throws IOException
+    */
+   def static String getData(String url) {
+      // connect to the URL
+      var c = new URL(url).openConnection as HttpURLConnection
+      c.connect
+      
+      if (c.responseCode == HttpURLConnection.HTTP_OK) {
+         // read data into a buffer
+         var os = new ByteArrayOutputStream
+         var is = c.inputStream
+         var int oneChar
+         while ((oneChar = is.read) > 0) {
+            os.write(oneChar)
+         }
+         is.close
+         os.close
+         
+         // return the data as a String
+         return os.toString
+      }
+
+      return null
+   }
+}
