@@ -24,9 +24,9 @@ import org.xtendroid.utils.AlertUtils;
 import org.xtendroid.utils.BgTask;
 
 /**
- * Sample 2 - simple sample to show the usage of basic UI helpers as well as
+ * Sample 1b - simple sample to show the usage of basic UI helpers as well as
  * asynchronous processing. This example fetches a random quote from the internet
- * when a button is pressed, and displays it in a TextView. Unlike Sample 1,
+ * when a button is pressed, and displays it in a TextView. Unlike Sample 1a,
  * this example uses the @AndroidActivity annotation rather than individual
  * @AndroidView annotations.
  */

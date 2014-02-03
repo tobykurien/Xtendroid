@@ -16,7 +16,7 @@ import static extension org.xtendroid.utils.AlertUtils.*
 import org.xtendroid.app.AndroidActivity
 
 /**
- * Sample 1 - simple sample to show the usage of basic UI helpers as well as 
+ * Sample 1a - simple sample to show the usage of basic UI helpers as well as 
  * asynchronous processing. This example fetches a random quote from the internet
  * when a button is pressed, and displays it in a TextView.
  */
