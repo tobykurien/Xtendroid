@@ -3,7 +3,9 @@ package asia.sonix.android.orm;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -323,15 +325,8 @@ public class AbatisService extends SQLiteOpenHelper {
          // get bean class package
          Package beanPackage = bean.getPackage();
          while (cursor.moveToNext()) {
-            Map<String, Object> map = new HashMap<String, Object>();
-            int i = 0;
-            for (String dataName : dataNames) {
-               map.put(dataName, cursor.getString(i));
-               i++;
-            }
-            JSONObject json = new JSONObject(map);
             try {
-               beanObj = (T) parse(json.toString(), bean, beanPackage.getName());
+               beanObj = (T) parse(cursor, bean, beanPackage.getName());
             } catch (Exception e) {
                Log.d(TAG, e.toString());
                return null;
@@ -391,15 +386,8 @@ public class AbatisService extends SQLiteOpenHelper {
          // get bean class package
          Package beanPackage = bean.getPackage();
          while (cursor.moveToNext()) {
-            Map<String, Object> map = new HashMap<String, Object>();
-            int i = 0;
-            for (String dataName : dataNames) {
-               map.put(dataName, cursor.getString(i));
-               i++;
-            }
-            JSONObject json = new JSONObject(map);
             try {
-               beanObj = (T) parse(json.toString(), bean, beanPackage.getName());
+               beanObj = (T) parse(cursor, bean, beanPackage.getName());
             } catch (Exception e) {
                Log.d(TAG, e.toString());
                return null;
@@ -481,9 +469,8 @@ public class AbatisService extends SQLiteOpenHelper {
     * @throws Exception
     */
    @SuppressWarnings({ "rawtypes", "unchecked" })
-   public Object parse(String jsonStr, Class beanClass, String basePackage) throws Exception {
+   public Object parse(Cursor cursor, Class beanClass, String basePackage) throws Exception {
       Object obj = null;
-      JSONObject jsonObj = new JSONObject(jsonStr);
       // Check bean object
       if (beanClass == null) {
          Log.d(TAG, "Bean class is null");
@@ -516,7 +503,7 @@ public class AbatisService extends SQLiteOpenHelper {
                Method m = beanClass.getDeclaredMethod(getBeanMethodName(fieldName, 1), parms);
                m.setAccessible(true);
                // Set value
-               m.invoke(obj, jsonObj.getInt(fieldName));
+               m.invoke(obj, cursor.getInt(cursor.getColumnIndex(fieldName)));
             } catch (Exception ex) {
                Log.d(TAG, ex.getMessage());
             }
@@ -526,7 +513,7 @@ public class AbatisService extends SQLiteOpenHelper {
                Method m = beanClass.getDeclaredMethod(getBeanMethodName(fieldName, 1), parms);
                m.setAccessible(true);
                // Set value
-               m.invoke(obj, jsonObj.getLong(fieldName));
+               m.invoke(obj, cursor.getLong(cursor.getColumnIndex(fieldName)));
             } catch (Exception ex) {
                Log.d(TAG, ex.getMessage());
             }
@@ -536,7 +523,7 @@ public class AbatisService extends SQLiteOpenHelper {
                Method m = beanClass.getDeclaredMethod(getBeanMethodName(fieldName, 1), parms);
                m.setAccessible(true);
                // Set value
-               m.invoke(obj, jsonObj.getBoolean(fieldName));
+               m.invoke(obj, cursor.getInt(cursor.getColumnIndex(fieldName)) != 0);
             } catch (Exception ex) {
                Log.d(TAG, ex.getMessage());
             }
@@ -546,7 +533,7 @@ public class AbatisService extends SQLiteOpenHelper {
                Method m = beanClass.getDeclaredMethod(getBeanMethodName(fieldName, 1), parms);
                m.setAccessible(true);
                // Set value
-               m.invoke(obj, jsonObj.getString(fieldName));
+               m.invoke(obj, cursor.getString(cursor.getColumnIndex(fieldName)));
             } catch (Exception ex) {
                Log.d(TAG, ex.getMessage());
             }
@@ -556,57 +543,68 @@ public class AbatisService extends SQLiteOpenHelper {
                Method m = beanClass.getDeclaredMethod(getBeanMethodName(fieldName, 1), parms);
                m.setAccessible(true);
                // Set value
-               m.invoke(obj, jsonObj.getDouble(fieldName));
+               m.invoke(obj, cursor.getDouble(cursor.getColumnIndex(fieldName)));
             } catch (Exception ex) {
                Log.d(TAG, ex.getMessage());
             }
-         } else if (type.getName().equals(List.class.getName()) || type.getName().equals(ArrayList.class.getName())) {
-            // Find out the Generic
-            String generic = props[i].getGenericType().toString();
-            if (generic.indexOf("<") != -1) {
-               String genericType = generic.substring(generic.lastIndexOf("<") + 1, generic.lastIndexOf(">"));
-               if (genericType != null) {
-                  JSONArray array = null;
-                  try {
-                     array = jsonObj.getJSONArray(fieldName);
-                  } catch (Exception ex) {
-                     Log.d(TAG, ex.getMessage());
-                     array = null;
-                  }
-                  if (array == null) {
-                     continue;
-                  }
-                  ArrayList arrayList = new ArrayList();
-                  for (int j = 0; j < array.length(); j++) {
-                     arrayList.add(parse(array.getJSONObject(j).toString(), Class.forName(genericType), basePackage));
-                  }
-                  // Set value
-                  Class[] parms = { type };
-                  try {
-                     Method m = beanClass.getDeclaredMethod(getBeanMethodName(fieldName, 1), parms);
-                     m.setAccessible(true);
-                     m.invoke(obj, arrayList);
-                  } catch (Exception ex) {
-                     Log.d(TAG, ex.getMessage());
-                  }
-               }
-            } else {
-               // No generic defined
-               generic = null;
-            }
-         } else if (typeName.startsWith(basePackage)) {
+         } else if (typeName.equals("java.util.Date")) {
             Class[] parms = { type };
             try {
                Method m = beanClass.getDeclaredMethod(getBeanMethodName(fieldName, 1), parms);
                m.setAccessible(true);
-               // Set value
-               JSONObject customObj = jsonObj.getJSONObject(fieldName);
-               if (customObj != null) {
-                  m.invoke(obj, parse(customObj.toString(), type, basePackage));
-               }
-            } catch (JSONException ex) {
+               // "Wed Mar 19 16:50:59 SAST 2014"
+               m.invoke(obj, new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy").parse(
+                        cursor.getString(cursor.getColumnIndex(fieldName))));
+            } catch (Exception ex) {
                Log.d(TAG, ex.getMessage());
             }
+//         } else if (type.getName().equals(List.class.getName()) || type.getName().equals(ArrayList.class.getName())) {
+//            // Find out the Generic
+//            String generic = props[i].getGenericType().toString();
+//            if (generic.indexOf("<") != -1) {
+//               String genericType = generic.substring(generic.lastIndexOf("<") + 1, generic.lastIndexOf(">"));
+//               if (genericType != null) {
+//                  JSONArray array = null;
+//                  try {
+//                     array = jsonObj.getJSONArray(fieldName);
+//                  } catch (Exception ex) {
+//                     Log.d(TAG, ex.getMessage());
+//                     array = null;
+//                  }
+//                  if (array == null) {
+//                     continue;
+//                  }
+//                  ArrayList arrayList = new ArrayList();
+//                  for (int j = 0; j < array.length(); j++) {
+//                     arrayList.add(parse(array.getJSONObject(j).toString(), Class.forName(genericType), basePackage));
+//                  }
+//                  // Set value
+//                  Class[] parms = { type };
+//                  try {
+//                     Method m = beanClass.getDeclaredMethod(getBeanMethodName(fieldName, 1), parms);
+//                     m.setAccessible(true);
+//                     m.invoke(obj, arrayList);
+//                  } catch (Exception ex) {
+//                     Log.d(TAG, ex.getMessage());
+//                  }
+//               }
+//            } else {
+//               // No generic defined
+//               generic = null;
+//            }
+//         } else if (typeName.startsWith(basePackage)) {
+//            Class[] parms = { type };
+//            try {
+//               Method m = beanClass.getDeclaredMethod(getBeanMethodName(fieldName, 1), parms);
+//               m.setAccessible(true);
+//               // Set value
+//               JSONObject customObj = jsonObj.getJSONObject(fieldName);
+//               if (customObj != null) {
+//                  m.invoke(obj, parse(customObj.toString(), type, basePackage));
+//               }
+//            } catch (JSONException ex) {
+//               Log.d(TAG, ex.getMessage());
+//            }
          } else {
             // Skip
             Log.d(TAG, "Field " + fieldName + "#" + typeName + " is skip");
