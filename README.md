@@ -216,7 +216,7 @@ class User {
   @Property String lastName
   @Property int age
   
-  def toString() {
+  override toString() {
       firstName + " " + lastName
   }
 }
