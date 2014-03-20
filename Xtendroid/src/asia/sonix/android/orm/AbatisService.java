@@ -194,9 +194,13 @@ public class AbatisService extends SQLiteOpenHelper {
     * @return Map<String, Object> result
     */
    public Map<String, Object> executeForMap(int sqlId, Map<String, ? extends Object> bindParams) {
+      String sql = context.getResources().getString(sqlId);
+      return executeForMap(sqlId, bindParams);
+   }
+   
+   public Map<String, Object> executeForMap(String sql, Map<String, ? extends Object> bindParams) {
       getDbObject();
       try {
-         String sql = context.getResources().getString(sqlId);
          if (bindParams != null) {
             Iterator<String> mapIterator = bindParams.keySet().iterator();
             while (mapIterator.hasNext()) {
@@ -245,9 +249,13 @@ public class AbatisService extends SQLiteOpenHelper {
     * @return List<Map<String, Object>> result
     */
    public List<Map<String, Object>> executeForMapList(int sqlId, Map<String, ? extends Object> bindParams) {
+      String sql = context.getResources().getString(sqlId);
+      return executeForMapList(sqlId, bindParams);
+   }
+   
+   public List<Map<String, Object>> executeForMapList(String sql, Map<String, ? extends Object> bindParams) {
       getDbObject();
       try {
-         String sql = context.getResources().getString(sqlId);
          if (bindParams != null) {
             Iterator<String> mapIterator = bindParams.keySet().iterator();
             while (mapIterator.hasNext()) {
@@ -298,9 +306,14 @@ public class AbatisService extends SQLiteOpenHelper {
     */
    @SuppressWarnings({ "unchecked", "rawtypes" })
    public <T> T executeForBean(int sqlId, Map<String, ? extends Object> bindParams, Class bean) {
+      String sql = context.getResources().getString(sqlId);
+      return executeForBean(sql, bindParams, bean);
+   }
+   
+   @SuppressWarnings({ "unchecked", "rawtypes" })
+   public <T> T executeForBean(String sql, Map<String, ? extends Object> bindParams, Class bean) {
       getDbObject();
       try {
-         String sql = context.getResources().getString(sqlId);
          if (bindParams != null) {
             Iterator<String> mapIterator = bindParams.keySet().iterator();
             while (mapIterator.hasNext()) {
@@ -359,9 +372,14 @@ public class AbatisService extends SQLiteOpenHelper {
     */
    @SuppressWarnings({ "unchecked", "rawtypes" })
    public <T> List<T> executeForBeanList(int sqlId, Map<String, ? extends Object> bindParams, Class bean) {
+      String sql = context.getResources().getString(sqlId);
+      return executeForBeanList(sql, bindParams, bean);
+   }
+   
+   @SuppressWarnings({ "unchecked", "rawtypes" })
+   public <T> List<T> executeForBeanList(String sql, Map<String, ? extends Object> bindParams, Class bean) {
       getDbObject();
       try {
-         String sql = context.getResources().getString(sqlId);
          if (bindParams != null) {
             Iterator<String> mapIterator = bindParams.keySet().iterator();
             while (mapIterator.hasNext()) {
@@ -416,10 +434,14 @@ public class AbatisService extends SQLiteOpenHelper {
     * @return int 実行によって影響をもらった行数
     */
    public int execute(int sqlId, Map<String, ? extends Object> bindParams) {
+      String sql = context.getResources().getString(sqlId);
+      return execute(sqlId, bindParams);
+   }
+   
+   public int execute(String sql, Map<String, ? extends Object> bindParams) {
       getDbObject();
       try {
          int row = 0;
-         String sql = context.getResources().getString(sqlId);
          if (bindParams != null) {
             Iterator<String> mapIterator = bindParams.keySet().iterator();
             while (mapIterator.hasNext()) {
