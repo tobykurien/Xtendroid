@@ -5,6 +5,8 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import asia.sonix.android.orm.AbatisService
 import java.util.Map
+import java.util.Set
+import java.util.Map.Entry
 
 /**
  * Base class for creating your own database service class. This 
@@ -34,6 +36,45 @@ class BaseDbService extends AbatisService {
     * Override this to handle database version upgrades between versions
     */
    override onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+   }
+
+   /**
+    * Find an object by it's id
+    */
+   def findById(String table, long id, Class bean) {
+      executeForBean(
+         '''select * from «table» where id = #id#''',
+         #{ 'id' -> id },
+         bean
+      )
+   }
+
+   /**
+    * Find all objects in a table
+    */
+   def findAll(String table, String orderBy, Class bean) {
+      findByFields(table, #{}, orderBy, bean)
+   }
+
+   /**
+    * Find an object by fields
+    */
+   def findByFields(String table, Map<String, ? extends Object> values, String orderBy, Class bean) {
+      var where = values.keySet.fold("") [res, key|
+         if (res.length == 0) '''«key» = #«key»#'''
+         else '''«res» and «key» = #«key»#'''
+      ]
+      
+      var order = ""
+      if (orderBy != null && orderBy.trim.length > 0) {
+         order = "order by " + orderBy
+      } 
+            
+      executeForBeanList(
+         '''select * from «table» where «where» «order»''',
+         values,
+         bean
+      )
    }
 
    /**

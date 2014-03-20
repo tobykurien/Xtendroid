@@ -234,14 +234,10 @@ Create some SQL strings in res/values folder, e.g. in sqlmaps.xml:
         );
     </string>
 
-    <string name="dbGetUsers">
+    <string name="dbGetOlderThan">
       select * from users
-      order by lastName asc
-    </string>
-        
-    <string name="dbGetUser">
-      select * from users
-      where id = #id#
+      where age > #age#
+      order by age asc
     </string>
 </resources>
 ```
@@ -266,8 +262,15 @@ Now you are ready to play! Here are some examples:
 ```xtend
 import static extension DbService.*
 
-// get all users
-var users = db.executeForBeanList(R.string.dbGetUsers, null, typeof(User))
+// get all users order by lastName
+var users = db.findAll("users", "lastName asc", User)
+users.forEach [user|
+   Log.d("db", "Got user: " + user)
+]
+
+// get all users older than 20 (uses SQL defined above)
+var users = db.executeForBeanList(R.string.dbGetOlderThan, 
+   #{ 'age' -> 20 }, User)
 users.forEach [user|
    Log.d("db", "Got user: " + user)
 ]
@@ -280,8 +283,7 @@ var johnId = db.insert("users", #{
 })
 
 // get back this user
-var john = db.executeForBean(R.string.dbGetUser, 
-   #{'id' -> johnId}, typeof(User))
+var john = db.findById("users", johnId, User)
 toast("Hi " + john)   
 
 // update this user
