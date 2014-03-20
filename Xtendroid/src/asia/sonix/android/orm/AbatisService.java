@@ -546,7 +546,8 @@ public class AbatisService extends SQLiteOpenHelper {
                Method m = beanClass.getDeclaredMethod(getBeanMethodName(fieldName, 1), parms);
                m.setAccessible(true);
                // Set value
-               m.invoke(obj, cursor.getInt(cursor.getColumnIndex(fieldName)) != 0);
+               String val = cursor.getString(cursor.getColumnIndex(fieldName));
+               m.invoke(obj, val.equalsIgnoreCase("true"));
             } catch (Exception ex) {
                Log.d(TAG, ex.getMessage());
             }
