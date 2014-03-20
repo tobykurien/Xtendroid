@@ -510,6 +510,7 @@ public class AbatisService extends SQLiteOpenHelper {
       for (int i = 0; i < props.length; i++) {
          String fieldName = props[i].getName();
          fieldName = fieldName.replaceAll("_", "");
+         if (cursor.getColumnIndex(fieldName) < 0) continue;
 
          // Skip public and static fields
          if (props[i].getModifiers() == (Modifier.PUBLIC | Modifier.STATIC)) {
