@@ -204,6 +204,11 @@ var adapter = new BeanAdapter<User>(this, R.layout.row_user, users)
 userList.adapter = adapter
 ```
 
+The list will now display the data. If you need to add some presentation logic, for 
+example display a formatted date, simply add a method to the bean to do it (e.g.
+```def getFormattedDate() {...}``` and then display it in the list by naming your 
+view appropriately, e.g. ```<TextView android:id="@+id/formatted_date" .../>```
+
 Database
 --------
 
@@ -268,11 +273,11 @@ users.forEach [user|
    Log.d("db", "Got user: " + user)
 ]
 
-// get all users older than 20 (uses SQL defined above)
-var users = db.executeForBeanList(R.string.dbGetOlderThan, 
-   #{ 'age' -> 20 }, User)
-users.forEach [user|
-   Log.d("db", "Got user: " + user)
+// get all users older than 18 (uses SQL defined above)
+var adults = db.executeForBeanList(R.string.dbGetOlderThan, 
+   #{ 'age' -> 18 }, User)
+adults.forEach [adult|
+   Log.d("db", "Got user: " + adult)
 ]
 
 // insert a record
