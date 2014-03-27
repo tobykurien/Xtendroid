@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
 import android.util.Log
-import java.util.HashMap
+import java.util.WeakHashMap
 
 /**
  * A base class for easy access to SharedPreferences. Implements caching of
@@ -13,7 +13,7 @@ import java.util.HashMap
  */
 class BasePreferences {
    protected SharedPreferences pref
-   protected static val cache = new HashMap<Integer, BasePreferences>
+   protected static val cache = new WeakHashMap<Integer, BasePreferences>
 
    protected new() {
    }
