@@ -195,7 +195,7 @@ public class AbatisService extends SQLiteOpenHelper {
     */
    public Map<String, Object> executeForMap(int sqlId, Map<String, ? extends Object> bindParams) {
       String sql = context.getResources().getString(sqlId);
-      return executeForMap(sqlId, bindParams);
+      return executeForMap(sql, bindParams);
    }
    
    public Map<String, Object> executeForMap(String sql, Map<String, ? extends Object> bindParams) {
@@ -250,7 +250,7 @@ public class AbatisService extends SQLiteOpenHelper {
     */
    public List<Map<String, Object>> executeForMapList(int sqlId, Map<String, ? extends Object> bindParams) {
       String sql = context.getResources().getString(sqlId);
-      return executeForMapList(sqlId, bindParams);
+      return executeForMapList(sql, bindParams);
    }
    
    public List<Map<String, Object>> executeForMapList(String sql, Map<String, ? extends Object> bindParams) {
@@ -435,7 +435,7 @@ public class AbatisService extends SQLiteOpenHelper {
     */
    public int execute(int sqlId, Map<String, ? extends Object> bindParams) {
       String sql = context.getResources().getString(sqlId);
-      return execute(sqlId, bindParams);
+      return execute(sql, bindParams);
    }
    
    public int execute(String sql, Map<String, ? extends Object> bindParams) {
