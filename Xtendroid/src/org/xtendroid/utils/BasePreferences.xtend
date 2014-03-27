@@ -3,6 +3,7 @@ package org.xtendroid.utils
 import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
+import android.util.Log
 import java.util.HashMap
 
 /**
@@ -12,19 +13,19 @@ import java.util.HashMap
  */
 class BasePreferences {
    protected SharedPreferences pref
-   protected static val cache = new HashMap<String, BasePreferences>
+   protected static val cache = new HashMap<Integer, BasePreferences>
 
    protected new() {
    }
 
    static def BasePreferences getPreferences(Context context, Class<?> subclass) {
       if(cache.keySet.length > 5) cache.clear // avoid memory leaks by clearing often
-      if (cache.get(context.toString()) == null) {
+      if (cache.get(context.hashCode) == null) {
          val preferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext())
-         cache.put(context.toString(), newInstance(subclass, preferences))
+         cache.put(context.hashCode, newInstance(subclass, preferences))
       }
-
-      cache.get(context.toString())
+      
+      cache.get(context.hashCode)
    }
 
    def private setPref(SharedPreferences preferences) {
