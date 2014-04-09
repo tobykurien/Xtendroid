@@ -266,11 +266,11 @@ public class AbatisService extends SQLiteOpenHelper {
          }
          if (sql.indexOf('#') != -1) {
             Log.e(TAG, "undefined parameter in sql: " + sql);
-            return null;
+            return new ArrayList();
          }
          Cursor cursor = dbObj.rawQuery(sql, null);
          List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
-         if (cursor == null) { return null; }
+         if (cursor == null) { return new ArrayList(); }
          String[] columnNames = cursor.getColumnNames();
          while (cursor.moveToNext()) {
             Map<String, Object> map = new HashMap<String, Object>();
@@ -390,11 +390,11 @@ public class AbatisService extends SQLiteOpenHelper {
          }
          if (sql.indexOf('#') != -1) {
             Log.e(TAG, "undefined parameter in sql: " + sql);
-            return null;
+            return new ArrayList();
          }
          Cursor cursor = dbObj.rawQuery(sql, null);
          List<T> objectList = new ArrayList<T>();
-         if (cursor == null) { return null; }
+         if (cursor == null) { return new ArrayList(); }
          String[] columnNames = cursor.getColumnNames();
          List<String> dataNames = new ArrayList<String>();
          for (String columnName : columnNames) {
@@ -408,7 +408,7 @@ public class AbatisService extends SQLiteOpenHelper {
                beanObj = (T) parse(cursor, bean, beanPackage.getName());
             } catch (Exception e) {
                Log.d(TAG, e.toString());
-               return null;
+               return new ArrayList();
             }
             objectList.add(beanObj);
          }
