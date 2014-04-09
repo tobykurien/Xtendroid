@@ -3,7 +3,6 @@ package asia.sonix.android.orm;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -12,10 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -85,6 +80,9 @@ public class AbatisService extends SQLiteOpenHelper {
     */
    private Context context;
 
+   // show SQL as debug output
+   protected boolean showSQL = false;
+   
    /**
     * Default DB file nameを利用するConstructor
     * 
@@ -214,6 +212,7 @@ public class AbatisService extends SQLiteOpenHelper {
             Log.e(TAG, "undefined parameter in sql: " + sql);
             return map;
          }
+         if (showSQL) Log.d(TAG, sql);
          Cursor cursor = dbObj.rawQuery(sql, null);
          if (cursor == null) { return map; }
          String[] columnNames = cursor.getColumnNames();
@@ -267,6 +266,7 @@ public class AbatisService extends SQLiteOpenHelper {
             Log.e(TAG, "undefined parameter in sql: " + sql);
             return mapList;
          }
+         if (showSQL) Log.d(TAG, sql);
          Cursor cursor = dbObj.rawQuery(sql, null);
          if (cursor == null) { return mapList; }
          String[] columnNames = cursor.getColumnNames();
@@ -325,6 +325,7 @@ public class AbatisService extends SQLiteOpenHelper {
             Log.e(TAG, "undefined parameter in sql: " + sql);
             return beanObj;
          }
+         if (showSQL) Log.d(TAG, sql);
          Cursor cursor = dbObj.rawQuery(sql, null);
          if (cursor == null) { return beanObj; }
          String[] columnNames = cursor.getColumnNames();
@@ -387,6 +388,7 @@ public class AbatisService extends SQLiteOpenHelper {
             Log.e(TAG, "undefined parameter in sql: " + sql);
             return objectList;
          }
+         if (showSQL) Log.d(TAG, sql);
          Cursor cursor = dbObj.rawQuery(sql, null);
          if (cursor == null) { return objectList; }
          String[] columnNames = cursor.getColumnNames();
@@ -449,6 +451,7 @@ public class AbatisService extends SQLiteOpenHelper {
             return row;
          }
          try {
+            if (showSQL) Log.d(TAG, sql);
             dbObj.execSQL(sql);
             row += 1;
          } catch (SQLException e) {
@@ -570,9 +573,7 @@ public class AbatisService extends SQLiteOpenHelper {
             try {
                Method m = beanClass.getDeclaredMethod(getBeanMethodName(fieldName, 1), parms);
                m.setAccessible(true);
-               // "Wed Mar 19 16:50:59 SAST 2014"
-               m.invoke(obj, new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy").parse(
-                        cursor.getString(cursor.getColumnIndex(fieldName))));
+               m.invoke(obj, new Date(cursor.getLong((cursor.getColumnIndex(fieldName)))));
             } catch (Exception ex) {
                Log.d(TAG, "error: " + ex.getMessage());
             }
@@ -679,13 +680,21 @@ public class AbatisService extends SQLiteOpenHelper {
     * @author Toby Kurien
     */
    public String toSqlString(Object value) {
+     if (value == null) {
+        return "null";
+     }
+      
      String val = String.valueOf(value);
 
      if (value instanceof Integer ||
          value instanceof Float ||
          value instanceof Double ||
-         value instanceof Long ) {
+         value instanceof Long) {
        return val;
+     } else if (value instanceof Boolean) {
+        return "'" + ((Boolean) value ? "true" : "false") + "'";
+     } else if (value instanceof Date) {
+        return String.valueOf(((Date) value).getTime());
      } else {
        return "'" + val + "'"; // TODO escape special characters in val here
      }

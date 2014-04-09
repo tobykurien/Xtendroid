@@ -7,6 +7,7 @@ import asia.sonix.android.orm.AbatisService
 import java.util.Map
 import java.util.Set
 import java.util.Map.Entry
+import java.util.Date
 
 /**
  * Base class for creating your own database service class. This 
@@ -78,38 +79,48 @@ class BaseDbService extends AbatisService {
    }
 
    /**
+    * Convert the Map object into ContentValues object
+    */
+   def ContentValues getContentValues(Map<String, ? extends Object> values) {
+      var vals = new ContentValues()
+      for (String key : values.keySet) {
+         var value = values.get(key)
+         if (value instanceof Date) {
+            vals.put(key, (value as Date).time)
+         } else {
+            vals.put(key, String.valueOf(value))
+         }
+      }
+      vals
+   }
+
+   /**
     * Generic method to insert records into the database from a Map
     * of key-value pairs.
     * @return the id of the inserted row
     */
    def insert(String table, Map<String, ? extends Object> values) {
-      var vals = new ContentValues()
-      for (String key : values.keySet) {
-         vals.put(key, String.valueOf(values.get(key)))
-      }
-      
       var db = writableDatabase
       try {
-         return db.insert(table, "", vals)
+         return db.insert(table, "", values.contentValues)
       } finally {
          db.close()
       }
    }
-
+   
    /**
     * Generic method to update a record with the given id in the database from a Map
     * of key-value pairs.
     * @return the number of rows affected
     */
+   def update(String table, Map<String, ?> values, long id) {
+      update(table, values, String.valueOf(id))
+   }
+
    def update(String table, Map<String, ? extends Object> values, String id) {
-      var vals = new ContentValues()
-      for (String key : values.keySet) {
-         vals.put(key, String.valueOf(values.get(key)))
-      }
-      
       var db = writableDatabase
       try {
-         return db.update(table, vals, "id = ?", #[id])
+         return db.update(table, values.contentValues, "id = ?", #[id])
       } finally {
          db.close()
       }
