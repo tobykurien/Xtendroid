@@ -199,6 +199,7 @@ public class AbatisService extends SQLiteOpenHelper {
    }
    
    public Map<String, Object> executeForMap(String sql, Map<String, ? extends Object> bindParams) {
+      Map<String, Object> map = null;
       getDbObject();
       try {
          if (bindParams != null) {
@@ -211,24 +212,21 @@ public class AbatisService extends SQLiteOpenHelper {
          }
          if (sql.indexOf('#') != -1) {
             Log.e(TAG, "undefined parameter in sql: " + sql);
-            return null;
+            return map;
          }
          Cursor cursor = dbObj.rawQuery(sql, null);
-         List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
-         if (cursor == null) { return null; }
+         if (cursor == null) { return map; }
          String[] columnNames = cursor.getColumnNames();
-         while (cursor.moveToNext()) {
-            Map<String, Object> map = new HashMap<String, Object>();
+         if (cursor.moveToNext()) {
+            map = new HashMap<String, Object>();
             int i = 0;
             for (String columnName : columnNames) {
                map.put(columnName, cursor.getString(i));
                i++;
             }
-            mapList.add(map);
          }
-         if (mapList.size() <= 0) { return null; }
          cursor.close();
-         return mapList.get(0);
+         return map;
       } finally {
          dbObj.close();
       }
@@ -254,6 +252,7 @@ public class AbatisService extends SQLiteOpenHelper {
    }
    
    public List<Map<String, Object>> executeForMapList(String sql, Map<String, ? extends Object> bindParams) {
+      List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
       getDbObject();
       try {
          if (bindParams != null) {
@@ -266,11 +265,10 @@ public class AbatisService extends SQLiteOpenHelper {
          }
          if (sql.indexOf('#') != -1) {
             Log.e(TAG, "undefined parameter in sql: " + sql);
-            return new ArrayList();
+            return mapList;
          }
          Cursor cursor = dbObj.rawQuery(sql, null);
-         List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
-         if (cursor == null) { return new ArrayList(); }
+         if (cursor == null) { return mapList; }
          String[] columnNames = cursor.getColumnNames();
          while (cursor.moveToNext()) {
             Map<String, Object> map = new HashMap<String, Object>();
@@ -312,6 +310,7 @@ public class AbatisService extends SQLiteOpenHelper {
    
    @SuppressWarnings({ "unchecked", "rawtypes" })
    public <T> T executeForBean(String sql, Map<String, ? extends Object> bindParams, Class bean) {
+      T beanObj = null;
       getDbObject();
       try {
          if (bindParams != null) {
@@ -324,31 +323,26 @@ public class AbatisService extends SQLiteOpenHelper {
          }
          if (sql.indexOf('#') != -1) {
             Log.e(TAG, "undefined parameter in sql: " + sql);
-            return null;
+            return beanObj;
          }
          Cursor cursor = dbObj.rawQuery(sql, null);
-         List<T> objectList = new ArrayList<T>();
-         if (cursor == null) { return null; }
+         if (cursor == null) { return beanObj; }
          String[] columnNames = cursor.getColumnNames();
          List<String> dataNames = new ArrayList<String>();
          for (String columnName : columnNames) {
             dataNames.add(chgDataName(columnName));
          }
-         T beanObj = null;
          // get bean class package
          Package beanPackage = bean.getPackage();
-         while (cursor.moveToNext()) {
+         if (cursor.moveToNext()) {
             try {
                beanObj = (T) parse(cursor, bean, beanPackage.getName());
             } catch (Exception e) {
                Log.d(TAG, e.toString());
-               return null;
             }
-            objectList.add(beanObj);
          }
-         if (objectList.size() <= 0) { return null; }
          cursor.close();
-         return objectList.get(0);
+         return beanObj;
       } finally {
          dbObj.close();
       }
@@ -378,6 +372,7 @@ public class AbatisService extends SQLiteOpenHelper {
    
    @SuppressWarnings({ "unchecked", "rawtypes" })
    public <T> List<T> executeForBeanList(String sql, Map<String, ? extends Object> bindParams, Class bean) {
+      List<T> objectList = new ArrayList<T>();
       getDbObject();
       try {
          if (bindParams != null) {
@@ -390,27 +385,26 @@ public class AbatisService extends SQLiteOpenHelper {
          }
          if (sql.indexOf('#') != -1) {
             Log.e(TAG, "undefined parameter in sql: " + sql);
-            return new ArrayList();
+            return objectList;
          }
          Cursor cursor = dbObj.rawQuery(sql, null);
-         List<T> objectList = new ArrayList<T>();
-         if (cursor == null) { return new ArrayList(); }
+         if (cursor == null) { return objectList; }
          String[] columnNames = cursor.getColumnNames();
          List<String> dataNames = new ArrayList<String>();
          for (String columnName : columnNames) {
             dataNames.add(chgDataName(columnName));
          }
+         
          T beanObj = null;
          // get bean class package
          Package beanPackage = bean.getPackage();
          while (cursor.moveToNext()) {
             try {
                beanObj = (T) parse(cursor, bean, beanPackage.getName());
+               objectList.add(beanObj);
             } catch (Exception e) {
-               Log.d(TAG, e.toString());
-               return new ArrayList();
+               Log.e(TAG, e.toString(), e);
             }
-            objectList.add(beanObj);
          }
          cursor.close();
          return objectList;
@@ -580,7 +574,7 @@ public class AbatisService extends SQLiteOpenHelper {
                m.invoke(obj, new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy").parse(
                         cursor.getString(cursor.getColumnIndex(fieldName))));
             } catch (Exception ex) {
-               Log.d(TAG, ex.getMessage());
+               Log.d(TAG, "error: " + ex.getMessage());
             }
 //         } else if (type.getName().equals(List.class.getName()) || type.getName().equals(ArrayList.class.getName())) {
 //            // Find out the Generic
