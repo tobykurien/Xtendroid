@@ -574,7 +574,7 @@ public class AbatisService extends SQLiteOpenHelper {
                Method m = beanClass.getDeclaredMethod(getBeanMethodName(fieldName, 1), parms);
                m.setAccessible(true);
                Long dateVal = cursor.getLong((cursor.getColumnIndex(fieldName)));
-               if (dateVal == null) {
+               if (cursor.isNull(cursor.getColumnIndex(fieldName)) || dateVal == 0) {
                   m.invoke(obj, null);
                } else {
                   m.invoke(obj, new Date(dateVal));
