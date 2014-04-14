@@ -137,10 +137,16 @@ class AndroidActivityProcessor extends AbstractClassProcessor {
          try {
             Class.forName("android.view."+e.nodeName)
          } catch (ClassNotFoundException exception1) {
-            null
+            try {
+            	Class.forName(e.nodeName)
+	         } catch (ClassNotFoundException exception2) {
+	         	null
+             }
          }
       }
-      if (View.isAssignableFrom(clazz)) {
+      
+      
+      if (clazz != null && View.isAssignableFrom(clazz)) {
          return clazz
       }
       return null
