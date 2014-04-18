@@ -1,18 +1,88 @@
 package org.xtendroid.xtendroidtest.test;
 
+import android.content.Context;
 import android.test.AndroidTestCase;
+import com.google.common.collect.Maps;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import junit.framework.Assert;
+import org.eclipse.xtext.xbase.lib.Conversions;
+import org.xtendroid.utils.TimeUtils;
+import org.xtendroid.xtendroidtest.db.DbService;
+import org.xtendroid.xtendroidtest.models.User;
 
 @SuppressWarnings("all")
 public class DatabaseTest extends AndroidTestCase {
   public void testDbBasic() {
-    throw new Error("Unresolved compilation problems:"
-      + "\nThe method delete is undefined for the type DatabaseTest"
-      + "\nThe method insert is undefined for the type DatabaseTest"
-      + "\nThe method findById is undefined for the type DatabaseTest"
-      + "\nfirstName cannot be resolved"
-      + "\nlastName cannot be resolved"
-      + "\ncreatedAt cannot be resolved"
-      + "\nactive cannot be resolved"
-      + "\nexpiryDate cannot be resolved");
+    Context _context = this.getContext();
+    DbService _db = DbService.getDb(_context);
+    _db.delete("users");
+    final Date now = new Date();
+    Context _context_1 = this.getContext();
+    DbService _db_1 = DbService.getDb(_context_1);
+    Map<String,Object> _xsetliteral = null;
+    Map<String,Object> _tempMap = Maps.<String, Object>newHashMap();
+    _tempMap.put("createdAt", now);
+    _tempMap.put("firstName", "Toby");
+    _tempMap.put("lastName", "Kurien");
+    _tempMap.put("userName", "tobykurien");
+    _tempMap.put("active", Boolean.valueOf(true));
+    _xsetliteral = Collections.<String, Object>unmodifiableMap(_tempMap);
+    long tobyId = _db_1.insert("users", _xsetliteral);
+    Context _context_2 = this.getContext();
+    DbService _db_2 = DbService.getDb(_context_2);
+    User toby = _db_2.<User>findById("users", tobyId, User.class);
+    Assert.assertNotNull(toby);
+    String _firstName = toby.getFirstName();
+    Assert.assertEquals("Toby", _firstName);
+    String _lastName = toby.getLastName();
+    Assert.assertEquals("Kurien", _lastName);
+    String _userName = toby.getUserName();
+    Assert.assertEquals("tobykurien", _userName);
+    Date _createdAt = toby.getCreatedAt();
+    Assert.assertEquals(now, _createdAt);
+    boolean _isActive = toby.isActive();
+    Assert.assertEquals(true, _isActive);
+    Date _expiryDate = toby.getExpiryDate();
+    Assert.assertNull(_expiryDate);
+    long _currentTimeMillis = System.currentTimeMillis();
+    long _hours = TimeUtils.hours(24);
+    long _plus = (_currentTimeMillis + _hours);
+    final Date expiry = new Date(_plus);
+    Context _context_3 = this.getContext();
+    DbService _db_3 = DbService.getDb(_context_3);
+    Map<String,Object> _xsetliteral_1 = null;
+    Map<String,Object> _tempMap_1 = Maps.<String, Object>newHashMap();
+    _tempMap_1.put("username", "tobyk");
+    _tempMap_1.put("active", Boolean.valueOf(false));
+    _tempMap_1.put("expiryDate", expiry);
+    _xsetliteral_1 = Collections.<String, Object>unmodifiableMap(_tempMap_1);
+    _db_3.update("users", _xsetliteral_1, tobyId);
+    Context _context_4 = this.getContext();
+    DbService _db_4 = DbService.getDb(_context_4);
+    User _findById = _db_4.<User>findById("users", tobyId, User.class);
+    toby = _findById;
+    Assert.assertNotNull(toby);
+    String _userName_1 = toby.getUserName();
+    Assert.assertEquals("tobyk", _userName_1);
+    boolean _isActive_1 = toby.isActive();
+    Assert.assertEquals(false, _isActive_1);
+    Date _expiryDate_1 = toby.getExpiryDate();
+    Assert.assertNotNull(_expiryDate_1);
+    Date _expiryDate_2 = toby.getExpiryDate();
+    Assert.assertEquals(expiry, _expiryDate_2);
+    Context _context_5 = this.getContext();
+    DbService _db_5 = DbService.getDb(_context_5);
+    String _valueOf = String.valueOf(tobyId);
+    _db_5.delete("users", _valueOf);
+    Context _context_6 = this.getContext();
+    DbService _db_6 = DbService.getDb(_context_6);
+    List<User> users = _db_6.<User>findAll("users", null, User.class);
+    Assert.assertNotNull(users);
+    final List<User> _converted_users = (List<User>)users;
+    int _length = ((Object[])Conversions.unwrapArray(_converted_users, Object.class)).length;
+    Assert.assertEquals(0, _length);
   }
 }
