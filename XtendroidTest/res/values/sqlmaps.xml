@@ -1,0 +1,13 @@
+<resources>
+   <string name="dbInitialize">
+        create table users (
+           id integer primary key,
+           createdAt date not null,           
+           firstName varchar(128) not null,
+           lastName varchar(128) not null,
+           userName varchar(10) not null,
+           active boolean not null,
+           expiryDate date
+        );
+    </string>
+</resources>
