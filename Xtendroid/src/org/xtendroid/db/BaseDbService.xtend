@@ -4,10 +4,9 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import asia.sonix.android.orm.AbatisService
-import java.util.Map
-import java.util.Set
-import java.util.Map.Entry
 import java.util.Date
+import java.util.List
+import java.util.Map
 
 /**
  * Base class for creating your own database service class. This 
@@ -42,8 +41,8 @@ class BaseDbService extends AbatisService {
    /**
     * Find an object by it's id
     */
-   def findById(String table, long id, Class bean) {
-      executeForBean(
+   def <T> T findById(String table, long id, Class<T> bean) {
+      super.<T>executeForBean(
          '''select * from «table» where id = #id#''',
          #{ 'id' -> id },
          bean
@@ -53,14 +52,14 @@ class BaseDbService extends AbatisService {
    /**
     * Find all objects in a table
     */
-   def findAll(String table, String orderBy, Class bean) {
-      findByFields(table, #{}, orderBy, bean)
+   def <T> List<T> findAll(String table, String orderBy, Class<T> bean) {
+      this.<T>findByFields(table, #{}, orderBy, bean)
    }
 
    /**
     * Find an object by fields
     */
-   def findByFields(String table, Map<String, ? extends Object> values, String orderBy, Class bean) {
+   def <T> List<T> findByFields(String table, Map<String, ? extends Object> values, String orderBy, Class<T> bean) {
       var where = values.keySet.fold("") [res, key|
          if (res.length == 0) '''«key» = #«key»#'''
          else '''«res» and «key» = #«key»#'''
@@ -71,7 +70,7 @@ class BaseDbService extends AbatisService {
          order = "order by " + orderBy
       } 
             
-      executeForBeanList(
+      super.<T>executeForBeanList(
          '''select * from «table» where «where» «order»''',
          values,
          bean
