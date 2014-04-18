@@ -53,17 +53,23 @@ class BaseDbService extends AbatisService {
     * Find all objects in a table
     */
    def <T> List<T> findAll(String table, String orderBy, Class<T> bean) {
-      this.<T>findByFields(table, #{}, orderBy, bean)
+      this.<T>findByFields(table, null, orderBy, bean)
    }
 
    /**
     * Find an object by fields
     */
    def <T> List<T> findByFields(String table, Map<String, ? extends Object> values, String orderBy, Class<T> bean) {
-      var where = values.keySet.fold("") [res, key|
-         if (res.length == 0) '''«key» = #«key»#'''
-         else '''«res» and «key» = #«key»#'''
-      ]
+      var String where = null
+      if (values != null) {
+         where = values.keySet.fold("") [res, key|
+            if (res.length == 0) '''«key» = #«key»#'''
+            else '''«res» and «key» = #«key»#'''
+         ]
+      }
+      
+      if (where != null) where = " where " + where
+      else where = ""
       
       var order = ""
       if (orderBy != null && orderBy.trim.length > 0) {
@@ -71,7 +77,7 @@ class BaseDbService extends AbatisService {
       } 
             
       super.<T>executeForBeanList(
-         '''select * from «table» where «where» «order»''',
+         '''select * from «table» «where» «order»''',
          values,
          bean
       )
