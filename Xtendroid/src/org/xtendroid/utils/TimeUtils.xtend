@@ -61,6 +61,22 @@ class TimeUtils {
    }
    
    def public static now() {
-      System.currentTimeMillis
+      new Date(System.currentTimeMillis)
+   }
+   
+   def static operator_plus(Date date1, Date date2) {
+   	date1.time + date2.time
+   }
+
+   def static operator_minus(Date date1, Date date2) {
+   	date1.time - date2.time
+   }
+
+   def static operator_plus(Date date1, long time2) {
+   	new Date(date1.time + time2)
+   }
+
+   def static operator_minus(Date date1, long time2) {
+   	new Date(date1.time - time2)
    }
 }

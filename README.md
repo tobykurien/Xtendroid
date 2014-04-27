@@ -336,7 +336,12 @@ import static extension org.xtendroid.utils.TimeUtils.*
 
 var yesterday = 24.hours.ago
 var tomorrow = 24.hours.fromNow
-var futureDate = new Date(System.currentTimeMillis + 48.days + 20.hours + 2.seconds)
+
+// The following requires Xtendroid v0.8+
+var futureDate = now + 48.days + 20.hours + 2.seconds
+if (now - futureDate < 24.hours) {
+    // we are in the future!
+}
 ```
 
 
