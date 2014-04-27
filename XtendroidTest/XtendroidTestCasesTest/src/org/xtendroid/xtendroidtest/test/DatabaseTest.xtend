@@ -1,7 +1,6 @@
 package org.xtendroid.xtendroidtest.test
 
 import android.test.AndroidTestCase
-import android.util.Log
 import java.util.Date
 import org.xtendroid.xtendroidtest.models.User
 
@@ -17,7 +16,7 @@ class DatabaseTest extends AndroidTestCase {
       context.db.delete("users")
    	
       val now = new Date      
-      for(i: 0..20) {
+      for(i: 0..30) {
 	      context.db.insert("users", #{
 	         "createdAt" -> now,
 	         "firstName" -> "User " + i,

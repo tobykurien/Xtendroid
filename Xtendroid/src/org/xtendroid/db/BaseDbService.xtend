@@ -3,7 +3,6 @@ package org.xtendroid.db
 import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
-import android.util.Log
 import asia.sonix.android.orm.AbatisService
 import java.util.Date
 import java.util.List

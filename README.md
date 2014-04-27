@@ -280,6 +280,13 @@ adults.forEach [adult|
    Log.d("db", "Got user: " + adult)
 ]
 
+// alternative to above without defining an SQL string
+adults = db.findByFields("users", #{ 'age >' -> 18 }, User)
+
+// can also do paging by specifying a limit and offset, e.g.
+// get top 6 to top 10 users 18 or younger
+adults = db.findByFields("users", #{ 'age <=' -> 18 }, 5, 5, User)
+
 // insert a record
 var johnId = db.insert("users", #{
    'firstName' -> 'John',
