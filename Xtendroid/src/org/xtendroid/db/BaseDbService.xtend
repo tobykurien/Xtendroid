@@ -74,10 +74,10 @@ class BaseDbService extends AbatisService {
     * 	}, "surname desc", 0, 0, User)
     * 
     *  // get all users
-    *  db.findByFields("users", null, 0, 0, User)
+    *  db.findByFields("users", null, null, 0, 0, User)
     * 
     * // get first 10 users with age less than or equal to 18
-    * db.findByFields("users", #{ "age <=" -> 18 }, 10, 0, User) 
+    * db.findByFields("users", #{ "age <=" -> 18 }, null, 10, 0, User) 
     * 
     */
    def <T> List<T> findByFields(String table, Map<String, ? extends Object> values, String orderBy, long limit, long skip, Class<T> bean) {

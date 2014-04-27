@@ -7,9 +7,9 @@ import java.util.Date
  * 
  * import static extension org.xtendroid.utils.TimeUtils.*
  * 
- * var myDate = 3.days.ago
- * var tomorrow = 1.day.fromNow
- * System.out.println(myDate)
+ * var yesterday = 24.hours.ago
+ * var tomorrow = 24.hours.fromNow
+ * var futureDate = new Date(System.currentTimeMillis + 48.days + 20.hours + 2.seconds)
  */
 class TimeUtils {
    def public static second(long value) {

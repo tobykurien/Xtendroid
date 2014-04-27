@@ -281,11 +281,13 @@ adults.forEach [adult|
 ]
 
 // alternative to above without defining an SQL string
-adults = db.findByFields("users", #{ 'age >' -> 18 }, User)
+adults = db.findByFields("users", #{ 'age >' -> 18 },
+    "age asc", User)
 
 // can also do paging by specifying a limit and offset, e.g.
 // get top 6 to top 10 users 18 or younger
-adults = db.findByFields("users", #{ 'age <=' -> 18 }, 5, 5, User)
+adults = db.findByFields("users", #{ 'age <=' -> 18 }, "age desc",
+    5, 5, User)
 
 // insert a record
 var johnId = db.insert("users", #{
@@ -304,6 +306,39 @@ db.update("users", #{'lastName' -> 'Smith'}, johnId)
 // delete this user
 db.delete("users", johnId) 
 ```
+
+Utilities
+---------
+
+AlertUtils makes prompts and confirmation dialog boxes easy
+```xtend
+import static extension org.xtendroid.utils.AlertUtils.*
+
+toast("Upload started!")
+toastLong("No internet connection")
+
+confirm("Are you sure you want to exit?") [|
+    finish
+]
+```
+
+ViewUtils make getting widgets from views/activities/fragments/dialogs easier by eliminating the type-casting
+```xtend
+import static extension org.xtendroid.utils.ViewUtils.*
+
+var Button myButton = getView(R.id.my_button)
+var TextView myText = getView(R.id.my_text)
+```
+
+TimeUtil helps with using java.util.Date
+```xtend
+import static extension org.xtendroid.utils.TimeUtils.*
+
+var yesterday = 24.hours.ago
+var tomorrow = 24.hours.fromNow
+var futureDate = new Date(System.currentTimeMillis + 48.days + 20.hours + 2.seconds)
+```
+
 
 Samples
 -------

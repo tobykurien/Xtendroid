@@ -8,18 +8,18 @@ import android.widget.Button
 import android.widget.ListView
 import android.widget.Spinner
 import android.widget.TextView
-import java.util.HashMap
+import java.util.WeakHashMap
 
 /**
  * Convenience methods to simplify code using findViewById(). These should be imported as static extensions.
  * Implements lazy loading.
  */
 class ViewUtils {
-   static var cache = new HashMap<Integer, View> 
+   static var cache = new WeakHashMap<Integer, View> 
    
    def static <T extends View> T getView(Activity a, int resId) {
       if (cache.get(resId) == null) {
-        cache.put(resId, a.findViewById(resId) as View) 
+        cache.put(resId, a.findViewById(resId) as T) 
       }
       
       cache.get(resId) as T 
@@ -27,7 +27,7 @@ class ViewUtils {
 
    def static <T extends View> T getView(Fragment f, int resId) {
       if (cache.get(resId) == null) {
-        cache.put(resId, f.activity.findViewById(resId) as View) 
+        cache.put(resId, f.activity.findViewById(resId) as T) 
       }
       
       cache.get(resId) as T 
@@ -35,7 +35,7 @@ class ViewUtils {
 
    def static <T extends View> T getView(Dialog d, int resId) {
       if (cache.get(resId) == null) {
-        cache.put(resId, d.findViewById(resId) as View) 
+        cache.put(resId, d.findViewById(resId) as T) 
       }
       
       cache.get(resId) as T 
