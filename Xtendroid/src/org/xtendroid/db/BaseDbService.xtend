@@ -3,6 +3,7 @@ package org.xtendroid.db
 import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
+import android.util.Log
 import asia.sonix.android.orm.AbatisService
 import java.util.Date
 import java.util.List
@@ -57,30 +58,70 @@ class BaseDbService extends AbatisService {
    }
 
    /**
-    * Find an object by fields
+    * Find an object by the field-value mappings specified in the Map.
     */
    def <T> List<T> findByFields(String table, Map<String, ? extends Object> values, String orderBy, Class<T> bean) {
-      var String where = null
+   	findByFields(table, values, orderBy, 0, 0, bean)
+   }
+   
+   /**
+    * Find an object by the field-value mappings specified in the Map. The Map 
+    * key can contain a space followed by the operator for that field. 
+    * 
+    * Sample usage:
+    * 
+    *  // get all users sorted by surname descending
+    *  db.findByFields("users", #{
+    * 	}, "surname desc", 0, 0, User)
+    * 
+    *  // get all users
+    *  db.findByFields("users", null, 0, 0, User)
+    * 
+    * // get first 10 users with age less than or equal to 18
+    * db.findByFields("users", #{ "age <=" -> 18 }, 10, 0, User) 
+    * 
+    */
+   def <T> List<T> findByFields(String table, Map<String, ? extends Object> values, String orderBy, long limit, long skip, Class<T> bean) {
+      var String where = ""
       if (values != null) {
          where = values.keySet.fold("") [res, key|
-            if (res.length == 0) '''«key» = #«key»#'''
-            else '''«res» and «key» = #«key»#'''
+         	if (key.indexOf(" ") > 0) {
+         		val keyop = key.split(" ")
+         		val sqlPair = ''' where «key» #«keyop.get(0)»#'''
+		         if (res.length == 0) sqlPair 
+		         else '''«res» and «sqlPair»'''
+         	} else {
+		         if (res.length == 0) ''' where «key» = #«key»#'''
+		         else '''«res» and «key» = #«key»#'''
+         	}
          ]
       }
-      
-      if (where != null) where = " where " + where
-      else where = ""
       
       var order = ""
       if (orderBy != null && orderBy.trim.length > 0) {
          order = "order by " + orderBy
       } 
-            
-      super.<T>executeForBeanList(
-         '''select * from «table» «where» «order»''',
-         values,
-         bean
-      )
+
+		var sql = '''select * from «table» «where» «order»'''
+		if (limit > 0) {
+			if (skip > 0) {
+				sql = sql + ''' limit «skip»,«limit» '''
+			} else {
+				sql = sql + ''' limit «limit» '''
+			}
+		} 
+
+		// strip operators from the keys inside values Map (if any)
+		val vals = if (values == null) null else newHashMap()
+		values?.forEach [k,v|
+			if (k.indexOf(" ") > 0) {
+				vals.put(k.split(" ").get(0), v)
+			} else {
+				vals.put(k,v)
+			}
+		]
+
+      super.<T>executeForBeanList(sql, vals, bean)
    }
 
    /**

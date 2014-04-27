@@ -54,6 +54,16 @@ public class User {
     this._userName = userName;
   }
   
+  private int _age;
+  
+  public int getAge() {
+    return this._age;
+  }
+  
+  public void setAge(final int age) {
+    this._age = age;
+  }
+  
   private boolean _active;
   
   public boolean isActive() {

@@ -8,6 +8,7 @@ class User {
    @Property String firstName
    @Property String lastName
    @Property String userName
+   @Property int age
    @Property boolean active
    @Property Date expiryDate
 }

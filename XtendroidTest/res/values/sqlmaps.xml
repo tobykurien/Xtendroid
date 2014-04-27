@@ -6,6 +6,7 @@
            firstName varchar(128) not null,
            lastName varchar(128) not null,
            userName varchar(10) not null,
+           age integer,
            active boolean not null,
            expiryDate date
         );
