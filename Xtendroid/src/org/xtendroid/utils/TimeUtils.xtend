@@ -9,7 +9,7 @@ import java.util.Date
  * 
  * var yesterday = 24.hours.ago
  * var tomorrow = 24.hours.fromNow
- * var futureDate = new Date(System.currentTimeMillis + 48.days + 20.hours + 2.seconds)
+ * var futureDate = now + 48.days + 20.hours + 2.seconds
  */
 class TimeUtils {
    def public static second(long value) {
