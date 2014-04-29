@@ -9,8 +9,9 @@
     tools:context=".MainActivity" >
 
     <TextView
+        android:id="@+id/main_hello"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/hello_world" />
+        android:text="" />
 
 </RelativeLayout>
