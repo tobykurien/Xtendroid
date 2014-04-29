@@ -330,7 +330,7 @@ var Button myButton = getView(R.id.my_button)
 var TextView myText = getView(R.id.my_text)
 ```
 
-TimeUtil helps with using java.util.Date
+TimeUtils helps with using java.util.Date
 ```xtend
 import static extension org.xtendroid.utils.TimeUtils.*
 

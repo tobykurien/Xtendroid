@@ -12,71 +12,91 @@ import java.util.Date
  * var futureDate = now + 48.days + 20.hours + 2.seconds
  */
 class TimeUtils {
-   def public static second(long value) {
-      seconds(value)
-   }
-      
-   def public static seconds(long value) {
-      value * 1000
-   }
+	def public static second(long value) {
+		seconds(value)
+	}
 
-   def public static minute(long value) {
-      minutes(value)
-   }
-   
-   def public static minutes(long value) {
-      value * 1000 * 60
-   }
+	def public static seconds(long value) {
+		value * 1000
+	}
 
-   def public static hour(long value) {
-      hours(value)
-   }
-   
-   def public static hours(long value) {
-      value * 1000 * 60 * 60
-   }
+	def public static minute(long value) {
+		minutes(value)
+	}
 
-   def public static day(long value) {
-      days(value)
-   }
+	def public static minutes(long value) {
+		value * 1000 * 60
+	}
 
-   def public static days(long value) {
-      value * 1000 * 60 * 60 * 24
-   }
+	def public static hour(long value) {
+		hours(value)
+	}
 
-   def public static week(long value) {
-      weeks(value)
-   }
+	def public static hours(long value) {
+		value * 1000 * 60 * 60
+	}
 
-   def public static weeks(long value) {
-      value * 1000 * 60 * 60 * 24 * 7
-   }
+	def public static day(long value) {
+		days(value)
+	}
 
-   def public static ago(long valueMs) {
-      new Date(System.currentTimeMillis - valueMs)
-   }
+	def public static days(long value) {
+		value * 1000 * 60 * 60 * 24
+	}
 
-   def public static fromNow(long valueMs) {
-      new Date(System.currentTimeMillis + valueMs)
-   }
-   
-   def public static now() {
-      new Date(System.currentTimeMillis)
-   }
-   
-   def static operator_plus(Date date1, Date date2) {
-   	date1.time + date2.time
-   }
+	def public static week(long value) {
+		weeks(value)
+	}
 
-   def static operator_minus(Date date1, Date date2) {
-   	date1.time - date2.time
-   }
+	def public static weeks(long value) {
+		value * 1000 * 60 * 60 * 24 * 7
+	}
 
-   def static operator_plus(Date date1, long time2) {
-   	new Date(date1.time + time2)
-   }
+	def public static ago(long valueMs) {
+		new Date(System.currentTimeMillis - valueMs)
+	}
 
-   def static operator_minus(Date date1, long time2) {
-   	new Date(date1.time - time2)
-   }
+	def public static fromNow(long valueMs) {
+		new Date(System.currentTimeMillis + valueMs)
+	}
+
+	def public static now() {
+		new Date(System.currentTimeMillis)
+	}
+
+	def static operator_plus(Date date1, Date date2) {
+		date1.time + date2.time
+	}
+
+	def static operator_minus(Date date1, Date date2) {
+		date1.time - date2.time
+	}
+
+	def static operator_plus(Date date1, long time2) {
+		new Date(date1.time + time2)
+	}
+
+	def static operator_plus(long date1, Date time2) {
+		new Date(date1 + time2.time)
+	}
+
+	def static operator_minus(Date date1, long time2) {
+		new Date(date1.time - time2)
+	}
+
+	def static operator_minus(long date1, Date time2) {
+		new Date(date1 - time2.time)
+	}
+
+	def static operator_equals(Date date1, Date date2) {
+		date1.time == date2.time
+	}
+
+	def static operator_equals(Date date1, long date2) {
+		date1.time == date2
+	}
+
+	def static operator_equals(long date1, Date date2) {
+		date1 == date2.time
+	}
 }

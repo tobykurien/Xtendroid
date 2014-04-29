@@ -1,7 +1,7 @@
 package org.xtendroid.xtendroidtest.db
 
-import org.xtendroid.db.BaseDbService
 import android.content.Context
+import org.xtendroid.db.BaseDbService
 
 class DbService extends BaseDbService {
    
