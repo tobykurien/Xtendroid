@@ -208,6 +208,7 @@ class BaseDbService extends AbatisService {
 
 	/**
 	 * Find all objects from a db table. Return a lazy-loading iterator for large results.
+	 * NOTE: Work in progress, do not use!
 	 */
 	def <T> LazyList<T> lazyFindAll(String table, String orderBy, Class<T> bean) {
 		var sql = getFindByFieldsSql(table, null, orderBy)

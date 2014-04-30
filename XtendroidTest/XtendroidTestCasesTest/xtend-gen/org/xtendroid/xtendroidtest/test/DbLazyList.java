@@ -52,13 +52,27 @@ public class DbLazyList extends AndroidTestCase {
     Assert.assertNotNull(list);
     int _size = list.size();
     Assert.assertEquals(1000, _size);
-    IntegerRange _upTo = new IntegerRange(0, 1000);
+    IntegerRange _upTo = new IntegerRange(205, 900);
     for (final Integer i : _upTo) {
-      ManyItem _get = list.get((i).intValue());
-      String _itemName = _get.getItemName();
-      String _plus = ("Got " + _itemName);
-      Log.d("lazylist", _plus);
+      {
+        ManyItem _get = list.get((i).intValue());
+        String _itemName = _get.getItemName();
+        String _plus = ("Got " + _itemName);
+        Log.d("lazylisttest", _plus);
+        ManyItem _get_1 = list.get((i).intValue());
+        String _itemName_1 = _get_1.getItemName();
+        Assert.assertEquals(("Item " + Integer.valueOf(((i).intValue() + 1))), _itemName_1);
+      }
     }
+    ManyItem _get = list.get(0);
+    String _itemName = _get.getItemName();
+    Assert.assertEquals("Item 1", _itemName);
+    ManyItem _get_1 = list.get(204);
+    String _itemName_1 = _get_1.getItemName();
+    Assert.assertEquals("Item 205", _itemName_1);
+    ManyItem _get_2 = list.get(999);
+    String _itemName_2 = _get_2.getItemName();
+    Assert.assertEquals("Item 1000", _itemName_2);
   }
   
   public void tearDown() {

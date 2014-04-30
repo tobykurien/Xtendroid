@@ -37,9 +37,15 @@ class DbLazyList extends AndroidTestCase {
 		assertEquals(1000, list.size)
 		
 		// check correct items retrieved
-		for (i: 0..1000) {
-			Log.d("lazylist", "Got " + list.get(i).itemName)
+		for (i: 205..900) {
+			Log.d("lazylisttest", "Got " + list.get(i).itemName)
+			assertEquals("Item " + (i + 1), list.get(i).itemName)
 		}
+		
+		// check random access
+  	   assertEquals("Item 1", list.get(0).itemName)
+  	   assertEquals("Item 205", list.get(204).itemName)
+  	   assertEquals("Item 1000", list.get(999).itemName)
 	}
 	
 	override void tearDown() {
