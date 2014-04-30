@@ -81,27 +81,7 @@ class BaseDbService extends AbatisService {
     * 
     */
    def <T> List<T> findByFields(String table, Map<String, ? extends Object> values, String orderBy, long limit, long skip, Class<T> bean) {
-      var String where = ""
-      if (values != null) {
-         where = values.keySet.fold("") [res, key|
-         	if (key.indexOf(" ") > 0) {
-         		val keyop = key.split(" ")
-         		val sqlPair = ''' where «key» #«keyop.get(0)»#'''
-		         if (res.length == 0) sqlPair 
-		         else '''«res» and «sqlPair»'''
-         	} else {
-		         if (res.length == 0) ''' where «key» = #«key»#'''
-		         else '''«res» and «key» = #«key»#'''
-         	}
-         ]
-      }
-      
-      var order = ""
-      if (orderBy != null && orderBy.trim.length > 0) {
-         order = "order by " + orderBy
-      } 
-
-		var sql = '''select * from «table» «where» «order»'''
+		var sql = "select * from " + getFindByFieldsSql(table, values, orderBy)
 		if (limit > 0) {
 			if (skip > 0) {
 				sql = sql + ''' limit «skip»,«limit» '''
@@ -122,6 +102,35 @@ class BaseDbService extends AbatisService {
 
       super.<T>executeForBeanList(sql, vals, bean)
    }
+
+	/**
+	 * Returns a partial SQL string (doesn't include "select * from " prefix) for 
+	 * the specified parameters, that cen then be used to retrieve the data, or 
+	 * get a count, and have a LIMIT added to the end
+	 */
+	def private String getFindByFieldsSql(String table, Map<String, ? extends Object> values, String orderBy) {
+      var String where = ""
+      if (values != null) {
+         where = values.keySet.fold("") [res, key|
+         	if (key.indexOf(" ") > 0) {
+         		val keyop = key.split(" ")
+         		val sqlPair = ''' where «key» #«keyop.get(0)»#'''
+		         if (res.length == 0) sqlPair 
+		         else '''«res» and «sqlPair»'''
+         	} else {
+		         if (res.length == 0) ''' where «key» = #«key»#'''
+		         else '''«res» and «key» = #«key»#'''
+         	}
+         ]
+      }
+      
+      var order = ""
+      if (orderBy != null && orderBy.trim.length > 0) {
+         order = "order by " + orderBy
+      } 
+
+		'''«table» «where» «order»'''		
+	}
 
    /**
     * Convert the Map object into ContentValues object
@@ -197,4 +206,11 @@ class BaseDbService extends AbatisService {
       }
    }   
 
+	/**
+	 * Find all objects from a db table. Return a lazy-loading iterator for large results.
+	 */
+	def <T> LazyList<T> lazyFindAll(String table, String orderBy, Class<T> bean) {
+		var sql = getFindByFieldsSql(table, null, orderBy)
+		new LazyList<T>(sql, null, this, bean)
+	}
 }

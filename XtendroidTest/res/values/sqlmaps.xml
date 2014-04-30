@@ -10,5 +10,12 @@
            active boolean not null,
            expiryDate date
         );
+
+        create table manyItems (
+           id integer primary key,
+           createdAt date not null,
+           itemName varchar(10),           
+           itemOrder integer
+        );
     </string>
 </resources>

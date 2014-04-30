@@ -1,7 +1,6 @@
 package org.xtendroid.xtendroidtest.test;
 
 import android.test.AndroidTestCase;
-import com.google.common.base.Objects;
 import java.util.Date;
 import junit.framework.Assert;
 
@@ -31,7 +30,7 @@ public class TimeUtils extends AndroidTestCase {
     long _hours_4 = org.xtendroid.utils.TimeUtils.hours(2);
     long _minus_3 = (-_hours_4);
     Assert.assertEquals(_minus_2, _minus_3);
-    boolean _equals = Objects.equal(date4, date5);
+    boolean _equals = org.xtendroid.utils.TimeUtils.operator_equals(date4, date5);
     Assert.assertTrue(_equals);
   }
 }
