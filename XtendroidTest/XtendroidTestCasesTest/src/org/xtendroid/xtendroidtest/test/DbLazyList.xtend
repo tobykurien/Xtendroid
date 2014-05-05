@@ -54,6 +54,19 @@ class DbLazyList extends AndroidTestCase {
 			Log.d("lazylisttest", "Got " + list.get(i).itemName)
 			assertEquals("Item " + (i + 1), list.get(i).itemName)
 		}
+
+		list = context.db.lazyFindByFields("manyItems", #{
+					'id >' -> 500
+					}, null, ManyItem)
+		assertNotNull(list)					
+		assertEquals(500, list.size)
+
+		// check correct items retrieved
+		for (i: 0..499) {
+			assertNotNull(list.get(i))
+			Log.d("lazylisttest", "Got " + list.get(i).itemName)
+			assertEquals("Item " + (i + 501), list.get(i).itemName)
+		}
 	}
 	
 	override void tearDown() {

@@ -89,6 +89,31 @@ public class DbLazyList extends AndroidTestCase {
         Assert.assertEquals(("Item " + Integer.valueOf(((i_1).intValue() + 1))), _itemName_4);
       }
     }
+    Context _context_1 = this.getContext();
+    DbService _db_1 = DbService.getDb(_context_1);
+    Map<String,Integer> _xsetliteral = null;
+    Map<String,Integer> _tempMap = Maps.<String, Integer>newHashMap();
+    _tempMap.put("id >", Integer.valueOf(500));
+    _xsetliteral = Collections.<String, Integer>unmodifiableMap(_tempMap);
+    LazyList<ManyItem> _lazyFindByFields = _db_1.<ManyItem>lazyFindByFields("manyItems", _xsetliteral, null, ManyItem.class);
+    list = _lazyFindByFields;
+    Assert.assertNotNull(list);
+    int _size_1 = list.size();
+    Assert.assertEquals(500, _size_1);
+    IntegerRange _upTo_2 = new IntegerRange(0, 499);
+    for (final Integer i_2 : _upTo_2) {
+      {
+        ManyItem _get_3 = list.get((i_2).intValue());
+        Assert.assertNotNull(_get_3);
+        ManyItem _get_4 = list.get((i_2).intValue());
+        String _itemName_3 = _get_4.getItemName();
+        String _plus = ("Got " + _itemName_3);
+        Log.d("lazylisttest", _plus);
+        ManyItem _get_5 = list.get((i_2).intValue());
+        String _itemName_4 = _get_5.getItemName();
+        Assert.assertEquals(("Item " + Integer.valueOf(((i_2).intValue() + 501))), _itemName_4);
+      }
+    }
   }
   
   public void tearDown() {

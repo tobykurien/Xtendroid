@@ -207,12 +207,32 @@ class BaseDbService extends AbatisService {
    }   
 
 	/**
-	 * Find all objects from a db table. Return a lazy-loading iterator for large results.
+	 * Find all objects from a db table. Return a lazy-loading list for large results.
 	 * Good for using in an Adapter (sequential access), but terrible for random access.
-	 * NOTE: Work in progress, do not use!
 	 */
 	def <T> LazyList<T> lazyFindAll(String table, String orderBy, Class<T> bean) {
 		var sql = getFindByFieldsSql(table, null, orderBy)
 		new LazyList<T>(sql, null, this, bean)
+	}
+
+	/**
+	 * Like findByFields() but returns a lazy-loading list for large results.
+	 * Good for using in an Adapter (sequential access), but terrible for random access.
+	 */
+	def <T> LazyList<T> lazyFindByFields(String table, Map<String, ? extends Object> values, 
+		String orderBy, Class<T> bean) {
+		var sql = getFindByFieldsSql(table, values, orderBy)
+
+		// strip operators from the keys inside values Map (if any)
+		val vals = if (values == null) null else newHashMap()
+		values?.forEach [k,v|
+			if (k.indexOf(" ") > 0) {
+				vals.put(k.split(" ").get(0), v)
+			} else {
+				vals.put(k,v)
+			}
+		]
+
+		new LazyList<T>(sql, vals, this, bean)
 	}
 }
