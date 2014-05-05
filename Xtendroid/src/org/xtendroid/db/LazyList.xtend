@@ -65,17 +65,10 @@ class LazyList<T> implements List<T> {
 		if (idx < 0) throw new ArrayIndexOutOfBoundsException('''Index «idx», Size «size»''')
 		if (idx >= size) throw new ArrayIndexOutOfBoundsException('''Index «idx», Size «size»''')
 
-		if (idx < head) {
-			head = idx - BATCH_SIZE
+		if (idx < head || idx >= tail) {
+			head = idx - (BATCH_SIZE/2)
 			if (head < 0) head = 0
-			tail = idx
-			loadBatch
-		}
-
-		if (idx >= tail) {
-			head = idx
-			tail = idx + BATCH_SIZE
-			if (tail > size) tail = size
+			tail = idx + (BATCH_SIZE/2)
 			loadBatch
 		}
 		

@@ -47,6 +47,13 @@ class DbLazyList extends AndroidTestCase {
   	   assertEquals("Item 1", list.get(0).itemName)
   	   assertEquals("Item 205", list.get(204).itemName)
   	   assertEquals("Item 1000", list.get(999).itemName)
+
+		// check reverse access
+		for (i: 950..620) {
+			assertNotNull(list.get(i))
+			Log.d("lazylisttest", "Got " + list.get(i).itemName)
+			assertEquals("Item " + (i + 1), list.get(i).itemName)
+		}
 	}
 	
 	override void tearDown() {
