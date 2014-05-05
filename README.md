@@ -305,6 +305,13 @@ db.update("users", #{'lastName' -> 'Smith'}, johnId)
 
 // delete this user
 db.delete("users", johnId) 
+
+// Suppose you have a million users and want to display them in a list.
+// You can do so using the optimized lazyFindAll() and lazyFindByFields() methods
+// They use a pre-allocated buffer to avoid garbage collection, and load
+// batches of data at a time
+var aMillionUsers = db.lazyFindAll("users", null, User)
+listView.adapter = new BeanAdapter(activity, R.layout.list_row, aMillionUsers)
 ```
 
 Utilities

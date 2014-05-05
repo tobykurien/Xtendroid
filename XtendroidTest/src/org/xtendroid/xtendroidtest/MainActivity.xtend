@@ -12,6 +12,7 @@ import org.xtendroid.xtendroidtest.models.ManyItem
 	def create() {
 		mainHello.text = getString(R.string.hello_world)
 		
+		// Run the DbLazyList test to populate the database with lots of items
 		var manyItems = db.lazyFindAll("manyitems", "id", ManyItem)
 		mainList.adapter = new BeanAdapter(this, R.layout.main_list_row, manyItems)
 	}
