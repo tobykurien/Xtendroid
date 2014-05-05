@@ -1,11 +1,9 @@
 package org.xtendroid.db
 
-import android.util.Log
 import java.util.ArrayList
 import java.util.Collection
 import java.util.List
 import java.util.Map
-import org.xtendroid.utils.BgTask
 
 /**
  * An List that lazily loads items from a query and loads a batch of beans
@@ -17,8 +15,6 @@ import org.xtendroid.utils.BgTask
 class LazyList<T> implements List<T> {
 	// How many items to load in each batch fetch
 	val static int BATCH_SIZE = 100
-	// How close to the edge of a window to get before pre-fetching nearest window
-	val static int WINDOW_PREFETCH_THRESHOLD = 50
 	
 	val String sql
 	val Map<String, ? extends Object> values
@@ -81,7 +77,7 @@ class LazyList<T> implements List<T> {
 	def void loadBatch() {
 		var t = new Thread [|
 			// load the batch we need
-			Log.d("lazylist", "Fetching " + " limit " + head + "," + (tail - head))
+			//Log.d("lazylist", "Fetching " + " limit " + head + "," + (tail - head))
 			db.executeForBeanList(
 				"select * from " + sql + " limit " + head + "," + (tail - head), 
 				values, bean, buffer)
