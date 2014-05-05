@@ -40,7 +40,7 @@ class BeanAdapter<T> extends BaseAdapter {
    }
    
    override getCount() {
-      data.length
+      data.size
    }
    
    override T getItem(int row) {
