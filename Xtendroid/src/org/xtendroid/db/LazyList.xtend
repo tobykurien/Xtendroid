@@ -69,30 +69,32 @@ class LazyList<T> implements List<T> {
 			head = idx - BATCH_SIZE
 			if (head < 0) head = 0
 			tail = idx
-			
-			// load the batch we need
-			Log.d("lazylist", "Fetching " + " limit " + head + "," + (tail - head))
-			db.executeForBeanList(
-				"select * from " + sql + " limit " + head + "," + (tail - head), 
-				values, bean, buffer)
+			loadBatch
 		}
 
-		if (idx > tail) {
+		if (idx >= tail) {
 			head = idx
 			tail = idx + BATCH_SIZE
 			if (tail > size) tail = size
-			
-			// load the batch we need
-			Log.d("lazylist", "Fetching " + " limit " + head + "," + (tail - head))
-			db.executeForBeanList(
-				"select * from " + sql + " limit " + head + "," + (tail - head), 
-				values, bean, buffer)
+			loadBatch
 		}
 		
 		if (head <= idx && idx <= tail) {
 			// we have the data in our buffer
 			return buffer.get(idx - head)
 		}		
+	}
+
+	def void loadBatch() {
+		var t = new Thread [|
+			// load the batch we need
+			Log.d("lazylist", "Fetching " + " limit " + head + "," + (tail - head))
+			db.executeForBeanList(
+				"select * from " + sql + " limit " + head + "," + (tail - head), 
+				values, bean, buffer)
+		]
+		t.start
+		t.join
 	}
 	
 	/* ------- The following methods are unsupported ------------ */	
