@@ -2,7 +2,7 @@ package org.xtendroid.xtendroidtest.test;
 
 import android.content.Context;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.test.suitebuilder.annotation.MediumTest;
 import com.google.common.collect.Maps;
 import java.util.Collections;
 import java.util.Date;
@@ -18,7 +18,7 @@ import org.xtendroid.xtendroidtest.models.User;
 /**
  * Test the Xtendroid database service
  */
-@SmallTest
+@MediumTest
 @SuppressWarnings("all")
 public class DatabaseTest extends AndroidTestCase {
   public void testDbLargeData() {

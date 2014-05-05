@@ -6,12 +6,12 @@ import org.xtendroid.xtendroidtest.models.User
 
 import static extension org.xtendroid.utils.TimeUtils.*
 import static extension org.xtendroid.xtendroidtest.db.DbService.*
-import android.test.suitebuilder.annotation.SmallTest
+import android.test.suitebuilder.annotation.MediumTest
 
 /**
  * Test the Xtendroid database service
  */
-@SmallTest
+@MediumTest
 class DatabaseTest extends AndroidTestCase {
    
    def testDbLargeData() {
