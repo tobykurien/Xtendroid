@@ -341,15 +341,9 @@ TimeUtils helps with using java.util.Date
 ```xtend
 import static extension org.xtendroid.utils.TimeUtils.*
 
-var yesterday = 24.hours.ago
-var tomorrow = 24.hours.fromNow
-var date1 = new Date(System.currentTimeMillis + 3.hours + 1.second)
-if (date1.time - System.currentTimeMillis < 1.hour) {
-  // we are less than 1 hour from the date
-}
-
-// The following requires Xtendroid v0.8+
-var futureDate = now + 48.days + 20.hours + 2.seconds
+var Date yesterday = 24.hours.ago
+var Date tomorrow = 24.hours.fromNow
+var Date futureDate = now + 48.days + 20.hours + 2.seconds
 if (futureDate - now < 24.hours) {
     // we are in the future!
 }
