@@ -21,7 +21,7 @@ public class DbLazyList extends AndroidTestCase {
   public void setUp() {
     Context _context = this.getContext();
     DbService _db = DbService.getDb(_context);
-    Map<String, Object> res = _db.executeForMap("select count(*) as cnt from manyItems", null);
+    Map<String,Object> res = _db.executeForMap("select count(*) as cnt from manyItems", null);
     Object _get = res.get("cnt");
     int _parseInt = Integer.parseInt(((String) _get));
     boolean _lessThan = (_parseInt < 1000);
@@ -33,9 +33,9 @@ public class DbLazyList extends AndroidTestCase {
       for (final Integer i : _upTo) {
         Context _context_2 = this.getContext();
         DbService _db_2 = DbService.getDb(_context_2);
-        Map<String, Object> _xsetliteral = null;
+        Map<String,Object> _xsetliteral = null;
         Date _now = TimeUtils.now();
-        Map<String, Object> _tempMap = Maps.<String, Object>newHashMap();
+        Map<String,Object> _tempMap = Maps.<String, Object>newHashMap();
         _tempMap.put("createdAt", _now);
         _tempMap.put("itemName", ("Item " + i));
         _tempMap.put("itemOrder", i);
@@ -56,11 +56,13 @@ public class DbLazyList extends AndroidTestCase {
     for (final Integer i : _upTo) {
       {
         ManyItem _get = list.get((i).intValue());
-        String _itemName = _get.getItemName();
+        Assert.assertNotNull(_get);
+        ManyItem _get_1 = list.get((i).intValue());
+        String _itemName = _get_1.getItemName();
         String _plus = ("Got " + _itemName);
         Log.d("lazylisttest", _plus);
-        ManyItem _get_1 = list.get((i).intValue());
-        String _itemName_1 = _get_1.getItemName();
+        ManyItem _get_2 = list.get((i).intValue());
+        String _itemName_1 = _get_2.getItemName();
         Assert.assertEquals(("Item " + Integer.valueOf(((i).intValue() + 1))), _itemName_1);
       }
     }

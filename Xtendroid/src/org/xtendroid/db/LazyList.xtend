@@ -25,12 +25,10 @@ class LazyList<T> implements List<T> {
 	val BaseDbService db
 	val Class<T> bean
 	
-	// buffers to hold window of retrieved data
-	var List<T> bufPrev
-	var List<T> bufCurrent
-	var List<T> bufNext
+	// buffer to hold window of retrieved data
+	val List<T> buffer
 	
-	val int size
+	var private int size
 	var int head = 0
 	var int tail = 0
 	
@@ -40,13 +38,15 @@ class LazyList<T> implements List<T> {
 		this.db = db	
 		this.bean = bean
 		
-		bufPrev = new ArrayList<T>(BATCH_SIZE)
-		bufCurrent = new ArrayList<T>(BATCH_SIZE)
-		bufNext = new ArrayList<T>(BATCH_SIZE)
+		buffer = new ArrayList<T>(BATCH_SIZE)
 		
 		// get the size of the data
-		var res = db.executeForMap("select count(*) as cnt from " + sql, values)
-		size = Integer.parseInt(res.get("cnt") as String)
+		var t = new Thread [|
+			var res = db.executeForMap("select count(*) as cnt from " + sql, values)
+			size = Integer.parseInt(res.get("cnt") as String)
+		]
+		t.start
+		t.join
 	}	
 
 	override size() {
@@ -62,62 +62,37 @@ class LazyList<T> implements List<T> {
 	 * NOTE: work in progress, no optimizations yet
 	 */
 	override get(int idx) {
-		if (head == tail) {
-			// we need to load the data
-			head = idx
-			tail = idx + BATCH_SIZE
+		if (idx < 0) throw new ArrayIndexOutOfBoundsException('''Index «idx», Size «size»''')
+		if (idx >= size) throw new ArrayIndexOutOfBoundsException('''Index «idx», Size «size»''')
 
+		if (idx < head) {
+			head = idx - BATCH_SIZE
+			if (head < 0) head = 0
+			tail = idx
+			
 			// load the batch we need
-			Log.d("lazylist", "Fetching " + " limit " + tail + "," + BATCH_SIZE)
-			var data = db.executeForBeanList(
-				"select * from " + sql + " limit " + idx + "," + BATCH_SIZE, 
-				values, bean)
-
-			bufPrev.clear
-			bufCurrent.clear
-			bufNext.clear
-		   for(b: data) {
-		   	bufCurrent.add(b)
-		   }
+			Log.d("lazylist", "Fetching " + " limit " + head + "," + (tail - head))
+			db.executeForBeanList(
+				"select * from " + sql + " limit " + head + "," + (tail - head), 
+				values, bean, buffer)
 		}
 
-		if (idx <= (head + WINDOW_PREFETCH_THRESHOLD) && bufPrev.size == 0) {
-			// prefetch previous data (can run this in bg thread)
-		}
-		
-		if (idx >= (tail - WINDOW_PREFETCH_THRESHOLD) && bufNext.size == 0) {
-			// prefetch next data (can run this in bg thread)
-//			new BgTask<Void>.runInBg [|
-				Log.d("lazylist", "Prefetching " + " limit " + tail + "," + BATCH_SIZE)
-				var data = db.executeForBeanList(
-					"select * from " + sql + " limit " + tail + "," + BATCH_SIZE, 
-					values, bean)
-			   for(b: data) {
-			   	bufNext.add(b)
-			   }
-				Log.d("lazylist", "Prefetching complete")
-//			   null
-//			]
-		}
-
-		if (idx >= tail) {
-  		   Log.d("lazylist", "Moving to next buffer for idx " + idx + 
-  		   			". Buf size " + bufNext.size)
-  		   			
-			// data is in next buffer, so swap buffers
-			// note: need to optimize this to avoid GC
-			bufPrev.clear
-			bufPrev = bufCurrent
-			bufCurrent = bufNext
-			bufNext = new ArrayList<T>(BATCH_SIZE)
+		if (idx > tail) {
 			head = idx
 			tail = idx + BATCH_SIZE
+			if (tail > size) tail = size
+			
+			// load the batch we need
+			Log.d("lazylist", "Fetching " + " limit " + head + "," + (tail - head))
+			db.executeForBeanList(
+				"select * from " + sql + " limit " + head + "," + (tail - head), 
+				values, bean, buffer)
 		}
 		
-		if (idx >= head && idx < tail) {
-			// we have the data in current buffer
-			return bufCurrent.get(idx - head)
-		}
+		if (head <= idx && idx <= tail) {
+			// we have the data in our buffer
+			return buffer.get(idx - head)
+		}		
 	}
 	
 	/* ------- The following methods are unsupported ------------ */	

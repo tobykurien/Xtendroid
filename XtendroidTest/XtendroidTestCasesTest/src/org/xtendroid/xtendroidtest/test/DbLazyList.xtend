@@ -38,6 +38,7 @@ class DbLazyList extends AndroidTestCase {
 		
 		// check correct items retrieved
 		for (i: 205..900) {
+			assertNotNull(list.get(i))
 			Log.d("lazylisttest", "Got " + list.get(i).itemName)
 			assertEquals("Item " + (i + 1), list.get(i).itemName)
 		}

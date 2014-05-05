@@ -2,6 +2,7 @@ package org.xtendroid.xtendroidtest.test;
 
 import android.content.Context;
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.SmallTest;
 import com.google.common.collect.Maps;
 import java.util.Collections;
 import java.util.Date;
@@ -17,6 +18,7 @@ import org.xtendroid.xtendroidtest.models.User;
 /**
  * Test the Xtendroid database service
  */
+@SmallTest
 @SuppressWarnings("all")
 public class DatabaseTest extends AndroidTestCase {
   public void testDbLargeData() {
@@ -28,8 +30,8 @@ public class DatabaseTest extends AndroidTestCase {
     for (final Integer i : _upTo) {
       Context _context_1 = this.getContext();
       DbService _db_1 = DbService.getDb(_context_1);
-      Map<String, Object> _xsetliteral = null;
-      Map<String, Object> _tempMap = Maps.<String, Object>newHashMap();
+      Map<String,Object> _xsetliteral = null;
+      Map<String,Object> _tempMap = Maps.<String, Object>newHashMap();
       _tempMap.put("createdAt", now);
       _tempMap.put("firstName", ("User " + i));
       _tempMap.put("lastName", ("Surname " + i));
@@ -41,8 +43,8 @@ public class DatabaseTest extends AndroidTestCase {
     }
     Context _context_2 = this.getContext();
     DbService _db_2 = DbService.getDb(_context_2);
-    Map<String, Integer> _xsetliteral_1 = null;
-    Map<String, Integer> _tempMap_1 = Maps.<String, Integer>newHashMap();
+    Map<String,Integer> _xsetliteral_1 = null;
+    Map<String,Integer> _tempMap_1 = Maps.<String, Integer>newHashMap();
     _tempMap_1.put("age <=", Integer.valueOf(18));
     _xsetliteral_1 = Collections.<String, Integer>unmodifiableMap(_tempMap_1);
     List<User> res = _db_2.<User>findByFields("users", _xsetliteral_1, null, User.class);
@@ -52,8 +54,8 @@ public class DatabaseTest extends AndroidTestCase {
     Assert.assertEquals(19, _length);
     Context _context_3 = this.getContext();
     DbService _db_3 = DbService.getDb(_context_3);
-    Map<String, Integer> _xsetliteral_2 = null;
-    Map<String, Integer> _tempMap_2 = Maps.<String, Integer>newHashMap();
+    Map<String,Integer> _xsetliteral_2 = null;
+    Map<String,Integer> _tempMap_2 = Maps.<String, Integer>newHashMap();
     _tempMap_2.put("age <=", Integer.valueOf(18));
     _xsetliteral_2 = Collections.<String, Integer>unmodifiableMap(_tempMap_2);
     List<User> _findByFields = _db_3.<User>findByFields("users", _xsetliteral_2, null, 5, 0, User.class);
@@ -64,8 +66,8 @@ public class DatabaseTest extends AndroidTestCase {
     Assert.assertEquals(5, _length_1);
     Context _context_4 = this.getContext();
     DbService _db_4 = DbService.getDb(_context_4);
-    Map<String, Integer> _xsetliteral_3 = null;
-    Map<String, Integer> _tempMap_3 = Maps.<String, Integer>newHashMap();
+    Map<String,Integer> _xsetliteral_3 = null;
+    Map<String,Integer> _tempMap_3 = Maps.<String, Integer>newHashMap();
     _tempMap_3.put("age <=", Integer.valueOf(18));
     _xsetliteral_3 = Collections.<String, Integer>unmodifiableMap(_tempMap_3);
     List<User> _findByFields_1 = _db_4.<User>findByFields("users", _xsetliteral_3, null, 5, 16, User.class);
@@ -83,8 +85,8 @@ public class DatabaseTest extends AndroidTestCase {
     final Date now = new Date();
     Context _context_1 = this.getContext();
     DbService _db_1 = DbService.getDb(_context_1);
-    Map<String, Object> _xsetliteral = null;
-    Map<String, Object> _tempMap = Maps.<String, Object>newHashMap();
+    Map<String,Object> _xsetliteral = null;
+    Map<String,Object> _tempMap = Maps.<String, Object>newHashMap();
     _tempMap.put("createdAt", now);
     _tempMap.put("firstName", "Toby");
     _tempMap.put("lastName", "Kurien");
@@ -124,8 +126,8 @@ public class DatabaseTest extends AndroidTestCase {
     final Date expiry = new Date(_plus);
     Context _context_4 = this.getContext();
     DbService _db_4 = DbService.getDb(_context_4);
-    Map<String, Object> _xsetliteral_1 = null;
-    Map<String, Object> _tempMap_1 = Maps.<String, Object>newHashMap();
+    Map<String,Object> _xsetliteral_1 = null;
+    Map<String,Object> _tempMap_1 = Maps.<String, Object>newHashMap();
     _tempMap_1.put("username", "tobyk");
     _tempMap_1.put("active", Boolean.valueOf(false));
     _tempMap_1.put("expiryDate", expiry);

@@ -337,7 +337,7 @@ public class AbatisService extends SQLiteOpenHelper {
          Package beanPackage = bean.getPackage();
          if (cursor.moveToNext()) {
             try {
-               beanObj = (T) parse(cursor, bean, beanPackage.getName());
+               beanObj = (T) parse(cursor, bean, beanPackage.getName(), bean.newInstance());
             } catch (Exception e) {
                Log.d(TAG, e.toString());
             }
@@ -373,7 +373,27 @@ public class AbatisService extends SQLiteOpenHelper {
    
    @SuppressWarnings({ "unchecked", "rawtypes" })
    public <T> List<T> executeForBeanList(String sql, Map<String, ? extends Object> bindParams, Class bean) {
-      List<T> objectList = new ArrayList<T>();
+	   return executeForBeanList(sql, bindParams, bean, null);
+   }
+
+   @SuppressWarnings({ "unchecked", "rawtypes" })
+   /**
+    * Execute a query and return a List of beans populated with the data from the database
+    * with column names matching the fields of the speified bean. A buffer of pre-instantiated
+    * beans can be passed in to avoid object instantiation, for better performance.
+    * @param sql - the SQL query to execute with placeholders like #id# and #name#
+    * @param bindParams - the values for the placeholders in the SQL
+    * @param bean - the class of the bean into which data will be stored
+    * @param objectList - an optional buffer of pre-instantiated beans to populate
+    * @return
+    */
+   public <T> List<T> executeForBeanList(String sql, Map<String, ? extends Object> bindParams, 
+		   Class bean, List<T> objectList) {
+	  
+	  if (objectList == null) {
+		  objectList = new ArrayList<T>();
+	  }
+	   
       getDbObject();
       try {
          if (bindParams != null) {
@@ -397,13 +417,18 @@ public class AbatisService extends SQLiteOpenHelper {
             dataNames.add(chgDataName(columnName));
          }
          
-         T beanObj = null;
          // get bean class package
+         T beanObj = null;
          Package beanPackage = bean.getPackage();
+         int i = 0;
          while (cursor.moveToNext()) {
             try {
-               beanObj = (T) parse(cursor, bean, beanPackage.getName());
-               objectList.add(beanObj);
+               if (objectList.size() <= i) {
+            	   // create new object and add to list
+            	   objectList.add((T) bean.newInstance());
+               }
+               beanObj = objectList.get(i++);
+               parse(cursor, bean, beanPackage.getName(), beanObj);
             } catch (Exception e) {
                Log.e(TAG, e.toString(), e);
             }
@@ -414,7 +439,7 @@ public class AbatisService extends SQLiteOpenHelper {
          dbObj.close();
       }
    }
-
+   
    /**
     * 指定したSQLIDにparameterをmappingして、実行する。
     * 
@@ -488,8 +513,8 @@ public class AbatisService extends SQLiteOpenHelper {
     * @throws Exception
     */
    @SuppressWarnings({ "rawtypes", "unchecked" })
-   public Object parse(Cursor cursor, Class beanClass, String basePackage) throws Exception {
-      Object obj = null;
+   public Object parse(Cursor cursor, Class beanClass, String basePackage, Object obj) throws Exception {
+      //Object obj = null;
       // Check bean object
       if (beanClass == null) {
          Log.d(TAG, "Bean class is null");
@@ -502,7 +527,8 @@ public class AbatisService extends SQLiteOpenHelper {
          return null;
       }
       // Create instance of this Bean class
-      obj = beanClass.newInstance();
+      if (obj == null) obj = beanClass.newInstance();
+      
       // Set value of each member variable of this object
       for (int i = 0; i < props.length; i++) {
          String fieldName = props[i].getName();
