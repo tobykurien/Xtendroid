@@ -87,16 +87,4 @@ class TimeUtils {
 	def static operator_minus(long date1, Date time2) {
 		new Date(date1 - time2.time)
 	}
-
-	def static operator_equals(Date date1, Date date2) {
-		date1.time == date2.time
-	}
-
-	def static operator_equals(Date date1, long date2) {
-		date1.time == date2
-	}
-
-	def static operator_equals(long date1, Date date2) {
-		date1 == date2.time
-	}
 }
