@@ -36,7 +36,9 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
 
       // add synthetic init-method
       var getter = if(field.type.simpleName.equalsIgnoreCase("Boolean")) "is" else "get"
-      field.declaringType.addMethod(getter + field.simpleName.upperCaseFirst) [
+      val orgName = field.simpleName
+      field.simpleName = "_" + field.simpleName
+      field.declaringType.addMethod(getter + orgName.upperCaseFirst) [
          visibility = Visibility::PUBLIC
          returnType = field.type
          exceptions = #[ JSONException.newTypeReference ]
@@ -45,8 +47,8 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
          // this automatically removes the expression as the field’s initializer
          body = [
             '''
-return _jsonObj.get«field.type»("«field.simpleName»");
-'''
+					return _jsonObj.get«field.type»("«orgName»");
+				'''
          ]
       ]
    }
