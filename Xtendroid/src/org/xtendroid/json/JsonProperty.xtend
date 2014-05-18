@@ -47,7 +47,7 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
          // this automatically removes the expression as the field’s initializer
          body = [
             '''
-					return _jsonObj.get«field.type»("«orgName»");
+					return _jsonObj.get«field.type.simpleName.upperCaseFirst»("«orgName»");
 				'''
          ]
       ]
