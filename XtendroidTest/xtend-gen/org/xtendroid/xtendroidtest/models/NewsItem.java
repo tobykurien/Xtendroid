@@ -1,6 +1,5 @@
 package org.xtendroid.xtendroidtest.models;
 
-import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xtendroid.json.JsonProperty;
@@ -14,18 +13,10 @@ public class NewsItem {
   private String _title;
   
   @JsonProperty
-  private String _content;
+  private long _id;
   
-  public String toString() {
-    try {
-      String _url = this.getUrl();
-      String _plus = (_url + "\r\n");
-      String _content = this.getContent();
-      return (_plus + _content);
-    } catch (Throwable _e) {
-      throw Exceptions.sneakyThrow(_e);
-    }
-  }
+  @JsonProperty
+  private boolean _published;
   
   protected final JSONObject _jsonObj;
   
@@ -41,7 +32,11 @@ public class NewsItem {
     return _jsonObj.getString("title");
   }
   
-  public String getContent() throws JSONException {
-    return _jsonObj.getString("content");
+  public long getId() throws JSONException {
+    return _jsonObj.getLong("id");
+  }
+  
+  public boolean isPublished() throws JSONException {
+    return _jsonObj.getBoolean("published");
   }
 }

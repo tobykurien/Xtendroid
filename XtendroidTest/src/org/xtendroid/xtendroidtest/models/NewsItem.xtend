@@ -5,9 +5,6 @@ import org.xtendroid.json.JsonProperty
 class NewsItem {
 	@JsonProperty String url
 	@JsonProperty String title
-	@JsonProperty String content
-	
-	override toString() {
-		url + "\r\n" + content
-	}
+	@JsonProperty long id
+	@JsonProperty boolean published
 }
