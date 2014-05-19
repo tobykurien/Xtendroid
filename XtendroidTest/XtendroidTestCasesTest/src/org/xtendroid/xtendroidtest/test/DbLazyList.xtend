@@ -9,7 +9,6 @@ import static org.xtendroid.utils.TimeUtils.*
 
 import static extension org.xtendroid.xtendroidtest.db.DbService.*
 
-@SmallTest
 class DbLazyList extends AndroidTestCase {
 	override void setUp() {
 		// check for data

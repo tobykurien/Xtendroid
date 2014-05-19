@@ -2,7 +2,6 @@ package org.xtendroid.xtendroidtest.test;
 
 import android.content.Context;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 import com.google.common.collect.Maps;
 import java.util.Collections;
@@ -15,7 +14,6 @@ import org.xtendroid.utils.TimeUtils;
 import org.xtendroid.xtendroidtest.db.DbService;
 import org.xtendroid.xtendroidtest.models.ManyItem;
 
-@SmallTest
 @SuppressWarnings("all")
 public class DbLazyList extends AndroidTestCase {
   public void setUp() {
