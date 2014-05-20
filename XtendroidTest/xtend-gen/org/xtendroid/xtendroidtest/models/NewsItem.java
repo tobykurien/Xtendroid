@@ -24,19 +24,43 @@ public class NewsItem {
     this._jsonObj = jsonObj;
   }
   
+  protected Boolean _urlLoaded = false;
+  
   public String getUrl() throws JSONException {
-    return _jsonObj.getString("url");
+    if (!_urlLoaded) {
+       _url = _jsonObj.getString("url");
+       _urlLoaded = true;
+    }
+    return _url;
   }
+  
+  protected Boolean _titleLoaded = false;
   
   public String getTitle() throws JSONException {
-    return _jsonObj.getString("title");
+    if (!_titleLoaded) {
+       _title = _jsonObj.getString("title");
+       _titleLoaded = true;
+    }
+    return _title;
   }
+  
+  protected Boolean _idLoaded = false;
   
   public long getId() throws JSONException {
-    return _jsonObj.getLong("id");
+    if (!_idLoaded) {
+       _id = _jsonObj.getLong("id");
+       _idLoaded = true;
+    }
+    return _id;
   }
   
+  protected Boolean _publishedLoaded = false;
+  
   public boolean isPublished() throws JSONException {
-    return _jsonObj.getBoolean("published");
+    if (!_publishedLoaded) {
+       _published = _jsonObj.getBoolean("published");
+       _publishedLoaded = true;
+    }
+    return _published;
   }
 }

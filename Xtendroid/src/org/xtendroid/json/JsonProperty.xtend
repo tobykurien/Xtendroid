@@ -15,17 +15,16 @@ annotation JsonProperty {
 class JsonPropertyProcessor extends AbstractFieldProcessor {
 
    override doTransform(MutableFieldDeclaration field, extension TransformationContext context) {
-// if (field.initializer == null)
-// field.addError("A Preference field must have an initializer.")
-
+      // if there isn't yet a constructor that takes a JSONObject, add it
 		if (!field.declaringType.declaredFields.exists[ it.simpleName == "_jsonObj"]) {
+		   // make a field for storing the JSONObject
 			var f = field.declaringType.addField("_jsonObj") []
 			f.setType(JSONObject.newTypeReference)
 			f.setFinal(true)
 			f.setVisibility(Visibility::PROTECTED)
-						
-			var c = field.declaringType.addConstructor [
-			]
+
+         // create the constructor						
+			var c = field.declaringType.addConstructor []
 			c.addParameter("jsonObj", JSONObject.newTypeReference)
 			c.body = [
 				'''
@@ -34,20 +33,31 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
 			]
 		}
 
-      // add synthetic init-method
-      var getter = if(field.type.simpleName.equalsIgnoreCase("Boolean")) "is" else "get"
+      // rename the property to _property
       val orgName = field.simpleName
       field.simpleName = "_" + field.simpleName
+
+      // make a flag for each property to indicate if it's been parsed
+      // so that we can cache the result of parsing
+      var f = field.declaringType.addField(field.simpleName + "Loaded") []
+      f.setType(Boolean.newTypeReference)
+      f.setInitializer(["false"])
+      f.setVisibility(Visibility::PROTECTED)
+
+      // create a getter method for the property
+      var getter = if(field.type.simpleName.equalsIgnoreCase("Boolean")) "is" else "get"
       field.declaringType.addMethod(getter + orgName.upperCaseFirst) [
          visibility = Visibility::PUBLIC
          returnType = field.type
          exceptions = #[ JSONException.newTypeReference ]
-         
-         // reassign the initializer expression to be the init method’s body
-         // this automatically removes the expression as the field’s initializer
+         // parse the value if it hasn't already been, then return the stored result
          body = [
             '''
-					return _jsonObj.get«field.type.simpleName.upperCaseFirst»("«orgName»");
+					if (!«field.simpleName»Loaded) {
+					   «field.simpleName» = _jsonObj.get«field.type.simpleName.upperCaseFirst»("«orgName»");
+					   «field.simpleName»Loaded = true;
+					}
+					return «field.simpleName»;
 				'''
          ]
       ]
