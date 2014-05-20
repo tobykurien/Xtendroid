@@ -15,11 +15,6 @@ annotation JsonProperty {
 /**
  * @JsonProperty annotation creates a "Json bean" that accepts a JSONObject
  * and then parses it on-demand with getters.
- * 
- * TODO: 
- * - Add support for parsing it in the constructor and discarding the JSONObject
- * afterwards, to free up RAM if most of the JSON is unused
- * - Add support for nested objects and arrays
  */
 class JsonPropertyProcessor extends AbstractFieldProcessor {
    // types supported by JSONObject
@@ -78,6 +73,8 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
                '''
             ]
          } else {
+            // TODO: if it's SomeObject with a JSONObject constructor, create it
+            // if it's a List<SomeObject>, then make an ArrayList (or lazy list) of those objects
             field.addError(field.type + " is not supported for @JsonProperty.")
          }
       ]
