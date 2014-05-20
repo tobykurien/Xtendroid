@@ -22,6 +22,12 @@ annotation JsonProperty {
  * - Add support for nested objects and arrays
  */
 class JsonPropertyProcessor extends AbstractFieldProcessor {
+   // types supported by JSONObject
+   val static supportedTypes = #[
+      "java.lang.Boolean", "java.lang.Double", "java.lang.Int",
+      "java.lang.Long", "java.lang.String", "org.json.JSONObject",
+      "org.json.JSONArray" 
+   ]
 
    override doTransform(MutableFieldDeclaration field, extension TransformationContext context) {
       // if there isn't yet a constructor that takes a JSONObject, add it
@@ -60,7 +66,7 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
          returnType = field.type
          exceptions = #[ JSONException.newTypeReference ]
          
-         if (field.type.primitiveIfWrapper.primitive || field.type.name.equals("java.lang.String")) {
+         if (supportedTypes.contains(field.type.wrapperIfPrimitive.name)) {
             // parse the value if it hasn't already been, then return the stored result
             body = [
                '''
