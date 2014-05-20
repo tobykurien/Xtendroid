@@ -12,6 +12,15 @@ import org.json.JSONException
 annotation JsonProperty {
 }
 
+/**
+ * @JsonProperty annotation creates a "Json bean" that accepts a JSONObject
+ * and then parses it on-demand with getters.
+ * 
+ * TODO: 
+ * - Add support for parsing it in the constructor and discarding the JSONObject
+ * afterwards, to free up RAM if most of the JSON is unused
+ * - Add support for nested objects and arrays
+ */
 class JsonPropertyProcessor extends AbstractFieldProcessor {
 
    override doTransform(MutableFieldDeclaration field, extension TransformationContext context) {
@@ -39,7 +48,7 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
 
       // make a flag for each property to indicate if it's been parsed
       // so that we can cache the result of parsing
-      var f = field.declaringType.addField(field.simpleName + "Loaded") []
+      val f = field.declaringType.addField(field.simpleName + "Loaded") []
       f.setType(Boolean.newTypeReference)
       f.setInitializer(["false"])
       f.setVisibility(Visibility::PROTECTED)
@@ -50,16 +59,21 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
          visibility = Visibility::PUBLIC
          returnType = field.type
          exceptions = #[ JSONException.newTypeReference ]
-         // parse the value if it hasn't already been, then return the stored result
-         body = [
-            '''
-					if (!«field.simpleName»Loaded) {
-					   «field.simpleName» = _jsonObj.get«field.type.simpleName.upperCaseFirst»("«orgName»");
-					   «field.simpleName»Loaded = true;
-					}
-					return «field.simpleName»;
-				'''
-         ]
+         
+         if (field.type.primitiveIfWrapper.primitive || field.type.name.equals("java.lang.String")) {
+            // parse the value if it hasn't already been, then return the stored result
+            body = [
+               '''
+                  if (!«field.simpleName»Loaded) {
+                     «field.simpleName» = _jsonObj.get«field.type.simpleName.upperCaseFirst»("«orgName»");
+                     «field.simpleName»Loaded = true;
+                  }
+                  return «field.simpleName»;
+               '''
+            ]
+         } else {
+            field.addError(field.type + " is not supported for @JsonProperty.")
+         }
       ]
    }
    
