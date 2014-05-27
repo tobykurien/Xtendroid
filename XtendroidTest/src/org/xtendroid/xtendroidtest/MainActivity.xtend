@@ -1,11 +1,14 @@
 package org.xtendroid.xtendroidtest
 
+import android.content.Intent
+import android.view.Menu
+import android.view.MenuItem
+import org.xtendroid.adapter.BeanAdapter
 import org.xtendroid.app.AndroidActivity
 import org.xtendroid.app.OnCreate
-import org.xtendroid.adapter.BeanAdapter
+import org.xtendroid.xtendroidtest.models.ManyItem
 
 import static extension org.xtendroid.xtendroidtest.db.DbService.*
-import org.xtendroid.xtendroidtest.models.ManyItem
 
 @AndroidActivity(layout=R.layout.activity_main) class MainActivity {
 	@OnCreate
@@ -16,4 +19,21 @@ import org.xtendroid.xtendroidtest.models.ManyItem
 		var manyItems = db.lazyFindAll("manyitems", "id", ManyItem)
 		mainList.adapter = new BeanAdapter(this, R.layout.main_list_row, manyItems)
 	}
+	
+	override onCreateOptionsMenu(Menu menu) {
+		menuInflater.inflate(R.menu.main, menu)
+		true
+	}
+	
+	override onOptionsItemSelected(MenuItem item) {
+		switch (item.itemId) {
+			case R.id.action_settings: {
+				val intent = new Intent(this, SettingsActivity)
+				startActivity(intent)
+			}
+		}
+		
+		super.onOptionsItemSelected(item)
+	}
+	
 }

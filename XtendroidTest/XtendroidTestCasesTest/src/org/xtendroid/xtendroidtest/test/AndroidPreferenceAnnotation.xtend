@@ -48,5 +48,8 @@ class AndroidPreferenceAnnotation extends ActivityInstrumentationTestCase2<Setti
 			assertEquals("https://github.com/tobykurien/xtendroid", activity.settings.url)
 			assertEquals(1000, activity.settings.maxTimeout)
 		]
+		
+		// wait for above stuff to run
+		Thread.sleep(2000)
 	}
 }
