@@ -19,7 +19,7 @@ public class DbLazyList extends AndroidTestCase {
   public void setUp() {
     Context _context = this.getContext();
     DbService _db = DbService.getDb(_context);
-    Map<String,Object> res = _db.executeForMap("select count(*) as cnt from manyItems", null);
+    Map<String, Object> res = _db.executeForMap("select count(*) as cnt from manyItems", null);
     Object _get = res.get("cnt");
     int _parseInt = Integer.parseInt(((String) _get));
     boolean _lessThan = (_parseInt < 1000);
@@ -31,9 +31,9 @@ public class DbLazyList extends AndroidTestCase {
       for (final Integer i : _upTo) {
         Context _context_2 = this.getContext();
         DbService _db_2 = DbService.getDb(_context_2);
-        Map<String,Object> _xsetliteral = null;
+        Map<String, Object> _xsetliteral = null;
         Date _now = TimeUtils.now();
-        Map<String,Object> _tempMap = Maps.<String, Object>newHashMap();
+        Map<String, Object> _tempMap = Maps.<String, Object>newHashMap();
         _tempMap.put("createdAt", _now);
         _tempMap.put("itemName", ("Item " + i));
         _tempMap.put("itemOrder", i);
@@ -89,8 +89,8 @@ public class DbLazyList extends AndroidTestCase {
     }
     Context _context_1 = this.getContext();
     DbService _db_1 = DbService.getDb(_context_1);
-    Map<String,Integer> _xsetliteral = null;
-    Map<String,Integer> _tempMap = Maps.<String, Integer>newHashMap();
+    Map<String, Integer> _xsetliteral = null;
+    Map<String, Integer> _tempMap = Maps.<String, Integer>newHashMap();
     _tempMap.put("id >", Integer.valueOf(500));
     _xsetliteral = Collections.<String, Integer>unmodifiableMap(_tempMap);
     LazyList<ManyItem> _lazyFindByFields = _db_1.<ManyItem>lazyFindByFields("manyItems", _xsetliteral, null, ManyItem.class);

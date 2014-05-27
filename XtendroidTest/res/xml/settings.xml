@@ -11,8 +11,4 @@
         android:key="url"
         android:title="Some URL" />
 
-    <EditTextPreference
-        android:dependency="enabled"
-        android:key="max_timeout"
-        android:title="Max timeout" />
 </PreferenceScreen>

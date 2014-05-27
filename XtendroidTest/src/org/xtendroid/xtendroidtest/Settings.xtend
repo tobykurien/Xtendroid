@@ -10,7 +10,9 @@ import org.xtendroid.annotations.AndroidPreference
 class Settings extends BasePreferences {
 	@AndroidPreference boolean enabled = true
 	@AndroidPreference String url = ""
-	@AndroidPreference long maxTimeout = 0
+	
+	// this value not shown in preference screen
+	@AndroidPreference long maxTimeout = 0 // long values not supported in pref screen
 	
 	def static Settings getSettings(Context context) {
       return getPreferences(context, Settings)
