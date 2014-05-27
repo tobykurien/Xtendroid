@@ -18,14 +18,14 @@ class BasePreferences {
    protected new() {
    }
 
-   static def BasePreferences getPreferences(Context context, Class<?> subclass) {
+   static def <T> T getPreferences(Context context, Class<T> subclass) {
       if(cache.keySet.length > 5) cache.clear // avoid memory leaks by clearing often
       if (cache.get(context.hashCode) == null) {
          val preferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext())
          cache.put(context.hashCode, newInstance(subclass, preferences))
       }
       
-      cache.get(context.hashCode)
+      cache.get(context.hashCode) as T
    }
 
    def private setPref(SharedPreferences preferences) {
