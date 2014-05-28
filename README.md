@@ -1,7 +1,14 @@
 Xtendroid
 =========
 
-Xtendroid is an Android library that combines the power of Xtend with some utility classes/annotations for productive Android development. With Xtendroid, you can spend a lot less time writing boilerplate code and benefit from the tooling support provided by the Xtend framework. Xtendroid is based on the convention-over-configuration philosophy, so resources in Android map automatically to Java getters and setters by name (CamelCase to resource_name mapping).
+Xtendroid is an Android library that combines the power of [Xtend](http://xtend-lang.org) 
+(think: CoffeeScript for Java) with some utility classes/annotations for productive Android development. With Xtendroid, 
+you can spend a lot less time writing boilerplate code and benefit from the tooling support 
+provided by the Xtend framework. Xtendroid is based on the convention-over-configuration 
+philosophy, so resources in Android map automatically to Java getters and setters by name 
+(CamelCase to resource_name mapping).
+
+[TOC]
 
 Examples
 ========
@@ -156,7 +163,7 @@ class Settings extends BasePreferences {
     *   settings.XXX 
     */
    def static Settings getSettings(Context context) {
-      return getPreferences(context, typeof(Settings)) as Settings
+      return getPreferences(context, Settings)
    }
 }
 ```
@@ -313,6 +320,43 @@ db.delete("users", johnId)
 var aMillionUsers = db.lazyFindAll("users", null, User)
 listView.adapter = new BeanAdapter(activity, R.layout.list_row, aMillionUsers)
 ```
+
+JSON handling
+-------------
+
+You can easily create a bean to hold and parse JSON data. This bean will simply 
+store the JSONObject passed into the constructor without parsing the data into fields. 
+The data is then parsed on-demand and cached, which makes it more efficient for use in 
+```Adapter``` classes (quick load time, minimal garbage collection, parse on-demand). 
+
+This can become memory-inefficient if you only need a small amount of data from the JSON response 
+(and you discard the rest), but in that case, you are wasting the user's bandwidth and 
+should seek to improve the JSON API call.
+
+Creating a JSON bean is done as in this example:
+
+```xtend
+class NewsItem {
+	@JsonProperty String url
+	@JsonProperty String title
+	@JsonProperty long id
+	@JsonProperty boolean published
+}
+```
+
+You can then load JSON into the bean as in this example:
+
+```xtend
+var jsonResponse = '''{"url":"http://one.com", "title": "One", "id": 1, "published": true}'''
+var newsItem = new NewsItem(new JSONObject(jsonResponse))
+toast(newsItem.title) // JSON parsed here and cached for later use
+```
+
+Currently, nested JSON beans are not yet supported, although you can declare
+```@JsonProperty JSONObject user`` for example. See the 
+[JsonTest](https://github.com/tobykurien/Xtendroid/blob/master/XtendroidTest/XtendroidTestCasesTest/src/org/xtendroid/xtendroidtest/test/JsonTest.xtend)
+for more.
+
 
 Utilities
 ---------
