@@ -5,27 +5,30 @@ import android.view.View;
 import android.widget.TextView;
 import junit.framework.Assert;
 import org.eclipse.xtext.xbase.lib.Exceptions;
-import org.xtendroid.xtendroidtest.MainActivity;
+import org.xtendroid.xtendroidtest.MainActivity2;
 import org.xtendroid.xtendroidtest.R;
 
 @SuppressWarnings("all")
-public class ActivityAnnotation extends ActivityInstrumentationTestCase2<MainActivity> {
-  public ActivityAnnotation() {
-    super(MainActivity.class);
+public class AndroidViewAnnotation extends ActivityInstrumentationTestCase2<MainActivity2> {
+  public AndroidViewAnnotation() {
+    super(MainActivity2.class);
   }
   
   public void testAnnotation() {
     try {
-      MainActivity _activity = this.getActivity();
-      final TextView annotationTv = ((MainActivity) _activity).getMainHello();
-      MainActivity _activity_1 = this.getActivity();
+      MainActivity2 _activity = this.getActivity();
+      final TextView annotationTv = ((MainActivity2) _activity).getMainHello();
+      MainActivity2 _activity_1 = this.getActivity();
       View _findViewById = _activity_1.findViewById(R.id.main_hello);
       final TextView tv = ((TextView) _findViewById);
-      MainActivity _activity_2 = this.getActivity();
+      MainActivity2 _activity_2 = this.getActivity();
       String _string = _activity_2.getString(R.string.hello_world);
       CharSequence _text = tv.getText();
       Assert.assertEquals(_string, _text);
-      MainActivity _activity_3 = this.getActivity();
+      int _id = annotationTv.getId();
+      int _id_1 = tv.getId();
+      Assert.assertEquals(_id, _id_1);
+      MainActivity2 _activity_3 = this.getActivity();
       final Runnable _function = new Runnable() {
         public void run() {
           annotationTv.setText("Testing");

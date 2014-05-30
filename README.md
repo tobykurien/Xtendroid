@@ -143,7 +143,7 @@ Since Honeycomb, Android has defaulted to using a single thread for all AsyncTas
 Shared Preferences
 ------------------
 
-If you are using SharedPreferences, and you have a PreferenceActivity to allow the user to change app settings, then the BasePreferences class and @Preference annotation makes it super-easy to access the settings in your Activity:
+If you are using SharedPreferences, and you have a PreferenceActivity to allow the user to change app settings, then the BasePreferences class and @AndroidPreference annotation makes it super-easy to access the settings in your Activity:
 
 Create a Settings class:
 ```xtend
