@@ -1,0 +1,3 @@
+include 'Xtendroid', 'examples:HelloWorld'
+
+//rootproject.name = "xtendroid-root"

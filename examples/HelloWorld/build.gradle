@@ -1,4 +1,5 @@
-apply plugin: 'android-library'
+
+apply plugin: 'android'
 apply plugin: 'xtend-android'
 
 dependencies {
@@ -6,15 +7,12 @@ dependencies {
   compile ('org.eclipse.xtend:org.eclipse.xtend.lib:2.6.+') {
     exclude module : 'org.eclipse.xtext.xbase.lib'
   }
+  compile project(':Xtendroid')
 }
 
 android {
    compileSdkVersion 19
    buildToolsVersion "19.1.0"
-   
-   dependencies {
-      compile fileTree(dir: 'libs', includes: ['*.jar'])
-   }
 
    sourceSets {
       main {
