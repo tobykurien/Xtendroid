@@ -302,7 +302,7 @@ public class AbatisService extends SQLiteOpenHelper {
     * 
     * @return List<Map<String, Object>> result
     */
-   @SuppressWarnings({ "unchecked", "rawtypes" })
+   @SuppressWarnings({ "rawtypes" })
    public <T> T executeForBean(int sqlId, Map<String, ? extends Object> bindParams, Class bean) {
       String sql = context.getResources().getString(sqlId);
       return executeForBean(sql, bindParams, bean);
@@ -365,13 +365,13 @@ public class AbatisService extends SQLiteOpenHelper {
     * 
     * @return List<Map<String, Object>> result
     */
-   @SuppressWarnings({ "unchecked", "rawtypes" })
+   @SuppressWarnings({ "rawtypes" })
    public <T> List<T> executeForBeanList(int sqlId, Map<String, ? extends Object> bindParams, Class bean) {
       String sql = context.getResources().getString(sqlId);
       return executeForBeanList(sql, bindParams, bean);
    }
    
-   @SuppressWarnings({ "unchecked", "rawtypes" })
+   @SuppressWarnings({ "rawtypes" })
    public <T> List<T> executeForBeanList(String sql, Map<String, ? extends Object> bindParams, Class bean) {
 	   return executeForBeanList(sql, bindParams, bean, null);
    }
@@ -601,7 +601,7 @@ public class AbatisService extends SQLiteOpenHelper {
                m.setAccessible(true);
                Long dateVal = cursor.getLong((cursor.getColumnIndex(fieldName)));
                if (cursor.isNull(cursor.getColumnIndex(fieldName)) || dateVal == 0) {
-                  m.invoke(obj, null);
+                  m.invoke(obj, new Object[]{null});
                } else {
                   m.invoke(obj, new Date(dateVal));
                }

@@ -78,7 +78,7 @@ class BeanAdapter<T> extends BaseAdapter {
          }
       ]
       
-      v
+      return v
    }
    
    /**
@@ -97,6 +97,4 @@ class BeanAdapter<T> extends BaseAdapter {
       ]
    }
 
-
-   
 }
