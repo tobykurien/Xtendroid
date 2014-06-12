@@ -3,9 +3,7 @@ apply plugin: 'xtend-android'
 
 dependencies {
   compile 'org.eclipse.xtext:org.eclipse.xtext.xbase.lib.slim:2.6+'
-  compile ('org.eclipse.xtend:org.eclipse.xtend.lib:2.6.+') {
-    exclude module : 'org.eclipse.xtext.xbase.lib'
-  }
+  xtendCompileOnly 'org.eclipse.xtend:org.eclipse.xtend.lib:2.6.+'
 }
 
 android {
