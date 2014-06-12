@@ -1,3 +1,2 @@
-include 'Xtendroid', 'examples:HelloWorld'
+include 'Xtendroid', 'examples:HelloWorld', 'examples:HandlerExample', 'examples:MovieSearchApp', 'examples:Sample1'
 
-//rootproject.name = "xtendroid-root"

@@ -1,20 +1,16 @@
 package com.example.xtendroid.sample1
 
-import android.app.Activity
 import android.app.ProgressDialog
 import android.os.Bundle
 import android.text.Html
-import android.widget.Button
-import android.widget.TextView
 import java.io.ByteArrayOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
-import org.xtendroid.annotations.AndroidView
+import org.xtendroid.app.AndroidActivity
+import org.xtendroid.app.OnCreate
 import org.xtendroid.utils.BgTask
 
 import static extension org.xtendroid.utils.AlertUtils.*
-import org.xtendroid.app.AndroidActivity
-import org.xtendroid.app.OnCreate
 
 /**
  * Sample 1b - simple sample to show the usage of basic UI helpers as well as 

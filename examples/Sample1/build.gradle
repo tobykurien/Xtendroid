@@ -1,0 +1,40 @@
+
+apply plugin: 'android'
+apply plugin: 'xtend-android'
+
+
+dependencies {
+  compile 'org.eclipse.xtext:org.eclipse.xtext.xbase.lib.slim:2.6+'
+  compile ('org.eclipse.xtend:org.eclipse.xtend.lib:2.6.+') {
+    exclude module : 'org.eclipse.xtext.xbase.lib'
+  }
+  compile project(':Xtendroid')
+}
+
+android {
+   compileSdkVersion 19
+   buildToolsVersion "19.1.0"
+
+   sourceSets {
+      main {
+         manifest {
+            srcFile 'AndroidManifest.xml'
+         }
+         java {
+            srcDir 'src'
+         }
+         res {
+            srcDir 'res'
+         }
+         assets {
+            srcDir 'assets'
+         }
+         resources {
+            srcDir 'src'
+         }
+         aidl {
+            srcDir 'src'
+         }
+      }
+   }
+}
