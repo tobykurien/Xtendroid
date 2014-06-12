@@ -31,7 +31,8 @@ import java.lang.annotation.ElementType
 @Active(AndroidActivityProcessor)
 @Target(ElementType.TYPE)
 annotation AndroidActivity {
-   int layout
+	int value = -1
+   int layout = -1
 }
 
 class AndroidActivityProcessor extends AbstractClassProcessor {
@@ -44,7 +45,7 @@ class AndroidActivityProcessor extends AbstractClassProcessor {
       val callBacksType = findInterface(annotatedClass.qualifiedName+"_CallBacks")
       val layoutResourceID = getValue(annotatedClass, context)
        
-      val viewFileName = layoutResourceID.substring(layoutResourceID.lastIndexOf('.') + 1)
+      val viewFileName = layoutResourceID?.substring(layoutResourceID.lastIndexOf('.') + 1)
       if (viewFileName == null) {
          return;
       }
@@ -121,12 +122,19 @@ class AndroidActivityProcessor extends AbstractClassProcessor {
    }
    
    def String getValue(MutableClassDeclaration annotatedClass, extension TransformationContext context) {
-      val value = annotatedClass.annotations.findFirst[
+      var value = annotatedClass.annotations.findFirst[
          annotationTypeDeclaration==AndroidActivity.newTypeReference.type
       ].getExpression("layout")
       
-      if (value == null) return null
-      
+      if (value == null || value.toString.trim == "-1") {
+      	value = annotatedClass.annotations.findFirst[
+            annotationTypeDeclaration==AndroidActivity.newTypeReference.type
+         ].getExpression("value")
+         
+         if (value == null) {
+            return null
+         }
+      }
       return value.toString
    }
      

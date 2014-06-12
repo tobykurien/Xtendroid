@@ -1,0 +1,2 @@
+include 'Xtendroid', 'examples:HelloWorld', 'examples:HandlerExample', 'examples:MovieSearchApp', 'examples:Sample1'
+

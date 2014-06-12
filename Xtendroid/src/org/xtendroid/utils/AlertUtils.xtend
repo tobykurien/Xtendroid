@@ -8,7 +8,6 @@ import android.content.Context
 import android.support.v4.app.Fragment
 import android.support.v4.app.NotificationCompat
 import android.widget.Toast
-import org.eclipse.xtext.xbase.lib.Functions.Function0
 
 class AlertUtils {
 

@@ -1,20 +1,19 @@
-apply plugin: 'android-library'
+
+apply plugin: 'android'
 apply plugin: 'xtend-android'
+
 
 dependencies {
   compile 'org.eclipse.xtext:org.eclipse.xtext.xbase.lib.slim:2.6+'
   compile ('org.eclipse.xtend:org.eclipse.xtend.lib:2.6.+') {
     exclude module : 'org.eclipse.xtext.xbase.lib'
   }
+  compile project(':Xtendroid')
 }
 
 android {
    compileSdkVersion 19
    buildToolsVersion "19.1.0"
-   
-   dependencies {
-      compile fileTree(dir: 'libs', includes: ['*.jar'])
-   }
 
    sourceSets {
       main {

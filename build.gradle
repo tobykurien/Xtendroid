@@ -1,0 +1,16 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.8.+'
+        classpath 'org.xtend:xtend-gradle-plugin:0.1.+'
+    }
+}
+
+subprojects {
+
+   repositories {
+      mavenCentral()
+   }
+}

@@ -13,7 +13,6 @@ import org.xtendroid.annotations.AndroidView
 import org.xtendroid.utils.BgTask
 
 import static extension org.xtendroid.utils.AlertUtils.*
-import org.xtendroid.app.AndroidActivity
 
 /**
  * Sample 1a - simple sample to show the usage of basic UI helpers as well as 

@@ -3,9 +3,9 @@ package org.xtendroid.example.handlerexample
 import android.view.View
 import org.xtendroid.app.AndroidActivity
 
-@AndroidActivity(layout=R.layout.main) class ProgressTestActivity {
+@AndroidActivity(R.layout.main) class ProgressTestActivity {
 
-   override startProgress(View element) {
+   override void startProgress(View element) {
       // Using Thread for demo, never use Thread in production code
       new Thread(
          [ |
@@ -24,7 +24,6 @@ import org.xtendroid.app.AndroidActivity
    }
 
 }
-
 /*
  // The equivalent Java Code
 

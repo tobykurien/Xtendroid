@@ -9,17 +9,20 @@ import org.xtendroid.app.AndroidActivity
 /**
  * This activity covers what is described in http://www.javacodegeeks.com/2010/10/android-full-app-part-1-main-activity.html
  */
-@AndroidActivity("main") class MovieSearchAppActivity {
+@AndroidActivity(layout=R.layout.main) class MovieSearchAppActivity {
    
    val Strings strings = [|resources]
    
    @OnCreate def initializeOnCreate() {
+   	
       movieSearchRadioButton.onClickListener = [
          searchTypeTextView.text = strings.movies
       ]
+    
       peopleSearchRadioButton.onClickListener =  [
          searchTypeTextView.text = strings.people
       ]
+      
       searchButton.onClickListener = [
          val query = searchEditText.text.toString
          if (movieSearchRadioButton.isChecked) {
@@ -28,6 +31,7 @@ import org.xtendroid.app.AndroidActivity
             toastLong(peopleSearchRadioButton.text + " " + query)
          }
       ]
+      
       searchEditText.onFocusChangeListener = [ view, hasFocus |
          switch focusedEditText : view {
             EditText: {
