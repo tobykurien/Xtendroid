@@ -1,0 +1,37 @@
+subprojects {
+  apply plugin: 'android'
+  apply plugin: 'xtend-android'
+
+  dependencies {
+    compile project(':Xtendroid')
+    xtendCompileOnly 'org.eclipse.xtend:org.eclipse.xtend.lib:2.6.+'
+  }
+
+  android {
+     compileSdkVersion 19
+     buildToolsVersion "19.1.0"
+
+     sourceSets {
+        main {
+           manifest {
+              srcFile 'AndroidManifest.xml'
+           }
+           java {
+              srcDir 'src'
+           }
+           res {
+              srcDir 'res'
+           }
+           assets {
+              srcDir 'assets'
+           }
+           resources {
+              srcDir 'src'
+           }
+           aidl {
+              srcDir 'src'
+           }
+        }
+     }
+  }
+}
