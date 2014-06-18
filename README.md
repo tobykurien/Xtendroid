@@ -77,21 +77,21 @@ widgets will still be null. Typically, you can initialize your widget in ```onAc
 Here is an example of a Fragment:
 
 ```xtend
-  @AndroidFragment class MyFragment extends Fragment {
-  		@AndroidView TextView myText // references R.id.my_text
-  		
-		override onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		   // inflate and return our layout here
-			inflater.inflate(R.layout.fragment_courselist, container, false)
-		}
+@AndroidFragment class MyFragment extends Fragment {
+	@AndroidView TextView myText // references R.id.my_text
 	
-		override onActivityCreated(Bundle savedInstanceState) {
-			super.onActivityCreated(savedInstanceState)
-			
-			// initialize our widgets
-			myText.text = "Hello, fragment!"
-		}  		
-  }
+	override onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+	   // inflate and return our layout here
+		inflater.inflate(R.layout.fragment_myfragment, container, false)
+	}
+	
+	override onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState)
+		
+		// initialize our widgets
+		myText.text = "Hello, fragment!"
+	}  		
+}
 ```
 
 As an alternative to using individual ```@AndroidView``` annotations, you can bind all the controls in an 
@@ -101,10 +101,10 @@ not currently supported in Fragments):
 ```xtend
 @AndroidActivity(layout=R.layout.my_activity) class MyActivity {
 
-  @OnCreate
-  def init(Bundle savedInstanceState) {
-    myTextView.text = "some text"
-  }
+	@OnCreate
+	def init(Bundle savedInstanceState) {
+		myTextView.text = "some text"
+	}
 
 }
 
@@ -456,8 +456,8 @@ For more about the Xtend language, see http://xtend-lang.org
 Gotchas
 =======
 
-There are currently some bugs with the Xtend editor that can lead to unexpected behaviour (e.g. compile errors) when 
-you don't expect them. Here are the current bugs you should know about:
+There are currently some bugs with the Xtend editor that can lead to unexpected behaviour (e.g. compile errors). 
+Here are the current bugs you should know about:
 
 - [Android: Editor not refreshing R class](https://bugs.eclipse.org/bugs/show_bug.cgi?id=433358)
 - [Android: First-opened Xtend editor shows many errors and never clears those errors after build ](https://bugs.eclipse.org/bugs/show_bug.cgi?id=433589)
