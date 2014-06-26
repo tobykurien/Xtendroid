@@ -21,6 +21,11 @@ annotation Parcelize {}
  * http://blog.efftinge.de/2013/03/fun-with-active-annotations-my-little.html
  */
 
+/**
+ * 
+ * Composable with @Property and probably @JSONProperty
+ * 
+ */
 
 //@Active(ParcelPropertyProcessor) // because composability makes this redundant
 //annotation ParcelProperty {}
