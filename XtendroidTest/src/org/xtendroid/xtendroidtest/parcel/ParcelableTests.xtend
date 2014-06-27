@@ -10,7 +10,6 @@ import java.util.List
 
 //import org.xtendroid.parcel.AndroidParcelableEnum
 
-
 /**
 forbidden non-primitive types:
 	Byte B
@@ -27,8 +26,11 @@ forbidden non-primitive types:
 	Boolean[] BOBO
 */
 
+
 @AndroidParcelable
 class ParcelableTestA implements android.os.Parcelable {
+	JSONObject _jsonObj
+
 	@Property
 	byte b
 	byte[] bb
@@ -51,7 +53,6 @@ class ParcelableTestA implements android.os.Parcelable {
 	boolean bo
 	boolean[] bobo
 
-	
 	// object reference recursion
 	@Property
 	ParcelableTestA ppta
@@ -63,7 +64,7 @@ class ParcelableTestA implements android.os.Parcelable {
 @AndroidParcelable
 class ParcelableTestB implements Parcelable
 {
-//	JSONObject _jsonObject // required for both to interoperate or data will be lost during the marshalling process
+	JSONObject _jsonObj // required for both to interoperate or data will be lost during the marshalling process
 
 	@Property
 	byte b
@@ -84,18 +85,20 @@ class ParcelableTestB implements Parcelable
 	String s
 	
 	@JsonProperty("mint")
-	int i
+	int useAnAliasInstead
+
+	@JsonProperty
+	double[] dd__
+}
+/*
 
 	// Broken by design (tm)
-//	@JsonProperty // disallowed by @JsonProperty, due to it being an array
-//	double[] d__
-
-//	@JsonProperty // disallowed by @AndroidParcelable, allowed by @JsonProperty
-//	Double D_
+	@JsonProperty // disallowed by @AndroidParcelable, allowed by @JsonProperty
+//	Double DD_
 
 //	@JsonProperty // disallowed by both
 //	Double[] D__
-}
+}*/
 
 class A
 {
@@ -158,31 +161,40 @@ class C implements Parcelable
 	
 	@Property
 	String normal
+	
+	@JsonProperty
+	List<String> listy
+	
+	@JsonProperty
+	List<C> ourobouros
 }
+/*
+*/
 
 class Rare
 {
 	@JsonProperty
-	String stringy	
+	String stringy
+	
+	@JsonProperty
+	List<String> listy
+	
+	@JsonProperty
+	List<C> cs
 }
 
-// Absolutely broken, not composible using inheritance
-//@AndroidParcelable
-//class ComposableAnnotationParcelableJsonPropertyTestA extends ComposibleParent implements Parcelable 
-//{
-//	
-//}
+// TODO do inheritance tests to see unannotated fields added to child types
 
 // TODO enum tests
 //@AndroidParcelableEnum // TODO extend enum type to be parcelized
 //@XtendEnum(String, float, int, Complex) // provide types for the members 
-enum EnumTestA
-{
-	/**
-	 * @XtendEnumValue("", 1.0f, 1337, new Complex())
-	 * weetikveel
-	 * @XtendEnumValue("", 1.0f, 1337, new Complex())
-	 * , hu
-	 */
-	weetikveel, hu, nog, wat
-}
+//enum EnumTestA
+//{
+//	/**
+//	 * @XtendEnumValue("", 1.0f, 1337, new Complex())
+//	 * weetikveel
+//	 * @XtendEnumValue("", 1.0f, 1337, new Complex())
+//	 * , hu
+//	 *
+//	weetikveel, hu, nog, wat
+//}

@@ -10,6 +10,7 @@ import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
 import org.eclipse.xtend.lib.macro.declaration.MutableFieldDeclaration
 import org.eclipse.xtend.lib.macro.declaration.Visibility
 import org.xtendroid.json.JsonProperty
+import org.xtendroid.json.JsonPropertyProcessor
 
 //import org.eclipse.xtend.lib.macro.declaration.MutableEnumerationTypeDeclaration
 
@@ -27,14 +28,12 @@ annotation AndroidParcelable {}
 
 /**
  * 
- * Theoretically composable with @Property and probably @JSONProperty
+ * Composable with @Property and probably @JSONProperty
  * 
  */
 
 /**
  * TODO special concerns: parcelable enums
- * TODO true goal: thru composition and active annotations raw json to generate lazy-json-parsing pacelable types.
- * The problem with generating a lazy-json-parsing parcelable is that one also has to parcelize the original raw json input.
  */
  
  /**
@@ -91,6 +90,12 @@ class ParcelableProcessor implements TransformationParticipant<MutableClassDecla
 			in.writeLong(this.«f.simpleName».getTime());
 		«ELSEIF "org.json.JSONObject".equals(f.type.name)»
 			in.writeString(this.«f.simpleName».toString());
+		«ELSEIF f.type.name.startsWith('java.util.List')»
+			«IF f.type.actualTypeArguments.head.name.equals('java.lang.String')»
+				in.writeStringList(this.«f.simpleName»);
+			«ELSE»
+				in.writeTypedList(this.«f.simpleName»);
+			«ENDIF»
 		«ELSEIF f.type.name.endsWith('[]')»
 			«IF f.type.name.startsWith("java.util.Date")»
 				if (this.«f.simpleName» != null)
@@ -141,6 +146,12 @@ class ParcelableProcessor implements TransformationParticipant<MutableClassDecla
 			«ELSE»
 				this.«f.simpleName» = («f.type.name») in.createTypedArray(«f.type.name».CREATOR);
 			«ENDIF»
+		«ELSEIF f.type.name.startsWith('java.util.List')»
+			«IF f.type.actualTypeArguments.head.name.equals('java.lang.String')»
+				in.readStringList(this.«f.simpleName»);
+			«ELSE»
+				in.readTypedList(this.«f.simpleName», «f.type.actualTypeArguments.head.name».CREATOR);
+			«ENDIF»
 		«ELSE»
 			this.«f.simpleName» = («f.type.name») «f.type.name».CREATOR.createFromParcel(in);
 		«ENDIF»
@@ -157,6 +168,7 @@ class ParcelableProcessor implements TransformationParticipant<MutableClassDecla
 			}
 			
 			val fields = clazz.declaredFields // .filter[findAnnotation(xtendPropertyAnnotation) != null]
+			val jsonPropertyFieldDeclared = fields.exists[f | f.simpleName.equalsIgnoreCase(JsonPropertyProcessor.jsonObjectFieldName) && f.type.name.equalsIgnoreCase('org.json.JSONObject')]
 			for (f : fields)
 			{
 				if (unsupportedAbstractTypesAndSuggestedTypes.keySet.contains(f.type.name))
@@ -164,21 +176,20 @@ class ParcelableProcessor implements TransformationParticipant<MutableClassDecla
 					f.addError (String.format("%s has the type %s, it may not be used. Use this type instead: %s", f.simpleName, f.type.name, org.xtendroid.parcel.ParcelableProcessor.unsupportedAbstractTypesAndSuggestedTypes.get(f.type.name)))
 				}
 				
-				// TODO fix broken warning 
-				if (f.annotations.exists[a | a.equals(JsonProperty.newAnnotationReference)])
+				if (!jsonPropertyFieldDeclared && f.annotations.exists[a | a.annotationTypeDeclaration.simpleName.endsWith('JsonProperty') ])//.equals(JsonProperty.newAnnotationReference)])
 				{
+					f.addWarning (String.format("%s has certain fields that are annotated with @JsonProperty, you have to declare the %s field explicitly, initialized in the ctor as well to prevent data loss when passing the data object between intents.\nFor example:\n%s", f.declaringType.simpleName, JsonPropertyProcessor.jsonObjectFieldName,
 					// the gist of the story is to explicitly declare a type like this
-					/**
-						@AndroidParcelable
-						class C implements Parcelable
-						{
-							JSONObject _jsonObject
-							
-							@JsonProperty
-							String meh
-						}
-					 */
-					f.addWarning (String.format("%s has certain fields that are annotated with @JsonProperty, you have to parcelize the _jsonObject, initialized in the ctor as well to prevent data loss when passing the data object between intents.", f.simpleName))
+						'''
+							@AndroidParcelable
+							class C implements Parcelable
+							{
+								JSONObject «JsonPropertyProcessor.jsonObjectFieldName»
+								
+								@JsonProperty
+								String meh
+							}
+						'''))
 				}		
 			}
 			

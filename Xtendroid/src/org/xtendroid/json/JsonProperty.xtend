@@ -49,6 +49,8 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
    val static unsupportedTypes = #[
 		"float", "java.lang.Float"
    ]
+   
+   val public static jsonObjectFieldName = "_jsonObj"
 
    override doTransform(MutableFieldDeclaration field, extension TransformationContext context) {
 	   	// startsWith because float[] and Float[] are also disallowed
@@ -56,9 +58,9 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
             field.addError(field.type + " is not supported for @JsonProperty.")
    	
 	    // if there isn't yet a constructor that takes a JSONObject, add it
-		if (!field.declaringType.declaredFields.exists[ it.simpleName == "_jsonObj"]) {
+		if (!field.declaringType.declaredFields.exists[ it.simpleName == jsonObjectFieldName]) {
 		   // make a field for storing the JSONObject
-			field.declaringType.addField("_jsonObj") [
+			field.declaringType.addField(jsonObjectFieldName) [
 				type = JSONObject.newTypeReference
 				final = false
 				visibility = Visibility::PROTECTED
@@ -69,7 +71,7 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
 			field.declaringType.addConstructor [
 				addParameter("jsonObj", JSONObject.newTypeReference)
 				body = ['''
-					this._jsonObj = jsonObj;
+					this.«jsonObjectFieldName» = jsonObj;
 				''']
 			]
 			
@@ -105,7 +107,7 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
             // parse the value if it hasn't already been, then return the stored result
             body = ['''
               if (!«field.simpleName»Loaded) {
-                 «field.simpleName» = _jsonObj.get«supportedTypes.get(field.type.name)»("«jsonKey»");
+                 «field.simpleName» = «jsonObjectFieldName».get«supportedTypes.get(field.type.name)»("«jsonKey»");
                  «field.simpleName»Loaded = true;
               }
               return «field.simpleName»;
@@ -118,7 +120,7 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
 		 		body = [
 		 		'''
 				if (!«field.simpleName»Loaded) {
-					final «JSONArray.findTypeGlobally.qualifiedName» «field.simpleName»JsonArray = _jsonObj.getJSONArray("«jsonKey»");
+					final «JSONArray.findTypeGlobally.qualifiedName» «field.simpleName»JsonArray = «jsonObjectFieldName».getJSONArray("«jsonKey»");
 					this.«field.simpleName» = new «baseType»[«field.simpleName»JsonArray.length()];
 					for (int i=0; i<«field.simpleName»JsonArray.length(); i++)
 					{
@@ -129,6 +131,23 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
 				return «field.simpleName»;
 		 		'''
 		 		]
+		 	}else
+		 	{
+		 		body = [
+		 		'''
+				if (!«field.simpleName»Loaded) {
+					final «JSONArray.findTypeGlobally.qualifiedName» «field.simpleName»JsonArray = «jsonObjectFieldName».getJSONArray("«jsonKey»");
+					this.«field.simpleName» = new «baseType»[«field.simpleName»JsonArray.length()];
+					for (int i=0; i<«field.simpleName»JsonArray.length(); i++)
+					{
+						this.«field.simpleName»[i] = new «baseType.name»(«field.simpleName»JsonArray.getJSONObject(i));
+					}
+					«field.simpleName»Loaded = true;
+				}
+				return «field.simpleName»;
+		 		'''
+		 		]
+		 		
 		 	}
 	        // TODO interrogate base type for the JSONObject param in the ctor (no -ing clue how) -> found out how: field.addError(field.type.arrayComponentType.name)... I need a MutableFieldDefinition... not a TypeReference... damn
 	         
@@ -140,7 +159,7 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
 		 		body = [
 		 		'''
 				if (!«field.simpleName»Loaded) {
-					final «JSONArray.findTypeGlobally.qualifiedName» «field.simpleName»JsonArray = _jsonObj.getJSONArray("«jsonKey»");
+					final «JSONArray.findTypeGlobally.qualifiedName» «field.simpleName»JsonArray = «jsonObjectFieldName».getJSONArray("«jsonKey»");
 					this.«field.simpleName» = new java.util.ArrayList<«baseTypeName»>();
 					for (int i=0; i<«field.simpleName»JsonArray.length(); i++)
 					{
@@ -152,30 +171,36 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
 		 		'''
 		 		]
 			}
-			// TODO interrogate base type for the List generics param for a JSONObject param in the ctor
-//			else
-//			{
-//	         	// custom type
-//				
-//			}
+			// TODO interrogate base type for the List generics param for a JSONObject param in the ctor, f.type.actualTypeArguments
+			// in this current implementation, it is over-optimistically assumed that there is a ctor that takes a JSONObject for this generic type type
+			else
+			{
+	         	// custom type
+				val baseTypeName = field.type.actualTypeArguments.head.name
+				body = ['''
+				if (!«field.simpleName»Loaded) {
+					final «JSONArray.findTypeGlobally.qualifiedName» «field.simpleName»JsonArray = «jsonObjectFieldName».getJSONArray("«jsonKey»");
+					this.«field.simpleName» = new java.util.ArrayList<«baseTypeName»>();
+					for (int i=0; i<«field.simpleName»JsonArray.length(); i++)
+					{
+						((java.util.ArrayList<«baseTypeName»>) this.«field.simpleName»).add(new «baseTypeName»(«field.simpleName»JsonArray.getJSONObject(i)));
+					}
+					«field.simpleName»Loaded = true;
+				}
+				return «field.simpleName»;
+				''']
+			}
          	
          } else if (field.declaringType.declaredConstructors.exists[ctor | ctor.parameters.exists[p | p.type.equals(JSONObject.findTypeGlobally) && ctor.parameters.length == 1]])
 		 {
             // if it's single POJO that has a single ctor with a single JSONObject parameter, create it
         	body = ['''
               if (!«field.simpleName»Loaded) {
-                 «field.simpleName» = new «field.declaringType.simpleName»(_jsonObj.getJSONObject("«jsonKey»"));
+                 «field.simpleName» = new «field.declaringType.simpleName»(«jsonObjectFieldName».getJSONObject("«jsonKey»"));
                  «field.simpleName»Loaded = true;
               }
               return «field.simpleName»;
         	''']
-        	
-        	// if (!field.declaringType.declaredConstructors.exists[ctor | ctor.parameters.exists[p | p.type.equals(JSONArray.findTypeGlobally)]])
-//				 JSONArray «field.simpleName»JsonArray = _jsonObj.getJSONArray("«orgName»");
-//                 for (int i=0; i<«field.simpleName»JsonArray.length(); i++);
-//                 {
-//                 	«field.simpleName» = 
-//                 }
          }else {
             field.addError(field.type + " is not supported for @JsonProperty")
          }
