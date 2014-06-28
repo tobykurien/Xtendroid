@@ -27,7 +27,6 @@ forbidden non-primitive types:
 	Boolean[] BOBO
 */
 
-
 @AndroidParcelable
 class E implements android.os.Parcelable {
 	JSONObject _jsonObj
@@ -54,9 +53,11 @@ class E implements android.os.Parcelable {
 	boolean bo
 	boolean[] bobo
 
-	// object reference recursion
 	@Property
 	E eee
+	
+	@JsonProperty
+	Date ddd
 	
 	@JsonProperty
 	boolean boolz
@@ -143,7 +144,7 @@ class B
 	 * Rare is a JSON object
 	 */
 	@JsonProperty("someCustomType")
-	List<R> rares;
+	List<RRR> rares;
 	
 	/**
 	 * Primitive to JSON
@@ -155,7 +156,7 @@ class B
 	 * Rare is a JSON object
 	 */
 	@JsonProperty("y")
-	R[] y;
+	RRR[] y;
 }
 
 @AndroidParcelable
@@ -176,7 +177,7 @@ class C implements Parcelable
 	List<C> ourobouros
 }
 
-class R
+class RRR // in the android dev context, it's dangerous to name a type 'R'
 {
 	@JsonProperty
 	String stringy
@@ -219,6 +220,9 @@ class Datezzz implements Parcelable
 	
 	@JsonProperty("yyyy-MM-dd'T'HH:mm:sssZ")
 	List<Date> mehList
+	
+	@JsonProperty
+	int mehint
 }
 
 // TODO do inheritance tests to see unannotated fields added to child types
