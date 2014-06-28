@@ -8,6 +8,10 @@ import org.eclipse.xtend.lib.macro.declaration.Visibility
 import org.json.JSONObject
 import org.json.JSONException
 import org.json.JSONArray
+import java.util.concurrent.ConcurrentHashMap
+import java.text.DateFormat
+import java.text.ParseException
+import java.text.SimpleDateFormat
 
 @Active(JsonPropertyProcessor)
 annotation JsonProperty {
@@ -20,14 +24,6 @@ annotation JsonProperty {
 /**
  * @JsonProperty annotation creates a "Json bean" that accepts a JSONObject
  * and then parses it on-demand with getters.
- * 
- * #getBoolean
- * #getDouble
- * #getInt
- * #getLong
- * #getString
- * #getJsonArray
- * #getJsonObject
  * 
  */
 class JsonPropertyProcessor extends AbstractFieldProcessor {
@@ -79,7 +75,7 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
 
 	  // attempt to use the explicitly stated JSON member key, if stated
 	  val annotationValue = field.findAnnotation(JsonProperty.findTypeGlobally).getValue('value') as String
-      val jsonKey =  if (!annotationValue.nullOrEmpty) annotationValue else field.simpleName
+      val jsonKey =  if (!annotationValue.nullOrEmpty && !field.type.name.startsWith('java.util.Date')) annotationValue else field.simpleName
 
       // rename the property to _property if necessary
       // Another active annotation may want to do the same...
@@ -112,6 +108,37 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
               }
               return «field.simpleName»;
 			''']
+         } else if (field.type.name.startsWith('java.util.Date'))
+		 {
+		 	val dateFormat = annotationValue
+			exceptions = #[ java.text.ParseException.newTypeReference, org.json.JSONException.newTypeReference ]
+		 	if (field.type.array)
+		 	{
+		 		body = [
+		 		'''
+				if (!«field.simpleName»Loaded) {
+					final «JSONArray.findTypeGlobally.qualifiedName» «field.simpleName»JsonArray = «jsonObjectFieldName».getJSONArray("«jsonKey»");
+					this.«field.simpleName» = new «java.util.Date.findTypeGlobally.simpleName»[«field.simpleName»JsonArray.length()];
+					for (int i=0; i<«field.simpleName»JsonArray.length(); i++)
+					{
+						this.«field.simpleName»[i] = «ConcurrentDateFormatHashMap.newTypeReference.name».convertStringToDate("«dateFormat»", «field.simpleName»JsonArray.getString(i));
+					}
+					«field.simpleName»Loaded = true;
+				}
+				return «field.simpleName»;
+		 		'''
+		 		]
+		 		
+		 	}else // single object
+		 	{
+	            body = ['''
+	              if (!«field.simpleName»Loaded) {
+	                 «field.simpleName» = «ConcurrentDateFormatHashMap.newTypeReference.name».convertStringToDate("«dateFormat»", «jsonObjectFieldName».getString("«jsonKey»"));
+	                 «field.simpleName»Loaded = true;
+	              }
+	              return «field.simpleName»;
+				''']
+		 	}
          } else if (field.type.array)
 		 {
 		 	val baseType = field.type.arrayComponentType
@@ -151,9 +178,25 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
 		 	}
 	        // TODO interrogate base type for the JSONObject param in the ctor (no -ing clue how) -> found out how: field.addError(field.type.arrayComponentType.name)... I need a MutableFieldDefinition... not a TypeReference... damn
 	         
-         } else if (field.type.name.startsWith('java.util.List') && field.type.actualTypeArguments.length == 1) {
-         	
-			if (field.type.actualTypeArguments.exists[a | supportedTypes.containsKey(a.name)])
+         } else if (field.type.name.startsWith('java.util.List')) {
+         	if (field.type.name.endsWith('Date>'))
+         	{
+		 		val dateFormat = annotationValue
+				val baseTypeName = field.type.actualTypeArguments.head.name
+				body = ['''
+				if (!«field.simpleName»Loaded) {
+					final «JSONArray.findTypeGlobally.qualifiedName» «field.simpleName»JsonArray = «jsonObjectFieldName».getJSONArray("«jsonKey»");
+					this.«field.simpleName» = new java.util.ArrayList<«baseTypeName»>();
+					for (int i=0; i<«field.simpleName»JsonArray.length(); i++)
+					{
+						((java.util.ArrayList<«baseTypeName»>) this.«field.simpleName»).add(«ConcurrentDateFormatHashMap.newTypeReference.name».convertStringToDate("«dateFormat»", «field.simpleName»JsonArray.getString(i)));
+					}
+					«field.simpleName»Loaded = true;
+				}
+				return «field.simpleName»;
+				''']
+				exceptions = #[ java.text.ParseException.newTypeReference, org.json.JSONException.newTypeReference ]
+         	}else if (field.type.actualTypeArguments.exists[a | supportedTypes.containsKey(a.name)])
 			{
 				val baseTypeName = field.type.actualTypeArguments.map[a | a.name].join()
 		 		body = [
@@ -206,4 +249,43 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
          }
       ]
    }
+}
+
+class ThreadLocalDateFormatter extends ThreadLocal<DateFormat>
+{
+	String dateFormat
+	
+	public new(String dateFormat)
+	{
+		this.dateFormat = dateFormat
+	}
+	
+	public override get()
+	{
+		return super.get
+	}
+	
+	protected override def DateFormat initialValue()
+	{
+		return new SimpleDateFormat(dateFormat)
+	}
+	
+	public override def void set(DateFormat value)
+	{
+		super.set(value)
+	}
+}
+
+class ConcurrentDateFormatHashMap
+{
+	public val static concurrentMap = new ConcurrentHashMap<String, ThreadLocal<DateFormat>>();
+	private new() {}
+	public def static convertStringToDate(String dateFormat, String dateRaw) throws ParseException
+	{
+		if (!concurrentMap.containsKey(dateFormat))
+		{
+			concurrentMap.put(dateFormat, new ThreadLocalDateFormatter(dateFormat))
+		}
+		return concurrentMap.get(dateFormat).get().parse(dateRaw);
+	}
 }

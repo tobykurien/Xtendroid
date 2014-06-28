@@ -168,8 +168,6 @@ class C implements Parcelable
 	@JsonProperty
 	List<C> ourobouros
 }
-/*
-*/
 
 class Rare
 {
@@ -181,6 +179,24 @@ class Rare
 	
 	@JsonProperty
 	List<C> cs
+	
+	@JsonProperty
+	JSONArray rrr
+	
+	@JsonProperty
+	JSONObject obj
+}
+
+class Datezzz
+{
+	@JsonProperty("ddd-mmm-YYYY")
+	Date meh
+	
+	@JsonProperty("yyyy-MM-dd'T'HH:mm:ssZ")
+	Date[] mehArray
+	
+	@JsonProperty("yyyy-MM-dd'T'HH:mm:sssZ")
+	List<Date> mehList
 }
 
 // TODO do inheritance tests to see unannotated fields added to child types
