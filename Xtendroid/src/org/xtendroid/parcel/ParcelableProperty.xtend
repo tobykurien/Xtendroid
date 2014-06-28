@@ -9,16 +9,20 @@ import org.eclipse.xtend.lib.macro.TransformationParticipant
 import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
 import org.eclipse.xtend.lib.macro.declaration.MutableFieldDeclaration
 import org.eclipse.xtend.lib.macro.declaration.Visibility
-import org.xtendroid.json.JsonProperty
 import org.xtendroid.json.JsonPropertyProcessor
+import org.eclipse.xtend.lib.macro.declaration.MutableEnumerationTypeDeclaration
+import org.eclipse.xtend.lib.macro.declaration.MutableEnumerationValueDeclaration
 
 //import org.eclipse.xtend.lib.macro.declaration.MutableEnumerationTypeDeclaration
 
 @Active(ParcelableProcessor)
 annotation AndroidParcelable {}
 
-//@Active(ParcelableEnumProcessor)
-//annotation AndroidParcelableEnum {}
+@Active(ParcelableEnumTypeProcessor)
+annotation AndroidParcelableEnumType {}
+
+@Active(ParcelableEnumValueProcessor)
+annotation AndroidParcelableEnumValue {}
 
 /**
  *  resources:
@@ -32,10 +36,6 @@ annotation AndroidParcelable {}
  * 
  */
 
-/**
- * TODO special concerns: parcelable enums
- */
- 
  /**
   * TODO on a separate project: turn on logging, @AndroidLog android.os.Log
   */
@@ -55,7 +55,7 @@ class ParcelableProcessor implements TransformationParticipant<MutableClassDecla
 	val static supportedPrimitiveArrayType = #{
 		'java.lang.String[]' -> 'StringArray'
 		, 'boolean[]' -> 'BooleanArray'
-		, 'byte[]' -> 'ByteArray' // writeByte, readByte
+		, 'byte[]' -> 'ByteArray'
 		, 'double[]' -> 'DoubleArray'
 		, 'float[]' -> 'FloatArray'
 		, 'int[]' -> 'IntArray'
@@ -91,7 +91,17 @@ class ParcelableProcessor implements TransformationParticipant<MutableClassDecla
 		«ELSEIF "org.json.JSONObject".equals(f.type.name)»
 			in.writeString(this.«f.simpleName».toString());
 		«ELSEIF f.type.name.startsWith('java.util.List')»
-			«IF f.type.actualTypeArguments.head.name.equals('java.lang.String')»
+			«IF f.type.actualTypeArguments.head.name.equals('java.util.Date')»
+				if («f.simpleName» != null)
+				{
+					long[] «f.simpleName»LongArray = new long[«f.simpleName».size()];
+					for (int i=0; i<«f.simpleName».size(); i++)
+					{
+						«f.simpleName»LongArray[i] = ((java.util.Date) «f.simpleName».toArray()[i]).getTime();
+					}
+					in.writeLongArray(«f.simpleName»LongArray);
+				}
+			«ELSEIF f.type.actualTypeArguments.head.name.equals('java.lang.String')»
 				in.writeStringList(this.«f.simpleName»);
 			«ELSE»
 				in.writeTypedList(this.«f.simpleName»);
@@ -147,7 +157,18 @@ class ParcelableProcessor implements TransformationParticipant<MutableClassDecla
 				this.«f.simpleName» = («f.type.name») in.createTypedArray(«f.type.name».CREATOR);
 			«ENDIF»
 		«ELSEIF f.type.name.startsWith('java.util.List')»
-			«IF f.type.actualTypeArguments.head.name.equals('java.lang.String')»
+			«IF f.type.actualTypeArguments.head.name.equals('java.util.Date')»
+				long[] «f.simpleName»LongArray = in.createLongArray();
+				if («f.simpleName»LongArray != null)
+				{
+					java.util.Date[] «f.simpleName»DateArray = new Date[«f.simpleName»LongArray.length];
+					for (int i=0; i<«f.simpleName»LongArray.length; i++)
+					{
+						«f.simpleName»DateArray[i] = new Date(«f.simpleName»LongArray[i]);
+					}
+					«f.simpleName» = java.util.Arrays.asList(«f.simpleName»DateArray);
+				}
+			«ELSEIF f.type.actualTypeArguments.head.name.equals('java.lang.String')»
 				in.readStringList(this.«f.simpleName»);
 			«ELSE»
 				in.readTypedList(this.«f.simpleName», «f.type.actualTypeArguments.head.name».CREATOR);
@@ -164,7 +185,7 @@ class ParcelableProcessor implements TransformationParticipant<MutableClassDecla
 			if (!clazz.implementedInterfaces.exists[i | "android.os.Parcelable".endsWith(i.name) ])
 			{
 				val interfaces = clazz.implementedInterfaces.join(', ')
-				clazz.addError (String.format("%s must implement android.os.Parcelable, currently it implements %s", clazz.simpleName, if (interfaces.empty) 'nothing.' else interfaces))
+				clazz.addError (String.format("To use @AndroidParcelable, %s must implement android.os.Parcelable, currently it implements: %s.", clazz.simpleName, if (interfaces.empty) 'nothing.' else interfaces))
 			}
 			
 			val fields = clazz.declaredFields // .filter[findAnnotation(xtendPropertyAnnotation) != null]
@@ -173,12 +194,12 @@ class ParcelableProcessor implements TransformationParticipant<MutableClassDecla
 			{
 				if (unsupportedAbstractTypesAndSuggestedTypes.keySet.contains(f.type.name))
 				{
-					f.addError (String.format("%s has the type %s, it may not be used. Use this type instead: %s", f.simpleName, f.type.name, org.xtendroid.parcel.ParcelableProcessor.unsupportedAbstractTypesAndSuggestedTypes.get(f.type.name)))
+					f.addError (String.format("%s has the type %s, it may not be used with @AndroidParcelable. Use %s instead.", f.simpleName, f.type.name, ParcelableProcessor.unsupportedAbstractTypesAndSuggestedTypes.get(f.type.name)))
 				}
 				
 				if (!jsonPropertyFieldDeclared && f.annotations.exists[a | a.annotationTypeDeclaration.simpleName.endsWith('JsonProperty') ])//.equals(JsonProperty.newAnnotationReference)])
 				{
-					f.addWarning (String.format("%s has certain fields that are annotated with @JsonProperty, you have to declare the %s field explicitly, initialized in the ctor as well to prevent data loss when passing the data object between intents.\nFor example:\n%s", f.declaringType.simpleName, JsonPropertyProcessor.jsonObjectFieldName,
+					f.addWarning (String.format("%s has certain fields that are annotated with @JsonProperty, you have to declare the %s field explicitly, initialized in the ctor as well to prevent data loss when passing the data object between Activities/Services etc.\nFor example:\n%s", f.declaringType.simpleName, JsonPropertyProcessor.jsonObjectFieldName,
 					// the gist of the story is to explicitly declare a type like this
 						'''
 							@AndroidParcelable
@@ -249,20 +270,33 @@ class ParcelableProcessor implements TransformationParticipant<MutableClassDecla
 				body = ['''
 					«fields.map[f | f.mapTypeToReadMethodBody ].join()»
 				''']
+				// exceptions = #[ if java.util.Date... ]
 				returnType = void.newTypeReference				
 			]
 		}
 	}
 }
 
-// TODO convert enum values to int, implements Parcelable
-//class ParcelableEnumProcessor implements TransformationParticipant<MutableEnumerationTypeDeclaration>
-//{
-//	
-//	override doTransform(List<? extends MutableEnumerationTypeDeclaration> annotatedTargetElements, extension TransformationContext context) {
-//		val xtendPropertyAnnotationType = typeof(Property).findTypeGlobally
-//		for (clazz : annotatedTargetElements)
-//		{
-//		}
-//	}
-//}
+class ParcelableEnumTypeProcessor implements TransformationParticipant<MutableEnumerationTypeDeclaration>
+{
+	
+	override doTransform(List<? extends MutableEnumerationTypeDeclaration> annotatedTargetElements, extension TransformationContext context) {
+		for (enumType : annotatedTargetElements)
+		{
+			val enumTypeAnnotation = enumType.annotations.filter[a | a.annotationTypeDeclaration.simpleName.endsWith("AndroidParcelableEnumType")].head
+			// get all values of enum annotation (class/primitive types)
+			// then create a getter function for each class type,
+			// create ctor for each class type
+		}
+	}
+}
+
+class ParcelableEnumValueProcessor implements TransformationParticipant<MutableEnumerationValueDeclaration>
+{
+	override doTransform(List<? extends MutableEnumerationValueDeclaration> annotatedTargetElements, extension TransformationContext context) {
+		for (value : annotatedTargetElements)
+		{
+//			expand the enum types with values provided thru the annotation
+		}
+	}
+}

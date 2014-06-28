@@ -10,6 +10,7 @@ import java.util.List
 
 //import org.xtendroid.parcel.AndroidParcelableEnum
 
+
 /**
 forbidden non-primitive types:
 	Byte B
@@ -28,7 +29,7 @@ forbidden non-primitive types:
 
 
 @AndroidParcelable
-class ParcelableTestA implements android.os.Parcelable {
+class E implements android.os.Parcelable {
 	JSONObject _jsonObj
 
 	@Property
@@ -55,14 +56,14 @@ class ParcelableTestA implements android.os.Parcelable {
 
 	// object reference recursion
 	@Property
-	ParcelableTestA ppta
+	E eee
 	
 	@JsonProperty
 	boolean boolz
 }
 
 @AndroidParcelable
-class ParcelableTestB implements Parcelable
+class F implements Parcelable
 {
 	JSONObject _jsonObj // required for both to interoperate or data will be lost during the marshalling process
 
@@ -76,7 +77,7 @@ class ParcelableTestB implements Parcelable
 	Date[] dtdt
 	
 	@Property
-	ParcelableTestA ppta
+	E ppta
 
 	@JsonProperty
 	double d_
@@ -90,15 +91,21 @@ class ParcelableTestB implements Parcelable
 	@JsonProperty
 	double[] dd__
 }
-/*
 
+//@AndroidParcelable
+class ZZZ /** implements Parcelable */
+{
 	// Broken by design (tm)
+/*
 	@JsonProperty // disallowed by @AndroidParcelable, allowed by @JsonProperty
-//	Double DD_
+	Double DD_
 
-//	@JsonProperty // disallowed by both
-//	Double[] D__
-}*/
+	@JsonProperty // disallowed by both
+	Double[] D__
+*/
+	@Property
+	int placeHolder
+}
 
 class A
 {
@@ -136,7 +143,7 @@ class B
 	 * Rare is a JSON object
 	 */
 	@JsonProperty("someCustomType")
-	List<Rare> rares;
+	List<R> rares;
 	
 	/**
 	 * Primitive to JSON
@@ -148,7 +155,7 @@ class B
 	 * Rare is a JSON object
 	 */
 	@JsonProperty("y")
-	Rare[] y;
+	R[] y;
 }
 
 @AndroidParcelable
@@ -169,7 +176,7 @@ class C implements Parcelable
 	List<C> ourobouros
 }
 
-class Rare
+class R
 {
 	@JsonProperty
 	String stringy
@@ -185,10 +192,25 @@ class Rare
 	
 	@JsonProperty
 	JSONObject obj
+	
+	public def add_i_and_j()
+	{
+		return _i + _j
+	}
+	
+	@JsonProperty
+	int i
+	
+	@JsonProperty
+	int j
+	
 }
 
-class Datezzz
+@AndroidParcelable
+class Datezzz implements Parcelable
 {
+	JSONObject _jsonObj
+	
 	@JsonProperty("ddd-mmm-YYYY")
 	Date meh
 	
@@ -207,9 +229,9 @@ class Datezzz
 //enum EnumTestA
 //{
 //	/**
-//	 * @XtendEnumValue("", 1.0f, 1337, new Complex())
+//	 * @XtendEnumValue("StateA", 1.0f, 1337, new Complex())
 //	 * weetikveel
-//	 * @XtendEnumValue("", 1.0f, 1337, new Complex())
+//	 * @XtendEnumValue("StateB", 1.0f, 1337, new Complex())
 //	 * , hu
 //	 *
 //	weetikveel, hu, nog, wat
