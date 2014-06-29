@@ -2,44 +2,35 @@ package org.xtendroid.parcel
 
 import android.os.Parcel
 import android.os.Parcelable.Creator
-import java.util.List
 import org.eclipse.xtend.lib.macro.AbstractClassProcessor
 import org.eclipse.xtend.lib.macro.Active
 import org.eclipse.xtend.lib.macro.TransformationContext
-import org.eclipse.xtend.lib.macro.TransformationParticipant
 import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
-import org.eclipse.xtend.lib.macro.declaration.MutableEnumerationTypeDeclaration
-import org.eclipse.xtend.lib.macro.declaration.MutableEnumerationValueDeclaration
 import org.eclipse.xtend.lib.macro.declaration.MutableFieldDeclaration
 import org.eclipse.xtend.lib.macro.declaration.Visibility
 import org.json.JSONException
 import org.xtendroid.json.JsonPropertyProcessor
 
-//import org.eclipse.xtend.lib.macro.declaration.MutableEnumerationTypeDeclaration
-
 @Active(ParcelableProcessor)
 annotation AndroidParcelable {}
-
-@Active(ParcelableEnumTypeProcessor)
-annotation EnumType {}
-
-@Active(ParcelableEnumValueProcessor)
-annotation EnumValue {}
 
 /**
  *  resources:
  * http://mobile.dzone.com/articles/using-android-parcel
  * http://blog.efftinge.de/2013/03/fun-with-active-annotations-my-little.html
+ * http://probemonkey.wordpress.com/2011/05/21/annotations-with-varargs-parameters/ // currently not possible with xtend
  */
 
 /**
  * 
- * Composable with @Property and probably @JSONProperty
+ * Compatible with @Property and @JSONProperty
  * 
  */
-
+ 
  /**
-  * TODO on a separate project: turn on logging, @AndroidLog android.os.Log
+  * 
+  * Future work: Parcelable enum types
+  * 
   */
 
 class ParcelableProcessor extends AbstractClassProcessor
@@ -295,29 +286,5 @@ class ParcelableProcessor extends AbstractClassProcessor
 			exceptions = exceptionsTypeRef
 			returnType = void.newTypeReference				
 		]
-	}
-}
-
-class ParcelableEnumTypeProcessor implements TransformationParticipant<MutableEnumerationTypeDeclaration>
-{
-	
-	override doTransform(List<? extends MutableEnumerationTypeDeclaration> annotatedTargetElements, extension TransformationContext context) {
-		for (enumType : annotatedTargetElements)
-		{
-			val enumTypeAnnotation = enumType.annotations.filter[a | a.annotationTypeDeclaration.simpleName.endsWith("AndroidParcelableEnumType")].head
-			// get all values of enum annotation (class/primitive types)
-			// then create a getter function for each class type,
-			// create ctor for each class type
-		}
-	}
-}
-
-class ParcelableEnumValueProcessor implements TransformationParticipant<MutableEnumerationValueDeclaration>
-{
-	override doTransform(List<? extends MutableEnumerationValueDeclaration> annotatedTargetElements, extension TransformationContext context) {
-		for (value : annotatedTargetElements)
-		{
-//			expand the enum types with values provided thru the annotation: @Value
-		}
 	}
 }

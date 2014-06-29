@@ -12,14 +12,34 @@ import java.util.concurrent.ConcurrentHashMap
 import java.text.DateFormat
 import java.text.ParseException
 import java.text.SimpleDateFormat
+import java.util.Date
 
 @Active(JsonPropertyProcessor)
 annotation JsonProperty {
 	// Use this to explicitly state the key value (String) of the JSON Object
+	// and define the expected String for DateFormat for Date fields
 	String value = ""
 }
 
 // TODO either a JsonEnumProperty or add a parameter 'enums' to the existing @JsonProperty
+/**
+ * 
+ * Future work:
+ * annotation JsonEnumProperty
+ * {
+ *   String... value
+ * }
+ * 
+ * should transpile to
+ * 
+ * public @interface JsonEnumProperty {
+ *   String[] value() default “all”;
+ * }
+ * 
+ * So I can just define which enum values I expect from a JSON String.
+ * A switch statement in getter method that returns a enum object (from a generated enum type)
+ * will be generated accordingly.
+ */
 
 /**
  * @JsonProperty annotation creates a "Json bean" that accepts a JSONObject
@@ -276,6 +296,11 @@ class ThreadLocalDateFormatter extends ThreadLocal<DateFormat>
 	}
 }
 
+/**
+ * 
+ * Every Thread gets a different DateFormat object, to prevent unsafe multi-threaded use
+ * 
+ */
 class ConcurrentDateFormatHashMap
 {
 	public val static concurrentMap = new ConcurrentHashMap<String, ThreadLocal<DateFormat>>();
@@ -287,5 +312,14 @@ class ConcurrentDateFormatHashMap
 			concurrentMap.put(dateFormat, new ThreadLocalDateFormatter(dateFormat))
 		}
 		return concurrentMap.get(dateFormat).get().parse(dateRaw);
+	}
+	
+	public def static convertDateToString(String dateFormat, Date date) throws ParseException
+	{
+		if (!concurrentMap.containsKey(dateFormat))
+		{
+			concurrentMap.put(dateFormat, new ThreadLocalDateFormatter(dateFormat))
+		}
+		return concurrentMap.get(dateFormat).get().format(date);
 	}
 }

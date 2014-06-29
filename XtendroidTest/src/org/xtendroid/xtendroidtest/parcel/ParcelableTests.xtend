@@ -8,9 +8,6 @@ import org.json.JSONObject
 import org.json.JSONArray
 import java.util.List
 
-//import org.xtendroid.parcel.AndroidParcelableEnum
-
-
 /**
 forbidden non-primitive types:
 	Byte B
@@ -132,6 +129,14 @@ class A
 	String normalPropertyField
 }
 
+//@Data // is would be compatible with @AndroidParcelable, if it did not make the fields final
+@AndroidParcelable
+class P implements Parcelable
+{
+	String data
+}
+
+//@Data // is not compatible
 class B
 {
 	/**
@@ -224,19 +229,3 @@ class Datezzz implements Parcelable
 	@JsonProperty
 	int mehint
 }
-
-// TODO do inheritance tests to see unannotated fields added to child types
-
-// TODO enum tests
-//@AndroidParcelableEnum // TODO extend enum type to be parcelized
-//@XtendEnum(String, float, int, Complex) // provide types for the members 
-//enum EnumTestA
-//{
-//	/**
-//	 * @XtendEnumValue("StateA", 1.0f, 1337, new Complex())
-//	 * weetikveel
-//	 * @XtendEnumValue("StateB", 1.0f, 1337, new Complex())
-//	 * , hu
-//	 *
-//	weetikveel, hu, nog, wat
-//}
