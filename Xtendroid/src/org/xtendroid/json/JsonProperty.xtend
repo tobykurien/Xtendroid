@@ -111,6 +111,9 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
 	      initializer = ["false"]
 	      visibility = Visibility::PROTECTED
       ]
+	
+	  // for Date (e.g. List<Date>, Date[], Date) members
+	  val dateFormat = if (annotationValue.nullOrEmpty) "yyyy-MM-dd\'T\'HH:mm:ss.SSS\'Z\'" else annotationValue
 
       // create a getter method for the property
       var getter = if(field.type.simpleName.equalsIgnoreCase("Boolean")) "is" else "get"
@@ -130,7 +133,6 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
 			''']
          } else if (field.type.name.startsWith('java.util.Date'))
 		 {
-		 	val dateFormat = annotationValue
 			exceptions = #[ java.text.ParseException.newTypeReference, org.json.JSONException.newTypeReference ]
 		 	if (field.type.array)
 		 	{
@@ -201,7 +203,6 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
          } else if (field.type.name.startsWith('java.util.List')) {
          	if (field.type.name.endsWith('Date>'))
          	{
-		 		val dateFormat = annotationValue
 				val baseTypeName = field.type.actualTypeArguments.head.name
 				body = ['''
 				if (!«field.simpleName»Loaded) {
