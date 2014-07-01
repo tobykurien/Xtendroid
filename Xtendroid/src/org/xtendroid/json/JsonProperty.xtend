@@ -21,7 +21,6 @@ annotation JsonProperty {
 	String value = ""
 }
 
-// TODO either a JsonEnumProperty or add a parameter 'enums' to the existing @JsonProperty
 /**
  * 
  * Future work:
@@ -36,9 +35,15 @@ annotation JsonProperty {
  *   String[] value() default “all”;
  * }
  * 
+ * TODO either a JsonEnumProperty or add a parameter 'enums' to the existing @JsonProperty
+ * 
  * So I can just define which enum values I expect from a JSON String.
  * A switch statement in getter method that returns a enum object (from a generated enum type)
  * will be generated accordingly.
+ * 
+ * 
+ * TODO #toJSON()
+ * JsonProperty should also generate a #toJSON method, to do the obvious
  */
 
 /**
