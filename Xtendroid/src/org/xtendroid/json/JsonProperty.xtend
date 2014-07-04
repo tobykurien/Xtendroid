@@ -238,6 +238,7 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
 			// in this current implementation, it is over-optimistically assumed that there is a ctor that takes a JSONObject for this generic type type
 			else
 			{
+//				field.type.actualTypeArguments.head.type. // no way to interrogate yet
 	         	// custom type
 				val baseTypeName = field.type.actualTypeArguments.head.name
 				body = ['''
@@ -254,12 +255,12 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
 				''']
 			}
          	
-         } else if (field.declaringType.declaredConstructors.exists[ctor | ctor.parameters.exists[p | p.type.equals(JSONObject.findTypeGlobally) && ctor.parameters.length == 1]])
+         } else if (field.declaringType.findDeclaredConstructor(JSONObject.newTypeReference()) != null)
 		 {
             // if it's single POJO that has a single ctor with a single JSONObject parameter, create it
         	body = ['''
               if (!«field.simpleName»Loaded) {
-                 «field.simpleName» = new «field.declaringType.simpleName»(«jsonObjectFieldName».getJSONObject("«jsonKey»"));
+                 «field.simpleName» = new «field.type.simpleName»(«jsonObjectFieldName».getJSONObject("«jsonKey»"));
                  «field.simpleName»Loaded = true;
               }
               return «field.simpleName»;
