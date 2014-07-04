@@ -11,7 +11,7 @@ import java.util.Date
  * 
  * This test demonstrates the JSON to POJO translation of...
  * 1) primitive JSON types (i.e. String, boolean, Number), but not 'null'
- * @ 2) String -> Date (also array, List), according to the default date format string or one provided the user
+ * 2) String -> Date (also array, List), according to the default date format string or one provided the user
  * 3) A JSON Object containing another JSON Object
  * 4) The array version of the aforementioned
  * 5) The java.util.List version of the aforementioned
@@ -69,8 +69,8 @@ class ArraysOfPrimitives
 	@JsonProperty
 	var double[] dta
 
-	@JsonProperty("ita")
-	var int[] it_is_a_reserved_keyword
+	@JsonProperty
+	var int[] ita
 
 	@JsonProperty
 	var Integer[] iita
@@ -191,6 +191,28 @@ class JsonTest extends AndroidTestCase {
 		assertEquals(ret.get(0).id, 1)
 		assertEquals(ret.get(0).published, true)
 		assertEquals(ret.get(3).published, false)
+		
+		assertEquals(response.ddt, response.dt)
+		assertEquals(response.itisareservedkeyword, response.iit)
+		assertEquals(response.lt, response.llt)
+		assertEquals(response.bt, response.bbt)
+		
+		val arraysOfPrimitives = response.responseData.arraysOfPrimitives.get(0)
+		assertEquals(arraysOfPrimitives.ddta.get(0), arraysOfPrimitives.dta.get(0))
+		assertEquals(arraysOfPrimitives.lta.get(0), arraysOfPrimitives.llta.get(0))
+		assertEquals(arraysOfPrimitives.ita.get(0), arraysOfPrimitives.iita.get(0))
+		assertEquals(arraysOfPrimitives.bbta.get(0), arraysOfPrimitives.bta.get(0))
+		
+		val listsOfPrimitives = response.responseData.listsOfPrimitives.get(0)
+		assertEquals(listsOfPrimitives.ddtl.head, 0.01)
+		assertEquals(listsOfPrimitives.iitl.head, 1234)
+		assertEquals(listsOfPrimitives.lltl.head, 1234)
+		assertEquals(listsOfPrimitives.bbtl.head, true)
+
+		val dateTypes = response.responseData.dateTypes
+		assertEquals(dateTypes.scalar, dateTypes.array.get(0))
+		assertEquals(dateTypes.array.get(0), dateTypes.list.head)
+		
 	}
 	
 		

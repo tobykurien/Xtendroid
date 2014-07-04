@@ -13,6 +13,7 @@ import java.text.DateFormat
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.List
 
 @Active(JsonPropertyProcessor)
 annotation JsonProperty {
@@ -95,7 +96,13 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
 
 	  // attempt to use the explicitly stated JSON member key, if stated
 	  val annotationValue = field.findAnnotation(JsonProperty.findTypeGlobally).getValue('value') as String
-      val jsonKey =  if (!annotationValue.nullOrEmpty && !field.type.name.startsWith('java.util.Date')) annotationValue else field.simpleName
+	  
+	  ;
+	  
+      val jsonKey =  if (!annotationValue.nullOrEmpty && !(field.type.name.startsWith("java.util.Date") ||
+      	(field.type.equals(List.newTypeReference()) && field.type.actualTypeArguments.head.equals(Date.newTypeReference()))
+      ))
+       annotationValue else field.simpleName
 
       // rename the property to _property if necessary
       // Another active annotation may want to do the same...
