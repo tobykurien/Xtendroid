@@ -14,15 +14,17 @@ import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.List
+import java.lang.annotation.ElementType
+import java.lang.annotation.Target
 
 @Active(JsonPropertyProcessor)
+@Target(ElementType.FIELD)
 annotation JsonProperty {
 	// Use this to explicitly state the key value (String) of the JSON Object
 	// and define the expected String for DateFormat for Date fields
 	String value = ""
 }
 
-// TODO either a JsonEnumProperty or add a parameter 'enums' to the existing @JsonProperty
 /**
  * 
  * Future work:
@@ -37,9 +39,15 @@ annotation JsonProperty {
  *   String[] value() default “all”;
  * }
  * 
+ * TODO either a JsonEnumProperty or add a parameter 'enums' to the existing @JsonProperty
+ * 
  * So I can just define which enum values I expect from a JSON String.
  * A switch statement in getter method that returns a enum object (from a generated enum type)
  * will be generated accordingly.
+ * 
+ * 
+ * TODO #toJSON()
+ * JsonProperty should also generate a #toJSON method, to do the obvious
  */
 
 /**
@@ -118,6 +126,9 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
 	      initializer = ["false"]
 	      visibility = Visibility::PROTECTED
       ]
+	
+	  // for Date (e.g. List<Date>, Date[], Date) members
+	  val dateFormat = if (annotationValue.nullOrEmpty) "yyyy-MM-dd\'T\'HH:mm:ss.SSS\'Z\'" else annotationValue
 
       // create a getter method for the property
       var getter = if(field.type.simpleName.equalsIgnoreCase("Boolean")) "is" else "get"
@@ -137,7 +148,6 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
 			''']
          } else if (field.type.name.startsWith('java.util.Date'))
 		 {
-		 	val dateFormat = annotationValue
 			exceptions = #[ java.text.ParseException.newTypeReference, org.json.JSONException.newTypeReference ]
 		 	if (field.type.array)
 		 	{
@@ -208,7 +218,6 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
          } else if (field.type.name.startsWith('java.util.List')) {
          	if (field.type.name.endsWith('Date>'))
          	{
-		 		val dateFormat = annotationValue
 				val baseTypeName = field.type.actualTypeArguments.head.name
 				body = ['''
 				if (!«field.simpleName»Loaded) {
