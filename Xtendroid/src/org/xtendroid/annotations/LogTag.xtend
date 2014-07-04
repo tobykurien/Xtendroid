@@ -4,8 +4,11 @@ import org.eclipse.xtend.lib.macro.Active
 import org.eclipse.xtend.lib.macro.AbstractClassProcessor
 import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
 import org.eclipse.xtend.lib.macro.TransformationContext
+import java.lang.annotation.Target
+import java.lang.annotation.ElementType
 
 @Active(typeof(LogTagProcessor))
+@Target(ElementType.TYPE)
 annotation AddLogTag {
 	String value = ""
 }
