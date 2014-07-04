@@ -10,8 +10,11 @@ import org.eclipse.xtend.lib.macro.declaration.MutableFieldDeclaration
 import org.eclipse.xtend.lib.macro.declaration.Visibility
 import org.json.JSONException
 import org.xtendroid.json.JsonPropertyProcessor
+import java.lang.annotation.Target
+import java.lang.annotation.ElementType
 
 @Active(ParcelableProcessor)
+@Target(ElementType.TYPE)
 annotation AndroidParcelable {}
 
 /**
