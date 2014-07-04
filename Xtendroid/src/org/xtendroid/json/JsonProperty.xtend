@@ -13,8 +13,11 @@ import java.text.DateFormat
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.lang.annotation.ElementType
+import java.lang.annotation.Target
 
 @Active(JsonPropertyProcessor)
+@Target(ElementType.FIELD)
 annotation JsonProperty {
 	// Use this to explicitly state the key value (String) of the JSON Object
 	// and define the expected String for DateFormat for Date fields
