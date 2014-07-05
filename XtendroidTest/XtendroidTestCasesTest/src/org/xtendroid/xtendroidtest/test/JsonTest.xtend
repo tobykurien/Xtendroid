@@ -185,8 +185,8 @@ class JsonTest extends AndroidTestCase {
 		   		, "zuluFormat" :
 		   		{
 		   			  "scalar" : "2011-11-11T12:34:56.789Z"
-		   			, "array" : "2011-11-11T12:34:56.789Z"
-		   			, "list" : "2011-11-11T12:34:56.789Z"
+		   			, "array" : [ "2011-11-11T12:34:56.789Z" ]
+		   			, "list" : [ "2011-11-11T12:34:56.789Z" ]
 		   		}
 		   	}
 		   	
