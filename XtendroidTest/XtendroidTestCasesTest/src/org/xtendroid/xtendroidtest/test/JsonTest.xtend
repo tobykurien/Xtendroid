@@ -18,7 +18,6 @@ import java.util.Date
  * 
  */
  
- 
 class Result
 {
 	@JsonProperty
@@ -47,6 +46,9 @@ class ResultHolder
 	
 	@JsonProperty
 	var DateTypes dateTypes;
+
+	@JsonProperty
+	var ZuluFormat zuluFormat;
 }
 
 class DateTypes
@@ -58,6 +60,18 @@ class DateTypes
 	var Date[] array
 	
 	@JsonProperty("yyyy-MM-dd")
+	var List<Date> list
+}
+
+class ZuluFormat
+{
+	@JsonProperty
+	var Date scalar
+	
+	@JsonProperty
+	var Date[] array
+	
+	@JsonProperty
 	var List<Date> list
 }
 
@@ -168,6 +182,12 @@ class JsonTest extends AndroidTestCase {
 		   			, "array"  : [ "1981-07-07" ]
 		   			, "list"   : [ "1981-07-07" ]
 		   		}
+		   		, "zuluFormat" :
+		   		{
+		   			  "scalar" : "2011-11-11T12:34:56.789Z"
+		   			, "array" : "2011-11-11T12:34:56.789Z"
+		   			, "list" : "2011-11-11T12:34:56.789Z"
+		   		}
 		   	}
 		   	
 		   	, "ddt" : 0.01
@@ -180,7 +200,7 @@ class JsonTest extends AndroidTestCase {
 		   	, "bbt" : true
 		}
 		'''
-		
+
 		val response = new Response(new JSONObject(jsonRaw))
 		val ret = response.responseData.results
 		
@@ -212,6 +232,10 @@ class JsonTest extends AndroidTestCase {
 		val dateTypes = response.responseData.dateTypes
 		assertEquals(dateTypes.scalar, dateTypes.array.get(0))
 		assertEquals(dateTypes.array.get(0), dateTypes.list.head)
+
+		val zuluFormat = response.responseData.zuluFormat
+		assertEquals(zuluFormat.scalar, zuluFormat.array.get(0))
+		assertEquals(zuluFormat.array.get(0), zuluFormat.list.head)
 		
 	}
 	
