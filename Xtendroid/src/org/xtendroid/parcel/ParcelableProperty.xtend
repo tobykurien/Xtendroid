@@ -47,7 +47,8 @@ class ParcelableProcessor extends AbstractClassProcessor
 		, 'float' -> 'Float'
 		, 'int' -> 'Int'
 		, 'long' -> 'Long'
-		, 'String' -> 'String'
+		, 'String' -> 'String' // TODO determine if redundant
+		, 'android.util.SparseBooleanArray' -> 'SparseBooleanArray'
 	}
 	
 	val static supportedPrimitiveArrayType = #{
@@ -58,8 +59,8 @@ class ParcelableProcessor extends AbstractClassProcessor
 		, 'float[]' -> 'FloatArray'
 		, 'int[]' -> 'IntArray'
 		, 'long[]' -> 'LongArray'
-		, 'String[]' -> 'StringArray'
-		, 'android.util.SparseBooleanArray' -> 'SparseBooleanArray'
+		, 'String[]' -> 'StringArray' // TODO determine if redundant
+		, 'char[]' -> 'CharArray'
 	}
 	
 	val static unsupportedAbstractTypesAndSuggestedTypes = #{
@@ -80,6 +81,8 @@ class ParcelableProcessor extends AbstractClassProcessor
 	/**
 	 * 
 	 * Marshalling code generator for common types
+	 * 
+	 * TODO static fields should be exempt from Parcelization
 	 * 
 	 */
 	def mapTypeToWriteMethodBody(MutableFieldDeclaration f) '''
@@ -158,7 +161,8 @@ class ParcelableProcessor extends AbstractClassProcessor
 					}
 				}
 			«ELSE»
-				this.«f.simpleName» = («f.type.name») in.createTypedArray(«f.type.name».CREATOR);
+«««			    TODO determine how to derive the base type (remove the [] from the full array type) and replace this hack
+				this.«f.simpleName» = («f.type.name») in.createTypedArray(«f.type.name.substring(0,f.type.name.length-2)».CREATOR);
 			«ENDIF»
 		«ELSEIF f.type.name.startsWith('java.util.List')»
 			«IF f.type.actualTypeArguments.head.name.equals('java.util.Date')»
@@ -189,7 +193,7 @@ class ParcelableProcessor extends AbstractClassProcessor
 			clazz.addError (String.format("To use @AndroidParcelable, %s must implement android.os.Parcelable, currently it implements: %s.", clazz.simpleName, if (interfaces.empty) 'nothing.' else interfaces))
 		}
 		
-		val fields = clazz.declaredFields // .filter[findAnnotation(xtendPropertyAnnotation) != null]
+		val fields = clazz.declaredFields
 		val jsonPropertyFieldDeclared = fields.exists[f | f.simpleName.equalsIgnoreCase(JsonPropertyProcessor.jsonObjectFieldName) && f.type.name.equalsIgnoreCase('org.json.JSONObject')]
 		for (f : fields)
 		{
@@ -231,7 +235,7 @@ class ParcelableProcessor extends AbstractClassProcessor
 			addParameter('flags', int.newTypeReference)
 			addAnnotation(Override.newAnnotationReference)
 			body = [ '''
-				«fields.map[f | f.mapTypeToWriteMethodBody ].join()»
+				«fields.filter[f|!f.static].map[f | f.mapTypeToWriteMethodBody ].join()»
 			''']
 		]
 		
@@ -298,7 +302,7 @@ class ParcelableProcessor extends AbstractClassProcessor
 		clazz.addMethod('readFromParcel') [
 			addParameter('in', Parcel.newTypeReference)
 			body = ['''
-				«fields.map[f | f.mapTypeToReadMethodBody ].join()»
+				«fields.filter[f|!f.static].map[f | f.mapTypeToReadMethodBody ].join()»
 			''']
 			exceptions = exceptionsTypeRef
 			returnType = void.newTypeReference				
