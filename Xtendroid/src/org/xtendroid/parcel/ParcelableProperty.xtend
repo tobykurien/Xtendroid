@@ -12,6 +12,8 @@ import org.json.JSONException
 import org.xtendroid.json.JsonPropertyProcessor
 import java.lang.annotation.Target
 import java.lang.annotation.ElementType
+import org.json.JSONObject
+import org.xtendroid.json.JsonProperty
 
 @Active(ParcelableProcessor)
 @Target(ElementType.TYPE)
@@ -257,7 +259,7 @@ class ParcelableProcessor extends AbstractClassProcessor
 			''']
 		]
 
-		val exceptionsTypeRef = if (fields.exists[f|f.type.name.startsWith("org.json.JSON")])  #[ JSONException.newTypeReference() ] else #[]
+		val exceptionsTypeRef = if (fields.exists[f|f.type.name.startsWith("org.json.JSONObject")])  #[ JSONException.newTypeReference() ] else #[]
 		clazz.addConstructor[
 			addParameter('in', Parcel.newTypeReference)
 			body = ['''
@@ -280,6 +282,18 @@ class ParcelableProcessor extends AbstractClassProcessor
 				«ENDIF»
 			''']
 		]
+		
+		// if the raw JSON container is explicitly declared
+		// it needs to be declared in this @AndroidParcelable context or expect data loss during (de)marshalling
+		if (clazz.declaredFields.exists[f|f.simpleName.equals(JsonPropertyProcessor.jsonObjectFieldName)])
+		{
+			clazz.addConstructor[
+				addParameter('jsonObj', JSONObject.newTypeReference)
+				body = ['''
+					this.«JsonPropertyProcessor.jsonObjectFieldName» = jsonObj;
+				''']
+			]
+		}
 		
 		clazz.addMethod('readFromParcel') [
 			addParameter('in', Parcel.newTypeReference)
