@@ -7,6 +7,7 @@ import org.xtendroid.json.JsonProperty
 import org.json.JSONObject
 import org.json.JSONArray
 import java.util.List
+import android.util.SparseBooleanArray
 
 /**
 forbidden non-primitive types:
@@ -25,8 +26,118 @@ forbidden non-primitive types:
 */
 
 @AndroidParcelable
+class ModelRoot implements Parcelable
+{
+	@Property
+	JSONObject jsonObj
+	
+	@JsonProperty
+	String a_str
+	
+	@Property
+	byte   b_byte
+	
+	@Property
+	float  c_float
+	
+	@JsonProperty
+	double c_double
+	
+	@JsonProperty
+	int    d_int
+	
+	@JsonProperty
+	long   e_long
+	
+	@JsonProperty
+	String[] f_string_array
+	
+	@JsonProperty
+	boolean[] g_boolean_array
+
+	@Property
+	byte[] h_byte_array
+
+	@JsonProperty
+	double[] i_double_array
+
+	@Property // not supported
+	float[] j_float_array
+
+	@JsonProperty
+	int[] k_int_array
+
+	@JsonProperty
+	long[] l_long_array
+
+	@JsonProperty
+	List<String> f_string_list
+	
+//	@JsonProperty // unsupported by @AndroidParcelable
+//	List<Boolean> g_boolean_list
+//
+//	@JsonProperty // unsupported by @AndroidParcelable
+//	List<Byte> h_byte_list
+//
+//	@JsonProperty // unsupported by @AndroidParcelable
+//	List<Double> i_double_list
+//
+//	@JsonProperty // unsupported by @AndroidParcelable
+//	@Property // not supported by @JsonProperty
+//	List<Float> j_float_list
+//
+//	@JsonProperty // unsupported by @AndroidParcelable
+//	List<Integer> k_int_list
+//
+//	@JsonProperty // unsupported by @AndroidParcelable
+//	List<Long> l_long_list
+	
+	@Property
+	SparseBooleanArray m_bool_array
+	
+	// special cases start here
+	@JsonProperty
+	boolean n_bool
+	
+	@JsonProperty
+	boolean[] o_bool_array
+
+	@JsonProperty
+	Date p_date
+
+	@JsonProperty
+	Date[] q_date_array
+	
+	@Property
+	JSONArray r_json_array
+	
+	@JsonProperty
+	SubModel submodel
+	
+	@JsonProperty
+	SubModel[] lotsaSubmodels
+	
+	@JsonProperty
+	List<SubModel> evenMore
+	
+	// Missing in the 1st implementation
+	@Property
+	char[] s_char_array
+	
+//	@Property // not supported with @AndroidParcelable
+//	Exception exception
+}
+
+@AndroidParcelable
+class SubModel implements Parcelable
+{
+	@JsonProperty
+	boolean a
+}
+
+@AndroidParcelable
 class E implements android.os.Parcelable {
-	JSONObject _jsonObj
+	JSONObject jsonObj
 
 	@Property
 	byte b
@@ -63,7 +174,7 @@ class E implements android.os.Parcelable {
 @AndroidParcelable
 class F implements Parcelable
 {
-	JSONObject _jsonObj // required for both to interoperate or data will be lost during the marshalling process
+	JSONObject jsonObj // required for both to interoperate or data will be lost during the marshalling process
 
 	@Property
 	byte b
@@ -167,7 +278,7 @@ class B
 @AndroidParcelable
 class C implements Parcelable
 {
-	JSONObject _jsonObject
+	JSONObject jsonObject
 	
 	@JsonProperty
 	String meh
@@ -215,7 +326,7 @@ class RRR // in the android dev context, it's dangerous to name a type 'R'
 @AndroidParcelable
 class Datezzz implements Parcelable
 {
-	JSONObject _jsonObj
+	JSONObject jsonObj
 	
 	@JsonProperty("ddd-mmm-YYYY")
 	Date meh
