@@ -93,9 +93,11 @@ class ParcelableProcessor extends AbstractClassProcessor
 		«ELSEIF "boolean".equals(f.type.name)»
 			in.writeInt(this.«f.simpleName» ? 1 : 0);
 		«ELSEIF "java.util.Date".equals(f.type.name)»
-			in.writeLong(this.«f.simpleName».getTime());
+			if (this.«f.simpleName» != null)
+				in.writeLong(this.«f.simpleName».getTime());
 		«ELSEIF f.type.name.startsWith("org.json.JSON")»
-			in.writeString(this.«f.simpleName».toString());
+			if (this.«f.simpleName» != null)
+				in.writeString(this.«f.simpleName».toString());
 		«ELSEIF f.type.name.startsWith('java.util.List')»
 			«IF f.type.actualTypeArguments.head.name.equals('java.util.Date')»
 				if («f.simpleName» != null)
