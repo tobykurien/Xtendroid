@@ -118,7 +118,7 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
       // make a flag for each property to indicate if it's been parsed
       // so that we can cache the result of parsing
       field.declaringType.addField(field.simpleName + "Loaded") [
-	      type = Boolean.newTypeReference
+	      type = boolean.newTypeReference
 	      initializer = ["false"]
 	      visibility = Visibility::PROTECTED
       ]
