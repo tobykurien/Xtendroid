@@ -12,6 +12,8 @@ import org.json.JSONException
 import org.xtendroid.json.JsonPropertyProcessor
 import java.lang.annotation.Target
 import java.lang.annotation.ElementType
+import org.json.JSONObject
+import org.xtendroid.json.JsonProperty
 
 @Active(ParcelableProcessor)
 @Target(ElementType.TYPE)
@@ -45,7 +47,8 @@ class ParcelableProcessor extends AbstractClassProcessor
 		, 'float' -> 'Float'
 		, 'int' -> 'Int'
 		, 'long' -> 'Long'
-		, 'String' -> 'String'
+		, 'String' -> 'String' // TODO determine if redundant
+		, 'android.util.SparseBooleanArray' -> 'SparseBooleanArray'
 	}
 	
 	val static supportedPrimitiveArrayType = #{
@@ -56,8 +59,8 @@ class ParcelableProcessor extends AbstractClassProcessor
 		, 'float[]' -> 'FloatArray'
 		, 'int[]' -> 'IntArray'
 		, 'long[]' -> 'LongArray'
-		, 'String[]' -> 'StringArray'
-		, 'android.util.SparseBooleanArray' -> 'SparseBooleanArray'
+		, 'String[]' -> 'StringArray' // TODO determine if redundant
+		, 'char[]' -> 'CharArray'
 	}
 	
 	val static unsupportedAbstractTypesAndSuggestedTypes = #{
@@ -79,6 +82,8 @@ class ParcelableProcessor extends AbstractClassProcessor
 	 * 
 	 * Marshalling code generator for common types
 	 * 
+	 * TODO static fields should be exempt from Parcelization
+	 * 
 	 */
 	def mapTypeToWriteMethodBody(MutableFieldDeclaration f) '''
 		«IF supportedPrimitiveScalarType.containsKey(f.type.name)»
@@ -88,9 +93,11 @@ class ParcelableProcessor extends AbstractClassProcessor
 		«ELSEIF "boolean".equals(f.type.name)»
 			in.writeInt(this.«f.simpleName» ? 1 : 0);
 		«ELSEIF "java.util.Date".equals(f.type.name)»
-			in.writeLong(this.«f.simpleName».getTime());
+			if (this.«f.simpleName» != null)
+				in.writeLong(this.«f.simpleName».getTime());
 		«ELSEIF f.type.name.startsWith("org.json.JSON")»
-			in.writeString(this.«f.simpleName».toString());
+			if (this.«f.simpleName» != null)
+				in.writeString(this.«f.simpleName».toString());
 		«ELSEIF f.type.name.startsWith('java.util.List')»
 			«IF f.type.actualTypeArguments.head.name.equals('java.util.Date')»
 				if («f.simpleName» != null)
@@ -156,7 +163,8 @@ class ParcelableProcessor extends AbstractClassProcessor
 					}
 				}
 			«ELSE»
-				this.«f.simpleName» = («f.type.name») in.createTypedArray(«f.type.name».CREATOR);
+«««			    TODO determine how to derive the base type (remove the [] from the full array type) and replace this hack
+				this.«f.simpleName» = («f.type.name») in.createTypedArray(«f.type.name.substring(0,f.type.name.length-2)».CREATOR);
 			«ENDIF»
 		«ELSEIF f.type.name.startsWith('java.util.List')»
 			«IF f.type.actualTypeArguments.head.name.equals('java.util.Date')»
@@ -187,7 +195,7 @@ class ParcelableProcessor extends AbstractClassProcessor
 			clazz.addError (String.format("To use @AndroidParcelable, %s must implement android.os.Parcelable, currently it implements: %s.", clazz.simpleName, if (interfaces.empty) 'nothing.' else interfaces))
 		}
 		
-		val fields = clazz.declaredFields // .filter[findAnnotation(xtendPropertyAnnotation) != null]
+		val fields = clazz.declaredFields
 		val jsonPropertyFieldDeclared = fields.exists[f | f.simpleName.equalsIgnoreCase(JsonPropertyProcessor.jsonObjectFieldName) && f.type.name.equalsIgnoreCase('org.json.JSONObject')]
 		for (f : fields)
 		{
@@ -229,7 +237,7 @@ class ParcelableProcessor extends AbstractClassProcessor
 			addParameter('flags', int.newTypeReference)
 			addAnnotation(Override.newAnnotationReference)
 			body = [ '''
-				«fields.map[f | f.mapTypeToWriteMethodBody ].join()»
+				«fields.filter[f|!f.static].map[f | f.mapTypeToWriteMethodBody ].join()»
 			''']
 		]
 		
@@ -257,7 +265,7 @@ class ParcelableProcessor extends AbstractClassProcessor
 			''']
 		]
 
-		val exceptionsTypeRef = if (fields.exists[f|f.type.name.startsWith("org.json.JSON")])  #[ JSONException.newTypeReference() ] else #[]
+		val exceptionsTypeRef = if (fields.exists[f|f.type.name.startsWith("org.json.JSONObject")])  #[ JSONException.newTypeReference() ] else #[]
 		clazz.addConstructor[
 			addParameter('in', Parcel.newTypeReference)
 			body = ['''
@@ -281,10 +289,22 @@ class ParcelableProcessor extends AbstractClassProcessor
 			''']
 		]
 		
+		// if the raw JSON container is explicitly declared
+		// it needs to be declared in this @AndroidParcelable context or expect data loss during (de)marshalling
+		if (clazz.declaredFields.exists[f|f.simpleName.equals(JsonPropertyProcessor.jsonObjectFieldName)])
+		{
+			clazz.addConstructor[
+				addParameter('jsonObj', JSONObject.newTypeReference)
+				body = ['''
+					this.«JsonPropertyProcessor.jsonObjectFieldName» = jsonObj;
+				''']
+			]
+		}
+		
 		clazz.addMethod('readFromParcel') [
 			addParameter('in', Parcel.newTypeReference)
 			body = ['''
-				«fields.map[f | f.mapTypeToReadMethodBody ].join()»
+				«fields.filter[f|!f.static].map[f | f.mapTypeToReadMethodBody ].join()»
 			''']
 			exceptions = exceptionsTypeRef
 			returnType = void.newTypeReference				

@@ -82,8 +82,8 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
 		if (unsupportedTypes.exists[t | field.type.name.startsWith(t)])
             field.addError(field.type + " is not supported for @JsonProperty.")
    	
-	    // if there isn't yet a constructor that takes a JSONObject, add it
-		if (!field.declaringType.declaredFields.exists[ it.simpleName == jsonObjectFieldName]) {
+   		// The ctor is added if the raw JSON string container needs to be generated
+		if (!field.declaringType.declaredFields.exists[ it.simpleName.equals(jsonObjectFieldName)]) {
 		   // make a field for storing the JSONObject
 			field.declaringType.addField(jsonObjectFieldName) [
 				type = JSONObject.newTypeReference
@@ -91,21 +91,17 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
 				visibility = Visibility::PROTECTED
 				initializer = '''null'''
 			]
-	
-	     // create the constructor						
+
 			field.declaringType.addConstructor [
 				addParameter("jsonObj", JSONObject.newTypeReference)
 				body = ['''
 					this.«jsonObjectFieldName» = jsonObj;
 				''']
 			]
-			
 		}
 
 	  // attempt to use the explicitly stated JSON member key, if stated
 	  val annotationValue = field.findAnnotation(JsonProperty.findTypeGlobally).getValue('value') as String
-	  
-	  ;
 	  
       val jsonKey =  if (!annotationValue.nullOrEmpty && !(field.type.name.startsWith("java.util.Date") ||
       	(field.type.equals(List.newTypeReference()) && field.type.actualTypeArguments.head.equals(Date.newTypeReference()))
@@ -122,7 +118,7 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
       // make a flag for each property to indicate if it's been parsed
       // so that we can cache the result of parsing
       field.declaringType.addField(field.simpleName + "Loaded") [
-	      type = Boolean.newTypeReference
+	      type = boolean.newTypeReference
 	      initializer = ["false"]
 	      visibility = Visibility::PROTECTED
       ]
