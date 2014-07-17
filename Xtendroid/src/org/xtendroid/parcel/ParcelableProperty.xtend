@@ -163,8 +163,7 @@ class ParcelableProcessor extends AbstractClassProcessor
 					}
 				}
 			«ELSE»
-«««			    TODO determine how to derive the base type (remove the [] from the full array type) and replace this hack
-				this.«f.simpleName» = («f.type.name») in.createTypedArray(«f.type.name.substring(0,f.type.name.length-2)».CREATOR);
+				this.«f.simpleName» = («f.type.name») in.createTypedArray(«f.type.arrayComponentType».CREATOR);
 			«ENDIF»
 		«ELSEIF f.type.name.startsWith('java.util.List')»
 			«IF f.type.actualTypeArguments.head.name.equals('java.util.Date')»
