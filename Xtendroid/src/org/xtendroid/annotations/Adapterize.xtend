@@ -1,33 +1,28 @@
+
 package org.xtendroid.annotations
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.util.Log
+import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.TextView
-import java.lang.reflect.Method
-import java.util.HashMap
+import java.lang.annotation.ElementType
+import java.lang.annotation.Target
 import java.util.List
-import org.xtendroid.utils.Utils
-
-import android.view.View
 import org.eclipse.xtend.lib.macro.AbstractClassProcessor
 import org.eclipse.xtend.lib.macro.Active
 import org.eclipse.xtend.lib.macro.TransformationContext
 import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
 import org.eclipse.xtend.lib.macro.declaration.Visibility
-import android.widget.LinearLayout
-import org.eclipse.xtend.lib.macro.AbstractFieldProcessor
-import org.eclipse.xtend.lib.macro.declaration.MutableFieldDeclaration
+
+import static extension org.xtendroid.utils.NamingUtils.*
+import android.widget.TextView
+import android.widget.ImageView
 
 /**
  * 
- * These active annotations combine ideas from the original @AndroidView, BeanAdapter and Barend Garvelink's idea here:
+ * These active annotations combine ideas from the original @AndroidView, BeanAdapter type and Barend Garvelink's idea here:
  * http://blog.xebia.com/2013/07/30/a-better-custom-viewgroup/
  * 
  * sources:
@@ -36,96 +31,12 @@ import org.eclipse.xtend.lib.macro.declaration.MutableFieldDeclaration
  * * https://github.com/xebia/xebicon-2013__cc-in-aa/blob/4-_better_custom_ViewGroup/src/com/xebia/xebicon2013/cciaa/ContactListAdapter.java
  * * https://github.com/xebia/xebicon-2013__cc-in-aa/blob/4-_better_custom_ViewGroup/src/com/xebia/xebicon2013/cciaa/ContactView.java
  * 
+ * My aim is to pave the way from @JsonProperty and @AndroidParcelable to @Adapterize and @CustomViewGroup
+ * 
  */
-/**
- * Generic adapter to take data in the form of Java beans and use the getters
- * to get the data and apply to appropriately named views in the row layout, e.g.
- * getFirstName -> R.id.first_name
- * isToast -> R.id.toast
- */
-/*
-class BeanAdapter<T> extends BaseAdapter {
-   val List<T> data
-   val Context context
-   val int layoutId
-   val HashMap<Integer,Method> mapping = newHashMap()
-   
-   new(Context context, int layoutId, List<T> data) {
-      this.data = data
-      this.layoutId = layoutId
-      this.context = context
-   }
-
-   new(Context context, int layoutId, T[] data) {
-      this.data = data.map[i| i]
-      this.layoutId = layoutId
-      this.context = context
-   }
-   
-   override getCount() {
-      data.size
-   }
-   
-   override T getItem(int row) {
-      data.get(row)
-   }
-   
-   override getItemId(int row) {
-      try {
-         var item = getItem(row)
-         var m = item.class.getMethod("getId")
-         Long.valueOf(String.valueOf(m.invoke(item)))
-      } catch (Exception e) {
-         row as long
-      }
-   }
-   
-   override getView(int row, View cv, ViewGroup root) {
-      val i = getItem(row)
-      var v = cv
-      if (v == null) {
-         v = LayoutInflater.from(context).inflate(layoutId, root, false)
-         if (mapping.empty) setupMapping(v, i)
-      }
-      
-      val view = v
-      mapping.forEach [resId,method|
-         var res = view.findViewById(resId)
-         if (res != null) {
-            switch (res.class) {
-               case TextView: (res as TextView).setText(String.valueOf(method.invoke(i)))
-               case EditText: (res as EditText).setText(String.valueOf(method.invoke(i)))
-               case ImageView: (res as ImageView).setImageBitmap(method.invoke(i) as Bitmap)
-               default: Log.e("base_adapter", "View type not yet supported: " + res.class)
-            }
-         }
-      ]
-      
-      return v
-   }
-   
-   */
-/**
-    * Set up the bean-to-view mapping for use in subsequent rows
-    */
-/*
-   def setupMapping(View v, T i) {
-      i.class.methods.forEach [m|
-         if (m.name.startsWith("get") || m.name.startsWith("is")) {
-            // might be a getter, let's see if there is a corresponding view
-            var resName = Utils.toResourceName(m)
-            var resId = context.resources.getIdentifier(resName, "id", context.packageName)
-            if (resId > 0) {
-               mapping.put(resId, m)
-            } 
-         }
-      ]
-   }
-
-}
-*/
 
 @Active(typeof(AdapterizeProcessor))
+@Target(ElementType.TYPE)
 annotation Adapterize {
 }
 
@@ -141,7 +52,7 @@ class AdapterizeProcessor extends AbstractClassProcessor {
 
 		// determine data container
 		val dataContainerFields = clazz.declaredFields.filter[f|
-			(f.type.name.startsWith(java.util.List.newTypeReference.name) || f.type.array) && !f.final]
+			(f.type.name.startsWith(List.newTypeReference.name) || f.type.array) && !f.final]
 
 		// determine if it provides an aggregate data object
 		if (dataContainerFields.empty) {
@@ -153,11 +64,11 @@ class AdapterizeProcessor extends AbstractClassProcessor {
 		// where to get the inflater
 		clazz.addField("mContext") [
 			visibility = Visibility.PRIVATE
-			type = android.content.Context.newTypeReference
+			type = Context.newTypeReference
 			final = true
 		]
 
-		val dataContainerField = dataContainerFields.get(0)
+		val dataContainerField = dataContainerFields.head
 		clazz.addConstructor [
 			visibility = Visibility::PUBLIC
 			body = [
@@ -166,7 +77,7 @@ class AdapterizeProcessor extends AbstractClassProcessor {
 					this.mContext = context;
 				''']
 			addParameter("data", dataContainerField.type)
-			addParameter("context", android.content.Context.newTypeReference)
+			addParameter("context", Context.newTypeReference)
 		]
 
 		// if one dummy (custom) View (Group) type is provided, then use it
@@ -194,7 +105,7 @@ class AdapterizeProcessor extends AbstractClassProcessor {
 						«ELSEIF !dataContainerField.type.actualTypeArguments.empty»
 							«dataContainerField.type.actualTypeArguments.get(0).name» item = getItem(position);
 						«ENDIF»
-«««						// TODO the custom view might contain the method #show, because my other annotation generates one, also check if it has my annotation
+«««						// TODO add checks to ascertain if it contains the method #show
 						«IF !dummyType.name.startsWith("android")»
 							view.show(item);
 						«ENDIF»
@@ -255,8 +166,145 @@ class AdapterizeProcessor extends AbstractClassProcessor {
 
 }
 
+
+@Active(typeof(CustomViewGroupProcessor))
+@Target(ElementType.TYPE)
+annotation CustomViewGroup {
+	int layout = 0 // -1 could theoretically be an existing layout
+}
+
+class CustomViewGroupProcessor extends AbstractClassProcessor {
+	
+	// blatantly stolen from @AndroidActivity
+	// Caveat: This -ing thing cost me an hour of my life, apparently you need @Target(ElementType.TYPE) to get to the expression
+	def String getValue(MutableClassDeclaration clazz, extension TransformationContext context) {
+      var value = clazz.annotations.findFirst[
+         annotationTypeDeclaration.equals(CustomViewGroup.newTypeReference.type)
+      ]?.getExpression("layout")
+      
+      if (value == null)
+      {
+      	clazz.addError("You must enter the layout resource id like this: " + CustomViewGroup.newTypeReference.name + ("(layout = R.layout.something)"))
+      }
+
+      return value?.toString
+   }
+
+	override doTransform(MutableClassDeclaration clazz, extension TransformationContext context) {
+		
+		// determine if clazz extends BaseAdapter
+		val androidViewGroupType = ViewGroup.newTypeReference
+		if (!androidViewGroupType.isAssignableFrom(clazz.extendedClass)) {
+			clazz.addError(String.format("%s must extend an extending type of %s.", clazz.simpleName, androidViewGroupType.name))
+		}
+		
+		// determine there is at least one View type (e.g. ImageView or TextView) field that is contained within the custom layout
+		val androidViewFields = clazz.declaredFields.filter[f | View.newTypeReference.isAssignableFrom(f.type) ]
+		if (androidViewFields.nullOrEmpty)
+		{
+			clazz.addError("You must have at least one field of the type TextField or ImageView type or some customized type of those.")
+		}
+		
+				clazz.addConstructor[
+			visibility = Visibility.PUBLIC
+			addParameter("context", Context.newTypeReference)
+			body = ['''
+				super(context);
+				init(context);
+			''']
+		]
+		
+		clazz.addConstructor[
+			visibility = Visibility.PUBLIC
+			addParameter("context", Context.newTypeReference)
+			addParameter("attrs", AttributeSet.newTypeReference)
+			body = ['''
+				super(context, attrs);
+				init(context);
+			''']
+		]
+		
+		clazz.addConstructor[
+			visibility = Visibility.PUBLIC
+			addParameter("context", Context.newTypeReference)
+			addParameter("attrs", AttributeSet.newTypeReference)
+			addParameter("defStyle", int.newTypeReference)
+			body = ['''
+				super(context, attrs, defStyle);
+				init(context);
+			''']
+		]
+		
+		/**
+		 * Generates an init method to grab all the TextViews and ImageViews and ViewGroup#findViewById them.
+		 * 
+		 * Also, checks whether there is a method for the ViewGroup itself, it determines this by checking the method signature.
+		 * 
+		 * I only go by the signature, I don't care how it's called, it might be a pre-defined "init" method.
+		 */
+		val viewGroupInitMethod = clazz.declaredMethods.filter[m | m.parameters.exists[p | p.type.equals(Context.newTypeReference)] && m.parameters.size == 1]
+		val hasViewGroupInitMethod = !viewGroupInitMethod.nullOrEmpty
+//		
+//		// in case you prefer to set it up yourself
+		val hasInitMethod = clazz.declaredMethods.exists[m | m.simpleName.equalsIgnoreCase("init") && m.parameters.size == 1 &&  m.parameters?.head.type.equals(Context.newTypeReference)]
+		val layoutResourceID = getValue(clazz, context)
+
+		if (!hasInitMethod) // I know: the name is very ObjC-ish.
+		{
+			clazz.addMethod("init") [
+				visibility = Visibility.PRIVATE
+				returnType = void.newTypeReference
+				addParameter("context", Context.newTypeReference)
+				body = ['''
+					«IF hasViewGroupInitMethod»
+						«viewGroupInitMethod.head.simpleName»(context);
+					«ENDIF»
+					«IF !layoutResourceID.nullOrEmpty»
+						«LayoutInflater.newTypeReference.name».from(context).inflate(«layoutResourceID», this, true);
+					«ENDIF»
+					«androidViewFields.map[f | String.format("this.%s = (%s) findViewById(R.id.%s);", f.simpleName, f.type.name, f.simpleName.toResourceName)].join("\n")»
+				''']
+			]
+		}
+		
+		val androidViewType = View.newTypeReference
+		
+		// Take the first non android.widget.View type inference the type and use it as the Data type
+		var dummyDataFields = clazz.declaredFields.filter[f | !androidViewType.isAssignableFrom(f.type)]
+		
+		if (dummyDataFields.nullOrEmpty)
+		{
+			if (!clazz.declaredMethods.exists[m | m.simpleName.equals("show") && m.parameters.size == 1])
+			{
+				clazz.addWarning("You may provide a field where the type of the data object can be inferenced or create your own \"show(Data data) {...}\" function.\nThen you must call it from the adapter according to the method's signature.")
+			}
+		}else if (dummyDataFields.size == 1)
+		{
+			val dataField = dummyDataFields.head
+			clazz.addMethod("show") [
+				visibility = Visibility.PUBLIC
+				returnType = void.newTypeReference
+				addParameter("data", dataField.type)
+				body = ['''
+					«androidViewFields.filter[f | f.type.isAssignableFrom(TextView.newTypeReference) ].map[f | String.format("this.%s.setText(data.get%s());", f.simpleName, f.simpleName.sanitizeName.toFirstUpper)].join("\n")»
+					«androidViewFields.filter[f | f.type.isAssignableFrom(ImageView.newTypeReference) ].map[f | String.format("this.%s.setBackgroundResource(data.get%s());", f.simpleName, f.simpleName.sanitizeName.toFirstUpper)].join("\n")»
+«««					«androidViewFields.map[f | String.format("this.%s = (%s) findViewById(R.id.%s);", f.simpleName, f.type.name, f.simpleName.toResourceName)].join("\n")»
+«««					// _someTextView.setText(data.get<sameCamelCasedNameAsField>) // TextField and input is String type
+«««					// _someTextView.setText(context.getResources().getString(R.string.equivalent_of_uncamelcased_field_name)) // TextView and input is resId (int) type, this should be converted in the Data type, so I refuse to implement this flow
+«««					// _someImageView.setBackgroundResource(int) // ImageView and input is resId (int) type
+«««					// _someImageView.setBackground(Drawable) // probably from an enum type, or from the disk
+				''']
+			]
+		}
+	}
+	
+	def String sanitizeName(String s)
+	{
+		return s.replaceFirst("^_+", "")
+	}
+}
+
 /*
- 
  import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;

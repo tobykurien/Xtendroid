@@ -5,17 +5,28 @@ import org.xtendroid.annotations.Adapterize
 import java.util.List
 import org.xtendroid.parcel.AndroidParcelable
 import android.os.Parcelable
-import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
+import org.xtendroid.annotations.CustomViewGroup
+import android.widget.TextView
+import android.widget.ImageView
+import org.xtendroid.annotations.AndroidView
+import android.content.Context
+import org.xtendroid.xtendroidtest.R;
+import org.xtendroid.json.JsonProperty
 
 @AndroidParcelable
 class Payload implements Parcelable
 {
+	@Property
 	var String a
+	@Property
 	var String b
-	var String c
-	var String d
+	@Property
+	var int    c
+	
+	@JsonProperty // this requires a JSONException catch
+	var String d 
 }
 
 @Adapterize
@@ -29,4 +40,25 @@ class XtendAdapter extends BaseAdapter {
 class XtendAdapter2 extends BaseAdapter {
 	var Payload[] data
 	var RelativeLayout dummy
+}
+
+@CustomViewGroup(layout = R.layout.custom_adapter_view)
+class CustomAdapterView extends LinearLayout
+{
+	@AndroidView
+	TextView  a
+	@AndroidView
+	TextView  b
+	@AndroidView
+	ImageView c
+	
+	var Payload p
+
+	def void initViewGroup(Context context) {
+		orientation = LinearLayout.HORIZONTAL
+	}
+	
+//	def void init(Context context) {
+//		initViewGroup(context)
+//	}
 }

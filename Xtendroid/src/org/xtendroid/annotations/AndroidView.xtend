@@ -23,11 +23,9 @@ class AndroidViewProcessor extends AbstractFieldProcessor {
       
       val fragmentType = android.app.Fragment.newTypeReference
       val supportFragmentType = Fragment?.newTypeReference
-      val androidViewGroupType = ViewGroup.newTypeReference
       
       if ( fragmentType.type.isAssignableFrom(field.declaringType) ||
-            supportFragmentType != null && supportFragmentType.type.isAssignableFrom(field.declaringType) ||
-            androidViewGroupType.type.isAssignableFrom(field.declaringType)) {
+            supportFragmentType != null && supportFragmentType.type.isAssignableFrom(field.declaringType)) {
          // for fragments, add a findViewById method
          var exists = field.declaringType.declaredMethods.exists[m| m.simpleName == "findViewById"]
          if (!exists) field.declaringType.addMethod("findViewById") [
