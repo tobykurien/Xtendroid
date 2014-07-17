@@ -27,7 +27,7 @@ import org.eclipse.xtend.lib.macro.declaration.MutableFieldDeclaration
 
 /**
  * 
- * These active annotations combine ideas from the original BeanAdapter and Barend Garvelink's idea here
+ * These active annotations combine ideas from the original @AndroidView, BeanAdapter and Barend Garvelink's idea here:
  * http://blog.xebia.com/2013/07/30/a-better-custom-viewgroup/
  * 
  * sources:
@@ -171,8 +171,7 @@ class AdapterizeProcessor extends AbstractClassProcessor {
 
 		// if one dummy (custom) View (Group) type is provided, then use it
 		val androidViewGroupType = ViewGroup.newTypeReference
-		val androidViewType = View.newTypeReference
-		val dummyViews = clazz.declaredFields.filter[f| androidViewGroupType.isAssignableFrom(f.type) || androidViewType.isAssignableFrom(f.type) ]
+		val dummyViews = clazz.declaredFields.filter[f| androidViewGroupType.isAssignableFrom(f.type)]
 		if (dummyViews.size == 1) {
 			val dummyType = dummyViews.get(0).type
 			clazz.addMethod("getView") [
