@@ -25,6 +25,16 @@ class FragmentProcessor extends AbstractClassProcessor {
             '''
          ]
       ]
+      
+      if (!clazz.declaredConstructors.exists[ctor | ctor.parameters.empty])
+      {
+      	clazz.addConstructor[
+      		visibility = Visibility::PUBLIC
+      		body = [ '''
+      		// empty ctor prevents crashes
+      		''']
+      	]
+      }
    }
 
 }
