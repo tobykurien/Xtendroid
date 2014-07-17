@@ -106,7 +106,7 @@ class AdapterizeProcessor extends AbstractClassProcessor {
 							«dataContainerField.type.actualTypeArguments.get(0).name» item = getItem(position);
 						«ENDIF»
 «««						// TODO add checks to ascertain if it contains the method #show
-						«IF !dummyType.name.startsWith("android")»
+						«IF !dummyType.type.simpleName.startsWith("android")»
 							view.show(item);
 						«ENDIF»
 						return view;

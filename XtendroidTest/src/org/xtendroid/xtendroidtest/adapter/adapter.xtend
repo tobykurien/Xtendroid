@@ -33,13 +33,13 @@ class Payload implements Parcelable
 class XtendAdapter extends BaseAdapter {
 	@Property
 	var List<Payload> data
-	var LinearLayout dummy
+	var CustomAdapterView dummy
 }
 
 @AndroidAdapter
 class XtendAdapter2 extends BaseAdapter {
 	var Payload[] data
-	var RelativeLayout dummy
+	var CustomAdapterView2 dummy
 }
 
 @CustomViewGroup(layout = R.layout.custom_adapter_view)
