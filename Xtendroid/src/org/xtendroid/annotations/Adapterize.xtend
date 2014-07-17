@@ -202,7 +202,7 @@ class CustomViewGroupProcessor extends AbstractClassProcessor {
 		val androidViewFields = clazz.declaredFields.filter[f | View.newTypeReference.isAssignableFrom(f.type) ]
 		if (androidViewFields.nullOrEmpty)
 		{
-			clazz.addError("You must have at least one field of the type TextField or ImageView type or some customized type of those.")
+			clazz.addError("You must have at least one field of the type TextView or ImageView type or some customized type of those.")
 		}
 		
 				clazz.addConstructor[
@@ -244,7 +244,7 @@ class CustomViewGroupProcessor extends AbstractClassProcessor {
 		 */
 		val viewGroupInitMethod = clazz.declaredMethods.filter[m | m.parameters.exists[p | p.type.equals(Context.newTypeReference)] && m.parameters.size == 1]
 		val hasViewGroupInitMethod = !viewGroupInitMethod.nullOrEmpty
-//		
+
 //		// in case you prefer to set it up yourself
 		val hasInitMethod = clazz.declaredMethods.exists[m | m.simpleName.equalsIgnoreCase("init") && m.parameters.size == 1 &&  m.parameters?.head.type.equals(Context.newTypeReference)]
 		val layoutResourceID = getValue(clazz, context)
@@ -259,6 +259,7 @@ class CustomViewGroupProcessor extends AbstractClassProcessor {
 					«IF hasViewGroupInitMethod»
 						«viewGroupInitMethod.head.simpleName»(context);
 					«ENDIF»
+«««					// This check is pointless, but it might not be if addError is moved out of the function
 					«IF !layoutResourceID.nullOrEmpty»
 						«LayoutInflater.newTypeReference.name».from(context).inflate(«layoutResourceID», this, true);
 					«ENDIF»
@@ -289,12 +290,13 @@ class CustomViewGroupProcessor extends AbstractClassProcessor {
 					«androidViewFields.filter[f | f.type.isAssignableFrom(TextView.newTypeReference) ].map[f | String.format("this.%s.setText(data.get%s());", f.simpleName, f.simpleName.sanitizeName.toFirstUpper)].join("\n")»
 					«androidViewFields.filter[f | f.type.isAssignableFrom(ImageView.newTypeReference) ].map[f | String.format("this.%s.setBackgroundResource(data.get%s());", f.simpleName, f.simpleName.sanitizeName.toFirstUpper)].join("\n")»
 «««					«androidViewFields.map[f | String.format("this.%s = (%s) findViewById(R.id.%s);", f.simpleName, f.type.name, f.simpleName.toResourceName)].join("\n")»
-«««					// _someTextView.setText(data.get<sameCamelCasedNameAsField>) // TextField and input is String type
+«««					// _someTextView.setText(data.get<sameCamelCasedNameAsField>) // TextView and input is String type
 «««					// _someTextView.setText(context.getResources().getString(R.string.equivalent_of_uncamelcased_field_name)) // TextView and input is resId (int) type, this should be converted in the Data type, so I refuse to implement this flow
 «««					// _someImageView.setBackgroundResource(int) // ImageView and input is resId (int) type
 «««					// _someImageView.setBackground(Drawable) // probably from an enum type, or from the disk
 				''']
 			]
+//			dataField.remove
 		}
 	}
 	
@@ -303,71 +305,3 @@ class CustomViewGroupProcessor extends AbstractClassProcessor {
 		return s.replaceFirst("^_+", "")
 	}
 }
-
-/*
- import android.content.Context;
-import android.util.AttributeSet;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-
-public class ContactView extends LinearLayout {
-
-    public static final Contact EMPTY = new Contact(null, null, null, null);
-    private TextView nameView;
-    private TextView emailView;
-    private TextView addressView;
-    private Contact contact = EMPTY;
-
-    public ContactView(Context context) {
-        super(context);
-        init(context);
-    }
-
-    public ContactView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        init(context);
-    }
-
-    public ContactView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-        init(context);
-    }
-
-    private void init(Context context) {
-        setOrientation(VERTICAL);
-        LayoutInflater.from(context).inflate(R.layout.contact_view, this, true);
-        nameView = (TextView) findViewById(R.id.contact_name);
-        emailView = (TextView) findViewById(R.id.contact_email);
-        addressView = (TextView) findViewById(R.id.contact_address);
-    }
-
-    public void showContact(Contact contact) {
-        this.contact = (contact != null ? contact : EMPTY);
-        String name = contact.getName();
-        String email = contact.getEmail();
-        String address = contact.getAddressLines();
-        if (name != null) {
-            nameView.setText(name);
-        } else if (email != null) {
-            nameView.setText(email);
-        } else {
-            nameView.setText(R.string.unidentified);
-        }
-        if (email != null) {
-            emailView.setText(email);
-            emailView.setVisibility(name == null ? View.GONE : View.VISIBLE);
-        } else {
-            emailView.setVisibility(View.GONE);
-        }
-        if (address != null) {
-            addressView.setText(address);
-            addressView.setVisibility(View.VISIBLE);
-        } else {
-            addressView.setVisibility(View.GONE);
-        }
-    }
-}
- 
- */

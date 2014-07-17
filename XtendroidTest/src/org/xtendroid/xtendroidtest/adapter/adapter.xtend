@@ -62,3 +62,24 @@ class CustomAdapterView extends LinearLayout
 //		initViewGroup(context)
 //	}
 }
+
+@CustomViewGroup(layout = R.layout.custom_adapter_view)
+class CustomAdapterView2 extends RelativeLayout
+{
+	@AndroidView
+	TextView  a
+	@AndroidView
+	TextView  b
+	@AndroidView
+	ImageView c
+	
+	var Payload p
+
+	def void initViewGroup2(Context context) {
+		// meh
+	}
+	
+//	def void init(Context context) {
+//		initViewGroup(context)
+//	}
+}
