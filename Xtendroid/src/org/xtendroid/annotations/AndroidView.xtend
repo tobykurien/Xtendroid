@@ -9,7 +9,6 @@ import org.eclipse.xtend.lib.macro.declaration.MutableFieldDeclaration
 import org.eclipse.xtend.lib.macro.declaration.Visibility
 
 import static extension org.xtendroid.utils.Utils.*
-import android.view.ViewGroup
 
 @Active(typeof(AndroidViewProcessor))
 annotation AndroidView {
@@ -21,10 +20,10 @@ class AndroidViewProcessor extends AbstractFieldProcessor {
       val fieldName = field.simpleName
       field.simpleName = "_" + fieldName
       
-      val fragmentType = android.app.Fragment.newTypeReference
+      val fragmentType = android.app.Fragment?.newTypeReference
       val supportFragmentType = Fragment?.newTypeReference
       
-      if ( fragmentType.type.isAssignableFrom(field.declaringType) ||
+      if (fragmentType != null && fragmentType.type.isAssignableFrom(field.declaringType) ||
             supportFragmentType != null && supportFragmentType.type.isAssignableFrom(field.declaringType)) {
          // for fragments, add a findViewById method
          var exists = field.declaringType.declaredMethods.exists[m| m.simpleName == "findViewById"]
