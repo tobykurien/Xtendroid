@@ -1,7 +1,7 @@
 package org.xtendroid.xtendroidtest.adapter
 
 import android.widget.BaseAdapter
-import org.xtendroid.annotations.Adapterize
+import org.xtendroid.annotations.AndroidAdapter
 import java.util.List
 import org.xtendroid.parcel.AndroidParcelable
 import android.os.Parcelable
@@ -29,14 +29,14 @@ class Payload implements Parcelable
 	var String d 
 }
 
-@Adapterize
+@AndroidAdapter
 class XtendAdapter extends BaseAdapter {
 	@Property
 	var List<Payload> data
 	var LinearLayout dummy
 }
 
-@Adapterize
+@AndroidAdapter
 class XtendAdapter2 extends BaseAdapter {
 	var Payload[] data
 	var RelativeLayout dummy
@@ -63,7 +63,7 @@ class CustomAdapterView extends LinearLayout
 //	}
 }
 
-@CustomViewGroup(layout = R.layout.custom_adapter_view)
+@CustomViewGroup(layout = R.layout.custom_adapter_view2)
 class CustomAdapterView2 extends RelativeLayout
 {
 	@AndroidView

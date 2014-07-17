@@ -37,7 +37,7 @@ import android.widget.ImageView
 
 @Active(typeof(AdapterizeProcessor))
 @Target(ElementType.TYPE)
-annotation Adapterize {
+annotation AndroidAdapter {
 }
 
 class AdapterizeProcessor extends AbstractClassProcessor {
