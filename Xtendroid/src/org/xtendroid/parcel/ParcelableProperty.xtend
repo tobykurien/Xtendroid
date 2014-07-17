@@ -202,22 +202,6 @@ class ParcelableProcessor extends AbstractClassProcessor
 			{
 				f.addError (String.format("%s has the type %s, it may not be used with @AndroidParcelable. Use %s instead.", f.simpleName, f.type.name, ParcelableProcessor.unsupportedAbstractTypesAndSuggestedTypes.get(f.type.name)))
 			}
-			
-			if (!jsonPropertyFieldDeclared && f.annotations.exists[a | a.annotationTypeDeclaration.simpleName.endsWith('JsonProperty') ])//.equals(JsonProperty.newAnnotationReference)])
-			{
-				f.addWarning (String.format("%s has certain fields that are annotated with @JsonProperty, you have to declare the %s field explicitly, initialized in the ctor as well to prevent data loss when passing the data object between Activities/Services etc.\nFor example:\n%s", f.declaringType.simpleName, JsonPropertyProcessor.jsonObjectFieldName,
-				// the gist of the story is to explicitly declare a type like this
-					'''
-						@AndroidParcelable
-						class C implements Parcelable
-						{
-							JSONObject «JsonPropertyProcessor.jsonObjectFieldName»
-							
-							@JsonProperty
-							String meh
-						}
-					'''))
-			}		
 		}
 		
 		// @Override public int describeContents() { return 0; }
@@ -228,7 +212,6 @@ class ParcelableProcessor extends AbstractClassProcessor
 				return 0;
 			'''
 		]
-		
 
 		clazz.addMethod("writeToParcel")  [
 			returnType = void.newTypeReference
