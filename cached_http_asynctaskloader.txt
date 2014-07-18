@@ -1,7 +1,7 @@
 // the id assignment should be done by the (support) loader manager
 
 @AndroidLoader
-@AndroidRestful(method="POST", url="https://path/:var1/?meh=:var2", cache=true, cache_ttl=1234, deferred=true, deferred_ttl=-1) // creates getter setter for var1 and var2
+@AndroidRestful(method="POST", url="https://path/:var1/?meh=:var2", cached=true, cached_ttl=1234, deferred=true, deferred_ttl=-1, file_access_type=info.guardianproject.iocipher.File) // creates getter setter for var1 and var2
 // @GET, @POST, @PUT, @DELETE, @HEAD, @TRACE
 class MySuperLoader extends ..support...AsyncTaskLoader<KlassAnnotatedWithJsonProperty>
 {
