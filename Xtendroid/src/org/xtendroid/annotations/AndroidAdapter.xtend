@@ -83,34 +83,33 @@ class AdapterizeProcessor extends AbstractClassProcessor {
 		// if one dummy (custom) View (Group) type is provided, then use it
 		val androidViewGroupType = ViewGroup.newTypeReference
 		val dummyViews = clazz.declaredFields.filter[f| androidViewGroupType.isAssignableFrom(f.type)]
-		if (dummyViews.size == 1) {
-			val dummyType = dummyViews.get(0).type
-			clazz.addMethod("getView") [
-				visibility = Visibility::PUBLIC
-				returnType = dummyType
-				addAnnotation(Override.newAnnotationReference)
-				addParameter("position", int.newTypeReference)
-				addParameter("convertView", View.newTypeReference)
-				addParameter("parent", ViewGroup.newTypeReference)
-				body = [
-					'''
-						«dummyType» view;
-						if (convertView == null) {
-						    view = new «dummyType»(mContext);
-						} else {
-						    view = («dummyType») convertView;
-						}
-						«IF dataContainerField.type.array»
-							«dataContainerField.type.arrayComponentType» item = getItem(position);
-						«ELSEIF !dataContainerField.type.actualTypeArguments.empty»
-							«dataContainerField.type.actualTypeArguments.get(0).name» item = getItem(position);
-						«ENDIF»
-«««						// TODO add checks to ascertain if it contains the method #show
-						«IF !dummyType.type.simpleName.startsWith("android")»
-							view.show(item);
-						«ENDIF»
-						return view;
-					''']
+		if (!dummyViews.nullOrEmpty) {
+			dummyViews.forEach[dummyView |
+				val dummyType = dummyView.type
+				clazz.addMethod("getView") [
+					visibility = Visibility::PUBLIC
+					returnType = dummyType
+					addAnnotation(Override.newAnnotationReference)
+					addParameter("position", int.newTypeReference)
+					addParameter("convertView", View.newTypeReference)
+					addParameter("parent", ViewGroup.newTypeReference)
+					body = [
+						'''
+							«dummyType» view;
+							if (convertView == null) {
+							    view = new «dummyType»(mContext);
+							} else {
+							    view = («dummyType») convertView;
+							}
+							«IF dataContainerField.type.array»
+								«dataContainerField.type.arrayComponentType» item = getItem(position);
+							«ELSEIF !dataContainerField.type.actualTypeArguments.empty»
+								«dataContainerField.type.actualTypeArguments.get(0).name» item = getItem(position);
+							«ENDIF»
+							view.«dummyView.simpleName»(item);
+							return view;
+						''']
+					]
 			]
 		}
 		
@@ -242,8 +241,8 @@ class CustomViewGroupProcessor extends AbstractClassProcessor {
 		 * 
 		 * I only go by the signature, I don't care how it's called, it might be a pre-defined "init" method.
 		 */
-		val viewGroupInitMethod = clazz.declaredMethods.filter[m | m.parameters.exists[p | p.type.equals(Context.newTypeReference)] && m.parameters.size == 1]
-		val hasViewGroupInitMethod = !viewGroupInitMethod.nullOrEmpty
+		val viewGroupInitMethods = clazz.declaredMethods.filter[m | m.parameters.exists[p | p.type.equals(Context.newTypeReference)] && m.parameters.size == 1]
+		val hasViewGroupInitMethods = !viewGroupInitMethods.nullOrEmpty
 
 //		// in case you prefer to set it up yourself
 		val hasInitMethod = clazz.declaredMethods.exists[m | m.simpleName.equalsIgnoreCase("init") && m.parameters.size == 1 &&  m.parameters?.head.type.equals(Context.newTypeReference)]
@@ -256,8 +255,8 @@ class CustomViewGroupProcessor extends AbstractClassProcessor {
 				returnType = void.newTypeReference
 				addParameter("context", Context.newTypeReference)
 				body = ['''
-					«IF hasViewGroupInitMethod»
-						«viewGroupInitMethod.head.simpleName»(context);
+					«IF hasViewGroupInitMethods»
+						«viewGroupInitMethods.map[m | m.simpleName + '(context);'].join("\n")»
 					«ENDIF»
 «««					// This check is pointless, but it might not be if addError is moved out of the function
 					«IF !layoutResourceID.nullOrEmpty»
@@ -268,36 +267,27 @@ class CustomViewGroupProcessor extends AbstractClassProcessor {
 			]
 		}
 		
-		val androidViewType = View.newTypeReference
-		
-		// Take the first non android.widget.View type inference the type and use it as the Data type
-		var dummyDataFields = clazz.declaredFields.filter[f | !androidViewType.isAssignableFrom(f.type)]
-		
-		if (dummyDataFields.nullOrEmpty)
-		{
-			if (!clazz.declaredMethods.exists[m | m.simpleName.equals("show") && m.parameters.size == 1])
-			{
-				clazz.addWarning("You may provide a field where the type of the data object can be inferenced or create your own \"show(Data data) {...}\" function.\nThen you must call it from the adapter according to the method's signature.")
-			}
-		}else if (dummyDataFields.size == 1)
-		{
-			val dataField = dummyDataFields.head
-			clazz.addMethod("show") [
-				visibility = Visibility.PUBLIC
-				returnType = void.newTypeReference
-				addParameter("data", dataField.type)
-				body = ['''
-					«androidViewFields.filter[f | f.type.isAssignableFrom(TextView.newTypeReference) ].map[f | String.format("this.%s.setText(data.get%s());", f.simpleName, f.simpleName.sanitizeName.toFirstUpper)].join("\n")»
-					«androidViewFields.filter[f | f.type.isAssignableFrom(ImageView.newTypeReference) ].map[f | String.format("this.%s.setBackgroundResource(data.get%s());", f.simpleName, f.simpleName.sanitizeName.toFirstUpper)].join("\n")»
-«««					«androidViewFields.map[f | String.format("this.%s = (%s) findViewById(R.id.%s);", f.simpleName, f.type.name, f.simpleName.toResourceName)].join("\n")»
-«««					// _someTextView.setText(data.get<sameCamelCasedNameAsField>) // TextView and input is String type
-«««					// _someTextView.setText(context.getResources().getString(R.string.equivalent_of_uncamelcased_field_name)) // TextView and input is resId (int) type, this should be converted in the Data type, so I refuse to implement this flow
-«««					// _someImageView.setBackgroundResource(int) // ImageView and input is resId (int) type
-«««					// _someImageView.setBackground(Drawable) // probably from an enum type, or from the disk
-				''']
-			]
-//			dataField.remove
-		}
+		/**
+		 * 
+		 * The previous way to generate a "show" method for the adapter was too fragile.
+		 * New approach with temporarily abstract method (and temporarily abstract class)
+		 * 
+		 */
+		 val abstractMethod = clazz.declaredMethods.filter[m | m.abstract]?.head
+		 if (abstractMethod != null)
+		 {
+		 	clazz.abstract = false // unabstract declaring class
+		 	abstractMethod.visibility = Visibility.PUBLIC
+		 	abstractMethod.abstract = false
+		 	if (abstractMethod.parameters.length == 1)
+		 	{
+		 		val paramName = abstractMethod.parameters.head.simpleName
+			 	abstractMethod.body = ['''
+					«androidViewFields.filter[f | f.type.isAssignableFrom(TextView.newTypeReference) ].map[f | String.format("this.%s.setText(%s.get%s());", f.simpleName, paramName, f.simpleName.sanitizeName.toFirstUpper)].join("\n")»
+					«androidViewFields.filter[f | f.type.isAssignableFrom(ImageView.newTypeReference) ].map[f | String.format("this.%s.setBackgroundResource(%s.get%s());", f.simpleName, paramName, f.simpleName.sanitizeName.toFirstUpper)].join("\n")»
+			 	''']
+		 	}
+		 }
 	}
 	
 	def String sanitizeName(String s)

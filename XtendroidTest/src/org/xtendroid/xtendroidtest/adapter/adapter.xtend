@@ -33,17 +33,19 @@ class Payload implements Parcelable
 class XtendAdapter extends BaseAdapter {
 	@Property
 	var List<Payload> data
-	var CustomAdapterView dummy
+	var CustomAdapterView show
+	
 }
 
 @AndroidAdapter
 class XtendAdapter2 extends BaseAdapter {
 	var Payload[] data
-	var CustomAdapterView2 dummy
+	var CustomAdapterView2 show
+//	var CustomAdapterView  meh // this might actually be a good idea for Expandable ListView Adapter
 }
 
 @CustomViewGroup(layout = R.layout.custom_adapter_view)
-class CustomAdapterView extends LinearLayout
+abstract class CustomAdapterView extends LinearLayout
 {
 	@AndroidView
 	TextView  a
@@ -52,11 +54,14 @@ class CustomAdapterView extends LinearLayout
 	@AndroidView
 	ImageView c
 	
-	var Payload p
+	def abstract void show(Payload input)
 
 	def void initViewGroup(Context context) {
 		orientation = LinearLayout.HORIZONTAL
 	}
+	
+	def void someRandomMethodMatchingTheSignature(Context context)
+	{}
 	
 //	def void init(Context context) {
 //		initViewGroup(context)
@@ -64,7 +69,7 @@ class CustomAdapterView extends LinearLayout
 }
 
 @CustomViewGroup(layout = R.layout.custom_adapter_view2)
-class CustomAdapterView2 extends RelativeLayout
+abstract class CustomAdapterView2 extends RelativeLayout
 {
 	@AndroidView
 	TextView  a
@@ -73,7 +78,7 @@ class CustomAdapterView2 extends RelativeLayout
 	@AndroidView
 	ImageView c
 	
-	var Payload p
+	def abstract void show(Payload input)
 
 	def void initViewGroup2(Context context) {
 		// meh
