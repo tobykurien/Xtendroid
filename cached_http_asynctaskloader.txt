@@ -58,3 +58,38 @@ class MySuperLoader extends ..support...AsyncTaskLoader<KlassAnnotatedWithJsonPr
     @Redirect
     def byte[] whatToDo()
 }
+
+/*
+// cached, cached_ttl
+
+Store result (and encrypt with iocipher), you might need a new "@BeforeCache(ttl=1234) def preProcess(byte[] bytes)" annotation for this.
+The annotation marks a method, so that is run before the actual caching starts.
+
+... @AfterCache
+
+// deferred, deferred_ttl, JSON
+
+Convert call details (to make a complete call) to a JSON raw string, and store it to disk.
+
+JSON:
+
+{
+        "deferredOnDateTime"  : 12341234123412341234,
+        "deferredTtl"         : 1234,        
+        "cacheResult"         : true, // just store everything, TODO use defined methods to CRUD results (security?), iocipher should be enough
+        "url"                 : {
+                                        "re"         : "http://meh.com/:hmf/?a=:bleh",
+                                        "parameters" : [  {"hmf" : "something"}, {"bleh" : "somethingelse"} ] 
+                                },
+        "headers"             : [ "Accept-type: aoeuaoeu" ]        
+}
+
+*/
+
+// also
+@AndroidAsyncTask
+@AndroidRestful...
+class MySuperAsyncTask extends AsyncTask<A, B, C>
+{
+        ...
+}
