@@ -8,12 +8,14 @@ import android.os.Parcelable
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import org.xtendroid.annotations.CustomViewGroup
+import org.xtendroid.annotations.CustomView
 import android.widget.TextView
 import android.widget.ImageView
 import org.xtendroid.annotations.AndroidView
 import android.content.Context
 import org.xtendroid.xtendroidtest.R;
 import org.xtendroid.json.JsonProperty
+import android.widget.Button
 
 @AndroidParcelable
 class Payload implements Parcelable
@@ -30,10 +32,10 @@ class Payload implements Parcelable
 }
 
 @AndroidAdapter
-class XtendAdapter extends BaseAdapter {
+class XtendAdapter1 extends BaseAdapter {
 	@Property
 	var List<Payload> data
-	var CustomAdapterView show
+	var CustomAdapterView1 show
 	
 }
 
@@ -45,7 +47,7 @@ class XtendAdapter2 extends BaseAdapter {
 }
 
 @CustomViewGroup(layout = R.layout.custom_adapter_view)
-abstract class CustomAdapterView extends LinearLayout
+abstract class CustomAdapterView1 extends LinearLayout
 {
 	@AndroidView
 	TextView  a
@@ -81,10 +83,30 @@ abstract class CustomAdapterView2 extends RelativeLayout
 	def abstract void show(Payload input)
 
 	def void initViewGroup2(Context context) {
-		// meh
+		c.imageAlpha = 1 
 	}
 	
 //	def void init(Context context) {
 //		initViewGroup(context)
 //	}
+}
+
+@CustomView
+abstract class CustomView1 extends Button
+{
+	def void helpInitTheView (Context context)
+	{
+		// this matches the signature
+		activated = false
+	}
+}
+
+@CustomView
+abstract class CustomView2 extends TextView
+{
+	def void helpInitTheView (Context context)
+	{
+		// this matches the signature
+		text = "wow"
+	}
 }

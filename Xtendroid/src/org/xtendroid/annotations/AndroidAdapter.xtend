@@ -1,4 +1,3 @@
-
 package org.xtendroid.annotations
 
 import android.content.Context
@@ -34,7 +33,6 @@ import android.widget.ImageView
  * My aim is to pave the way from @JsonProperty and @AndroidParcelable to @Adapterize and @CustomViewGroup
  * 
  */
-
 @Active(typeof(AdapterizeProcessor))
 @Target(ElementType.TYPE)
 annotation AndroidAdapter {
@@ -82,9 +80,9 @@ class AdapterizeProcessor extends AbstractClassProcessor {
 
 		// if one dummy (custom) View (Group) type is provided, then use it
 		val androidViewGroupType = ViewGroup.newTypeReference
-		val dummyViews = clazz.declaredFields.filter[f| androidViewGroupType.isAssignableFrom(f.type)]
+		val dummyViews = clazz.declaredFields.filter[f|androidViewGroupType.isAssignableFrom(f.type)]
 		if (!dummyViews.nullOrEmpty) {
-			dummyViews.forEach[dummyView |
+			dummyViews.forEach [ dummyView |
 				val dummyType = dummyView.type
 				clazz.addMethod("getView") [
 					visibility = Visibility::PUBLIC
@@ -109,19 +107,20 @@ class AdapterizeProcessor extends AbstractClassProcessor {
 							view.«dummyView.simpleName»(item);
 							return view;
 						''']
-					]
+				]
 			]
 		}
-		
+
 		clazz.addMethod("getCount") [
 			addAnnotation(Override.newAnnotationReference)
-			body = ['''
-				«IF dataContainerField.type.array»
-					return «dataContainerField.simpleName».length;
-				«ELSE»
-					return «dataContainerField.simpleName».size();
-				«ENDIF»
-			''']
+			body = [
+				'''
+					«IF dataContainerField.type.array»
+						return «dataContainerField.simpleName».length;
+					«ELSE»
+						return «dataContainerField.simpleName».size();
+					«ENDIF»
+				''']
 			returnType = int.newTypeReference
 			visibility = Visibility.PUBLIC
 		]
@@ -129,35 +128,38 @@ class AdapterizeProcessor extends AbstractClassProcessor {
 		clazz.addMethod("getItem") [
 			addParameter("position", int.newTypeReference)
 			addAnnotation(Override.newAnnotationReference)
-			body = ['''
-				«IF dataContainerField.type.array»
-					return «dataContainerField.simpleName»[position];
-				«ELSE»
-					return «dataContainerField.simpleName».get(position);
-				«ENDIF»
-			''']
+			body = [
+				'''
+					«IF dataContainerField.type.array»
+						return «dataContainerField.simpleName»[position];
+					«ELSE»
+						return «dataContainerField.simpleName».get(position);
+					«ENDIF»
+				''']
 			if (dataContainerField.type.array)
 				returnType = dataContainerField.type.arrayComponentType
 			else
 				returnType = dataContainerField.type.actualTypeArguments.head
 			visibility = Visibility.PUBLIC
 		]
-		
+
 		clazz.addMethod("getItemId") [
 			addAnnotation(Override.newAnnotationReference)
 			addParameter("position", int.newTypeReference)
-			body = ['''
-				return position;
-			''']
+			body = [
+				'''
+					return position;
+				''']
 			returnType = long.newTypeReference
 			visibility = Visibility.PUBLIC
 		]
-		
+
 		clazz.addMethod("hasStableIds") [
 			addAnnotation(Override.newAnnotationReference)
-			body = ['''
-				return false;
-			''']
+			body = [
+				'''
+					return false;
+				''']
 			returnType = boolean.newTypeReference
 			visibility = Visibility.PUBLIC
 		]
@@ -165,6 +167,83 @@ class AdapterizeProcessor extends AbstractClassProcessor {
 
 }
 
+@Active(typeof(CustomViewProcessor))
+@Target(ElementType.TYPE)
+annotation CustomView {}
+
+/**
+ * 
+ * @CustomView is an undressed version of @CustomViewGroup
+ * 
+ */
+class CustomViewProcessor extends AbstractClassProcessor {
+	override doTransform(MutableClassDeclaration clazz, extension TransformationContext context) {
+
+		// determine if clazz extends View
+		// TODO make a utility function for this 
+		val androidViewType = View.newTypeReference
+		if (!androidViewType.isAssignableFrom(clazz.extendedClass)) {
+			clazz.addError(
+				String.format("%s must extend an extending type of %s.", clazz.simpleName, androidViewType.name))
+		}
+
+		clazz.addConstructor [
+			visibility = Visibility.PUBLIC
+			addParameter("context", Context.newTypeReference)
+			body = [
+				'''
+					super(context);
+					init(context);
+				''']
+		]
+
+		clazz.addConstructor [
+			visibility = Visibility.PUBLIC
+			addParameter("context", Context.newTypeReference)
+			addParameter("attrs", AttributeSet.newTypeReference)
+			body = [
+				'''
+					super(context, attrs);
+					init(context);
+				''']
+		]
+
+		clazz.addConstructor [
+			visibility = Visibility.PUBLIC
+			addParameter("context", Context.newTypeReference)
+			addParameter("attrs", AttributeSet.newTypeReference)
+			addParameter("defStyle", int.newTypeReference)
+			body = [
+				'''
+					super(context, attrs, defStyle);
+					init(context);
+				''']
+		]
+
+		// collect all the init methods and call them together
+		val initMethods = clazz.declaredMethods.filter[m|
+			m.parameters.exists[p|p.type.equals(Context.newTypeReference)] && m.parameters.size == 1]
+
+		// in case you prefer to set it up yourself
+		val hasMainInitMethod = clazz.declaredMethods.exists[m|
+			m.simpleName.equalsIgnoreCase("init") && m.parameters.size == 1 &&
+				m.parameters?.head.type.equals(Context.newTypeReference)]
+
+		if (!hasMainInitMethod) {
+			clazz.addMethod("init") [
+				visibility = Visibility.PRIVATE
+				returnType = void.newTypeReference
+				addParameter("context", Context.newTypeReference)
+				body = [
+					'''
+						«initMethods.map[m|m.simpleName + '(context);'].join("\n")»
+					''']
+			]
+		}
+
+	}
+
+}
 
 @Active(typeof(CustomViewGroupProcessor))
 @Target(ElementType.TYPE)
@@ -173,79 +252,80 @@ annotation CustomViewGroup {
 }
 
 class CustomViewGroupProcessor extends AbstractClassProcessor {
-	
+
 	// blatantly stolen from @AndroidActivity
 	// Caveat: This -ing thing cost me an hour of my life, apparently you need @Target(ElementType.TYPE) to get to the expression
 	def String getValue(MutableClassDeclaration clazz, extension TransformationContext context) {
-      var value = clazz.annotations.findFirst[
-         annotationTypeDeclaration.equals(CustomViewGroup.newTypeReference.type)
-      ]?.getExpression("layout")
-      
-      if (value == null)
-      {
-      	clazz.addError("You must enter the layout resource id like this: " + CustomViewGroup.newTypeReference.name + ("(layout = R.layout.something)"))
-      }
+		var value = clazz.annotations.findFirst [
+			annotationTypeDeclaration.equals(CustomViewGroup.newTypeReference.type)
+		]?.getExpression("layout")
 
-      return value?.toString
-   }
+		if (value == null) {
+			clazz.addError(
+				"You must enter the layout resource id like this: " + CustomViewGroup.newTypeReference.name +
+					("(layout = R.layout.something)"))
+		}
+
+		return value?.toString
+	}
 
 	override doTransform(MutableClassDeclaration clazz, extension TransformationContext context) {
-		
-		// determine if clazz extends BaseAdapter
+
+		// determine if clazz extends ViewGroup
 		val androidViewGroupType = ViewGroup.newTypeReference
 		if (!androidViewGroupType.isAssignableFrom(clazz.extendedClass)) {
-			clazz.addError(String.format("%s must extend an extending type of %s.", clazz.simpleName, androidViewGroupType.name))
+			clazz.addError(
+				String.format("%s must extend an extending type of %s.", clazz.simpleName, androidViewGroupType.name))
 		}
-		
+
 		// determine there is at least one View type (e.g. ImageView or TextView) field that is contained within the custom layout
-		val androidViewFields = clazz.declaredFields.filter[f | View.newTypeReference.isAssignableFrom(f.type) ]
-		if (androidViewFields.nullOrEmpty)
-		{
-			clazz.addError("You must have at least one field of the type TextView or ImageView type or some customized type of those.")
+		val androidViewFields = clazz.declaredFields.filter[f|View.newTypeReference.isAssignableFrom(f.type)]
+		if (androidViewFields.nullOrEmpty) {
+			clazz.addError(
+				"You must have at least one field of the type TextView or ImageView type or some customized type of those.")
 		}
-		
-				clazz.addConstructor[
+
+		clazz.addConstructor [
 			visibility = Visibility.PUBLIC
 			addParameter("context", Context.newTypeReference)
-			body = ['''
-				super(context);
-				init(context);
-			''']
+			body = [
+				'''
+					super(context);
+					init(context);
+				''']
 		]
-		
-		clazz.addConstructor[
+
+		clazz.addConstructor [
 			visibility = Visibility.PUBLIC
 			addParameter("context", Context.newTypeReference)
 			addParameter("attrs", AttributeSet.newTypeReference)
-			body = ['''
-				super(context, attrs);
-				init(context);
-			''']
+			body = [
+				'''
+					super(context, attrs);
+					init(context);
+				''']
 		]
-		
-		clazz.addConstructor[
+
+		clazz.addConstructor [
 			visibility = Visibility.PUBLIC
 			addParameter("context", Context.newTypeReference)
 			addParameter("attrs", AttributeSet.newTypeReference)
 			addParameter("defStyle", int.newTypeReference)
-			body = ['''
-				super(context, attrs, defStyle);
-				init(context);
-			''']
+			body = [
+				'''
+					super(context, attrs, defStyle);
+					init(context);
+				''']
 		]
-		
-		/**
-		 * Generates an init method to grab all the TextViews and ImageViews and ViewGroup#findViewById them.
-		 * 
-		 * Also, checks whether there is a method for the ViewGroup itself, it determines this by checking the method signature.
-		 * 
-		 * I only go by the signature, I don't care how it's called, it might be a pre-defined "init" method.
-		 */
-		val viewGroupInitMethods = clazz.declaredMethods.filter[m | m.parameters.exists[p | p.type.equals(Context.newTypeReference)] && m.parameters.size == 1]
+
+		val viewGroupInitMethods = clazz.declaredMethods.filter[m|
+			m.parameters.exists[p|p.type.equals(Context.newTypeReference)] && m.parameters.size == 1]
 		val hasViewGroupInitMethods = !viewGroupInitMethods.nullOrEmpty
 
-//		// in case you prefer to set it up yourself
-		val hasInitMethod = clazz.declaredMethods.exists[m | m.simpleName.equalsIgnoreCase("init") && m.parameters.size == 1 &&  m.parameters?.head.type.equals(Context.newTypeReference)]
+		// in case you prefer to set it up yourself
+		val hasInitMethod = clazz.declaredMethods.exists[m|
+			m.simpleName.equalsIgnoreCase("init") && m.parameters.size == 1 &&
+				m.parameters?.head.type.equals(Context.newTypeReference)]
 		val layoutResourceID = getValue(clazz, context)
 
 		if (!hasInitMethod) // I know: the name is very ObjC-ish.
@@ -254,44 +334,48 @@ class CustomViewGroupProcessor extends AbstractClassProcessor {
 				visibility = Visibility.PRIVATE
 				returnType = void.newTypeReference
 				addParameter("context", Context.newTypeReference)
-				body = ['''
-					«IF hasViewGroupInitMethods»
-						«viewGroupInitMethods.map[m | m.simpleName + '(context);'].join("\n")»
-					«ENDIF»
-«««					// This check is pointless, but it might not be if addError is moved out of the function
-					«IF !layoutResourceID.nullOrEmpty»
-						«LayoutInflater.newTypeReference.name».from(context).inflate(«layoutResourceID», this, true);
-					«ENDIF»
-					«androidViewFields.map[f | String.format("this.%s = (%s) findViewById(R.id.%s);", f.simpleName, f.type.name, f.simpleName.toResourceName)].join("\n")»
-				''']
+				body = [
+					'''
+						«IF !layoutResourceID.nullOrEmpty»
+							«LayoutInflater.newTypeReference.name».from(context).inflate(«layoutResourceID», this, true);
+						«ENDIF»
+						«androidViewFields.map[f|
+							String.format("this.%s = (%s) findViewById(R.id.%s);", f.simpleName, f.type.name,
+								f.simpleName.toResourceName)].join("\n")»
+						«IF hasViewGroupInitMethods»
+							«viewGroupInitMethods.map[m|m.simpleName + '(context);'].join("\n")»
+						«ENDIF»
+					''']
 			]
 		}
-		
+
 		/**
 		 * 
 		 * The previous way to generate a "show" method for the adapter was too fragile.
 		 * New approach with temporarily abstract method (and temporarily abstract class)
 		 * 
 		 */
-		 val abstractMethod = clazz.declaredMethods.filter[m | m.abstract]?.head
-		 if (abstractMethod != null)
-		 {
-		 	clazz.abstract = false // unabstract declaring class
-		 	abstractMethod.visibility = Visibility.PUBLIC
-		 	abstractMethod.abstract = false
-		 	if (abstractMethod.parameters.length == 1)
-		 	{
-		 		val paramName = abstractMethod.parameters.head.simpleName
-			 	abstractMethod.body = ['''
-					«androidViewFields.filter[f | f.type.isAssignableFrom(TextView.newTypeReference) ].map[f | String.format("this.%s.setText(%s.get%s());", f.simpleName, paramName, f.simpleName.sanitizeName.toFirstUpper)].join("\n")»
-					«androidViewFields.filter[f | f.type.isAssignableFrom(ImageView.newTypeReference) ].map[f | String.format("this.%s.setBackgroundResource(%s.get%s());", f.simpleName, paramName, f.simpleName.sanitizeName.toFirstUpper)].join("\n")»
-			 	''']
-		 	}
-		 }
+		val abstractMethod = clazz.declaredMethods.filter[m|m.abstract]?.head
+		if (abstractMethod != null) {
+			clazz.abstract = false // unabstract declaring class
+			abstractMethod.visibility = Visibility.PUBLIC
+			abstractMethod.abstract = false
+			if (abstractMethod.parameters.length == 1) {
+				val paramName = abstractMethod.parameters.head.simpleName
+				abstractMethod.body = [
+					'''
+						«androidViewFields.filter[f|f.type.isAssignableFrom(TextView.newTypeReference)].map[f|
+							String.format("this.%s.setText(%s.get%s());", f.simpleName, paramName,
+								f.simpleName.sanitizeName.toFirstUpper)].join("\n")»
+						«androidViewFields.filter[f|f.type.isAssignableFrom(ImageView.newTypeReference)].map[f|
+							String.format("this.%s.setBackgroundResource(%s.get%s());", f.simpleName, paramName,
+								f.simpleName.sanitizeName.toFirstUpper)].join("\n")»
+					''']
+			}
+		}
 	}
-	
-	def String sanitizeName(String s)
-	{
+
+	def String sanitizeName(String s) {
 		return s.replaceFirst("^_+", "")
 	}
 }
