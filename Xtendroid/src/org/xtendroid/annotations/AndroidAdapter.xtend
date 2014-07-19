@@ -18,6 +18,7 @@ import org.eclipse.xtend.lib.macro.declaration.Visibility
 import static extension org.xtendroid.utils.NamingUtils.*
 import android.widget.TextView
 import android.widget.ImageView
+import org.eclipse.xtend.lib.macro.declaration.TypeReference
 
 /**
  * 
@@ -30,7 +31,7 @@ import android.widget.ImageView
  * * https://github.com/xebia/xebicon-2013__cc-in-aa/blob/4-_better_custom_ViewGroup/src/com/xebia/xebicon2013/cciaa/ContactListAdapter.java
  * * https://github.com/xebia/xebicon-2013__cc-in-aa/blob/4-_better_custom_ViewGroup/src/com/xebia/xebicon2013/cciaa/ContactView.java
  * 
- * My aim is to pave the way from @JsonProperty and @AndroidParcelable to @Adapterize and @CustomViewGroup
+ * My aim is to pave the way from @JsonProperty and @AndroidParcelable to @AndroidAdapter, @CustomViewGroup, @CustomView, or native android view widgets.
  * 
  */
 @Active(typeof(AdapterizeProcessor))
@@ -80,7 +81,9 @@ class AdapterizeProcessor extends AbstractClassProcessor {
 
 		// if one dummy (custom) View (Group) type is provided, then use it
 		val androidViewGroupType = ViewGroup.newTypeReference
-		val dummyViews = clazz.declaredFields.filter[f|androidViewGroupType.isAssignableFrom(f.type)]
+		val androidViewType = View.newTypeReference
+		val dummyViews = clazz.declaredFields.filter[f|
+			androidViewGroupType.isAssignableFrom(f.type) || androidViewType.isAssignableFrom(f.type)]
 		if (!dummyViews.nullOrEmpty) {
 			dummyViews.forEach [ dummyView |
 				val dummyType = dummyView.type
@@ -102,10 +105,45 @@ class AdapterizeProcessor extends AbstractClassProcessor {
 							«IF dataContainerField.type.array»
 								«dataContainerField.type.arrayComponentType» item = getItem(position);
 							«ELSEIF !dataContainerField.type.actualTypeArguments.empty»
-								«dataContainerField.type.actualTypeArguments.get(0).name» item = getItem(position);
+								«dataContainerField.type.actualTypeArguments.head.name» item = getItem(position);
 							«ENDIF»
-							view.«dummyView.simpleName»(item);
+							«IF dummyType.name.startsWith("android")»
+								«dummyView.simpleName»(view, item);
+							«ELSE»
+								view.«dummyView.simpleName»(item);
+							«ENDIF»
 							return view;
+						''']
+				]
+				
+				// Determine type of data
+				var TypeReference dataContainerFieldType;
+				if (dataContainerField.type.array) {
+					dataContainerFieldType = dataContainerField.type.arrayComponentType
+				} else if (!dataContainerField.type.actualTypeArguments.empty) {
+					dataContainerFieldType = dataContainerField.type.actualTypeArguments.head
+				}
+				
+				// find the user-defined setup methods
+				val finaldataContainerFieldType = dataContainerFieldType
+				val setupMethods = clazz.declaredMethods.filter[m|m.parameters.length == 2].filter[m|
+					m.parameters.head.type.equals(dummyType) &&
+						m.parameters.get(1).type.equals(finaldataContainerFieldType)]
+						
+				// one method to rule them all
+				clazz.addMethod(dummyView.simpleName) [
+					visibility = Visibility.PRIVATE
+					returnType = void.newTypeReference
+					addParameter("view", dummyType)
+					addParameter("data", finaldataContainerFieldType)
+					body = [
+						'''
+							«IF setupMethods.nullOrEmpty»
+								// add a method with two parameters, like this:
+								/* def void doSomethingWith(«dummyType.simpleName» view, «finaldataContainerFieldType.simpleName» andData) { ... } */
+							«ELSE»
+								«setupMethods.map[m|m.simpleName + '(view, data);'].join("\n")»
+							«ENDIF»
 						''']
 				]
 			]
@@ -154,6 +192,7 @@ class AdapterizeProcessor extends AbstractClassProcessor {
 			visibility = Visibility.PUBLIC
 		]
 
+	/*
 		clazz.addMethod("hasStableIds") [
 			addAnnotation(Override.newAnnotationReference)
 			body = [
@@ -163,6 +202,7 @@ class AdapterizeProcessor extends AbstractClassProcessor {
 			returnType = boolean.newTypeReference
 			visibility = Visibility.PUBLIC
 		]
+*/
 	}
 
 }
@@ -364,12 +404,19 @@ class CustomViewGroupProcessor extends AbstractClassProcessor {
 				val paramName = abstractMethod.parameters.head.simpleName
 				abstractMethod.body = [
 					'''
-						«androidViewFields.filter[f|f.type.isAssignableFrom(TextView.newTypeReference)].map[f|
-							String.format("this.%s.setText(%s.get%s());", f.simpleName, paramName,
-								f.simpleName.sanitizeName.toFirstUpper)].join("\n")»
-						«androidViewFields.filter[f|f.type.isAssignableFrom(ImageView.newTypeReference)].map[f|
-							String.format("this.%s.setBackgroundResource(%s.get%s());", f.simpleName, paramName,
-								f.simpleName.sanitizeName.toFirstUpper)].join("\n")»
+						try
+						{
+							«androidViewFields.filter[f|f.type.isAssignableFrom(TextView.newTypeReference)].map[f|
+								String.format("this.%s.setText(%s.get%s());", f.simpleName, paramName,
+									f.simpleName.sanitizeName.toFirstUpper)].join("\n")»
+							«androidViewFields.filter[f|f.type.isAssignableFrom(ImageView.newTypeReference)].map[f|
+								String.format("this.%s.setBackgroundResource(%s.get%s());", f.simpleName, paramName,
+									f.simpleName.sanitizeName.toFirstUpper)].join("\n")»
+«««						// JSONException forced my hand, so I respond with my own sneaky throw
+						}catch (Throwable e)
+						{
+							throw new RuntimeException(e);
+						}
 					''']
 			}
 		}
