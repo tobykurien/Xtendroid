@@ -15,6 +15,7 @@ import org.eclipse.xtend.lib.macro.declaration.MutableFieldDeclaration
 import org.eclipse.xtend.lib.macro.declaration.Visibility
 
 import static extension org.xtendroid.utils.NamingUtils.*
+import android.support.v4.app.FragmentActivity
 
 /**
  * 
@@ -33,31 +34,50 @@ annotation AndroidLoader {
 }
 
 class AndroidLoaderProcessor extends AbstractClassProcessor {
+	
+	def String getLoaderIdFromName(MutableFieldDeclaration f)
+	{
+		return 'LOADER_' + f.simpleName.toResourceName.toUpperCase + '_ID'
+	}
+
+	def String getLoaderIdFromName(String chars)
+	{
+		return 'LOADER_' + chars.toResourceName.toUpperCase + '_ID'
+	}
 
 	override doTransform(MutableClassDeclaration clazz, extension TransformationContext context) {
-
+		
 		// check if extends (support) LoaderCallbacks
 		val mandatoryCallbackTypes = #['android.app.LoaderManager$LoaderCallbacks',
 			'android.support.v4.app.LoaderManager$LoaderCallbacks']
-		if (!clazz.implementedInterfaces.exists[i|i.simpleName.endsWith('LoaderCallbacks')]) {
+		val callbackInterface = clazz.implementedInterfaces.findFirst[i|i.simpleName.endsWith('LoaderCallbacks')]
+		if (callbackInterface == null) {
 			clazz.addError(String.format("You must implement a LoaderCallbacks interface, either %s", mandatoryCallbackTypes.join(' or ')))
 		}
 
 		// we need at least one loader in the field
 		val mandatoryLoaderTypes = #['android.content.Loader', 'android.support.v4.content.Loader']
-		val loaderFields = clazz.declaredFields.filter[f|mandatoryLoaderTypes.contains(f.type.name)]
+		val loaderFields = clazz.declaredFields.filter[f| !f.type.inferred && (
+			android.content.Loader.newTypeReference.isAssignableFrom(f.type) ||
+			android.support.v4.content.Loader.newTypeReference.isAssignableFrom(f.type)
+		)]
+
 		if (loaderFields.size == 0) {
 			clazz.addError(
 				String.format("You must declare Loaders of these types in the fields: %s",
 					mandatoryLoaderTypes.join(', ')))
+			clazz.declaredFields.filter[f|f.type.inferred].forEach[f|f.addWarning("To make the @AndroidLoader annotation recognize your Loader fields," +
+				"\nyou must declare the Loader type on the left hand side of the field expression.")]
 		}
+		
 
 		// check if you are using the correct types
-		val usingSupportCallbacks = clazz.implementedInterfaces.exists[i|i.simpleName.equalsIgnoreCase('android.support.v4.app.LoaderManager$LoaderCallbacks')]
-		val usingSupportLoaders = loaderFields.exists[i|i.simpleName.equalsIgnoreCase('android.support.v4.app.LoaderManager$LoaderCallbacks')]
+		// TODO rethink this check, if the user wants to shoot herself in the foot..., BgLoader is done with support
+		val usingSupportCallbacks = clazz.implementedInterfaces.exists[i|'android.support.v4.app.LoaderManager$LoaderCallbacks'.endsWith(i.type.simpleName)]
+		val usingSupportLoaders = loaderFields.exists[i|'android.support.v4.app.LoaderManager$LoaderCallbacks'.endsWith(i.type.simpleName)]
 		if (!usingSupportCallbacks && usingSupportLoaders || usingSupportCallbacks && !usingSupportLoaders)
 		{
-			clazz.addError(
+			clazz.addWarning(
 				"Don't mix support version and the standard version of Loaders and LoaderCallbacks"
 			)
 		}
@@ -71,44 +91,35 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 		}
 		if (!areLoadersTheSameType)
 		{
-			clazz.addError("Loaders must be declared with the same type. (hint: mixing support.v4 with standard Loader type?)")
+			clazz.addWarning("Loaders should be declared with the same type. (hint: mixing support.v4 with standard Loader type?)")
 		}
 		  
 		// generate ID tags with random numbers for each Loader
 		val className = clazz.simpleName // this was added to decrease the chance of collisions (but there are no guarantees)
 		val randomInitialInt = loaderFields.map[f|className + f.simpleName].join().bytes.fold(0 as int, [_1, _2| _1 as int + _2 as int])
-		var initLoaderBody = '''
-			// (re)load Loader result
-		'''
-		
-		for (var i=randomInitialInt; i<loaderFields.length; i++)
+
+		for (var i=0; i<loaderFields.length; i++)
 		{
-			val int integer = i
-			// f.simpleName.toResourceName.toUpperCase
-			val loaderIdName = getLoaderIdFromName(loaderFields.get(i))
-			
-			clazz.addField(loaderIdName) [
+			val int integer = i + randomInitialInt * (i+1)
+			val f = loaderFields.get(i)
+			clazz.addField(f.simpleName.loaderIdFromName) [
 				final = true
 				static = true
 				type = int.newTypeReference
-				initializer = ['''«integer»;''']
+				initializer = ['''«integer»''']
 			]
 			
-			val support = if (usingSupportLoaders) "Support" else ''
-			
-			initLoaderBody += '''
-			    if (getLoaderManager().getLoader(«loaderIdName») != null)
-			    {
-			      get«support»LoaderManager().initLoader(«loaderIdName», this);
-			    }
-			'''
 		}
 
-		// add initLoaders method
-		val _initLoaderBody = initLoaderBody
-		clazz.addMethod("initLoaders") [
-			returnType = void.newTypeReference
-			body = [_initLoaderBody]			
+		// add getters for Loaders (NOTE: workaround/hack, because I don't know how to evaluate initializer exprs)
+		// TODO determine how to evaluate exprs like body (method) and initializer (field)
+		loaderFields.forEach[f|
+			clazz.addMethod("get" + f.simpleName.toJavaIdentifier.toFirstUpper + "Loader")
+			[
+				visibility = Visibility.PUBLIC
+				body = f.initializer
+				returnType = f.type
+			]
 		]
 		
 		// neither an Activity nor Fragment
@@ -161,6 +172,37 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 			}
 			isTypeFragment = true
 		}
+		
+		val support = if (usingSupportCallbacks) "Support" else ''
+		
+		var String bigString = '''
+			// (re)load Loader result
+		'''
+		
+		for (f : loaderFields)
+		{
+			bigString += '''
+			    if (getLoaderManager().getLoader(«f.loaderIdFromName») != null)
+			    {
+			      «IF isTypeFragment»
+			      	getActivity().
+			      «ENDIF»
+			      get«support»LoaderManager().initLoader(«f.loaderIdFromName», null, («callbackInterface.type.simpleName») this);
+			    }
+			'''
+			if (usingSupportCallbacks && isTypeActivity)
+			{
+				if (!clazz.extendedClass.isAssignableFrom(FragmentActivity.newTypeReference))
+					clazz.addError("Your Activity type must extend android.support.v4.app.FragmentActivity, to use android.app.LoaderManager$LoaderCallbacks")
+			}
+		}
+	
+		// add initLoaders method
+		val String _bigString = bigString.toString
+		clazz.addMethod("initLoaders") [
+			returnType = void.newTypeReference
+			body = [_bigString]			
+		]
 
 		// if multiple Loaders then no generic param
 		// if single then generic param
@@ -173,17 +215,21 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 				addParameter("LOADER_ID", int.newTypeReference)
 				addParameter("args", Bundle.newTypeReference)
 				addAnnotation(Override.newAnnotationReference)
-				returnType = void.newTypeReference
+				returnType = Loader.newTypeReference
 				visibility = Visibility.PUBLIC
 				body = [
 					'''
-						«loaderFields.map[f|String.format("if (%s == LOADER_ID) return %s;", f.loaderIdFromName, f.simpleName)].join("\n")»
+						«loaderFields.map[f|String.format("if (%s == LOADER_ID) return get%sLoader();", f.loaderIdFromName, f.simpleName.toJavaIdentifier.toFirstUpper)].join("\n")»
 						return null;
-					''']					
+					''']
+														
 			]
 		}else
 		{
-			onCreateLoaderMethod.addWarning('You must return the Loader objects here, you may use the getLoaderObject synthetic method.')
+			if (onCreateLoaderMethod?.body?.toString.nullOrEmpty)
+			{
+				onCreateLoaderMethod.addWarning('You must return the Loader objects here, you may use the getLoaderObject synthetic method.')
+			}
 			clazz.addMethod('getLoaderObject') [
 				addParameter("LOADER_ID", int.newTypeReference)
 				addParameter("args", Bundle.newTypeReference)
@@ -191,15 +237,10 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 				visibility = Visibility.PRIVATE
 				body = [
 					'''
-						«loaderFields.map[f|String.format("if (%s == LOADER_ID) return %s;", f.loaderIdFromName, f.simpleName)].join("\n")»
+						«loaderFields.map[f|String.format("if (%s == LOADER_ID) return get%sLoader();", f.loaderIdFromName, f.simpleName.toJavaIdentifier.toFirstUpper)].join("\n")»
 						return null;
 					''']				
 			]
 		}
-	}
-	
-	def getLoaderIdFromName(MutableFieldDeclaration f)
-	{
-		return 'LOADER_' + f.simpleName.toResourceName.toUpperCase + '_ID'
 	}
 }
