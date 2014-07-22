@@ -32,11 +32,15 @@ class LoaderTestActivity1 extends FragmentActivity implements android.support.v4
 	var BgLoader<LoaderPayLoad> babyThatsWhat = new BgLoader<LoaderPayLoad>(this, [|new LoaderPayLoad()], [])
 
 	override onLoadFinished(Loader loader, Object data) {
+		if (loader.id == LOADER_ANOTHER_THING_ID)
+		{
+			// do something
+			
+		}
 	}
 
 	override onLoaderReset(Loader loader) {
 	}
-
 }
 
 // NOTE: the sequence of the annotations matter
@@ -44,17 +48,14 @@ class LoaderTestActivity1 extends FragmentActivity implements android.support.v4
 @AndroidLoader
 class LoaderTestActivity2 extends android.app.Activity implements android.app.LoaderManager.LoaderCallbacks {
 
-	var BgLoader<LoaderPayLoad> something //= new BgLoader<LoaderPayLoad>(this, [|new LoaderPayLoad()], [])
-	var BgLoader<LoaderPayLoad> anotherThing //= new BgLoader<LoaderPayLoad>(this, [|new LoaderPayLoad()], [])
-	var BgLoader<LoaderPayLoad> babyThatsWhat //= new BgLoader<LoaderPayLoad>(this, [|new LoaderPayLoad()], [])
-
-	override onLoadFinished(Loader loader, Object data) {
-		throw new UnsupportedOperationException("TODO: auto-generated method stub")
+	var android.content.Loader<LoaderPayLoad> a = new android.content.Loader<LoaderPayLoad>(this)
+	
+	override onLoadFinished(android.content.Loader loader, Object data) {
 	}
 
-	override onLoaderReset(Loader loader) {
-		throw new UnsupportedOperationException("TODO: auto-generated method stub")
+	override onLoaderReset(android.content.Loader loader) {
 	}
+	
 }
 //
 //@AndroidLoader

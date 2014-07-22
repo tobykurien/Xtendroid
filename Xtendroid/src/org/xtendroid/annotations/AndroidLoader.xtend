@@ -57,43 +57,31 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 
 		// we need at least one loader in the field
 		val mandatoryLoaderTypes = #['android.content.Loader', 'android.support.v4.content.Loader']
-		val loaderFields = clazz.declaredFields.filter[f| !f.type.inferred && (
+		val loaderFields = clazz.declaredFields.filter[f| !f.type.inferred && f.initializer != null && (
 			android.content.Loader.newTypeReference.isAssignableFrom(f.type) ||
 			android.support.v4.content.Loader.newTypeReference.isAssignableFrom(f.type)
 		)]
 
 		if (loaderFields.size == 0) {
+			clazz.declaredFields.filter[f|f.type.inferred].forEach[f|f.addWarning("To make the @AndroidLoader annotation recognize your Loader fields," +
+				"\nyou must declare the Loader type on the left hand side of the field expression.")]
 			clazz.addError(
 				String.format("You must declare Loaders of these types in the fields: %s",
 					mandatoryLoaderTypes.join(', ')))
-			clazz.declaredFields.filter[f|f.type.inferred].forEach[f|f.addWarning("To make the @AndroidLoader annotation recognize your Loader fields," +
-				"\nyou must declare the Loader type on the left hand side of the field expression.")]
 		}
 		
 
 		// check if you are using the correct types
 		// TODO rethink this check, if the user wants to shoot herself in the foot..., BgLoader is done with support
-		val usingSupportCallbacks = clazz.implementedInterfaces.exists[i|'android.support.v4.app.LoaderManager$LoaderCallbacks'.endsWith(i.type.simpleName)]
-		val usingSupportLoaders = loaderFields.exists[i|'android.support.v4.app.LoaderManager$LoaderCallbacks'.endsWith(i.type.simpleName)]
+		val usingSupportCallbacks = clazz.implementedInterfaces.exists[i|android.support.v4.app.LoaderManager$LoaderCallbacks.newTypeReference.isAssignableFrom(i)]
+		val usingSupportLoaders = loaderFields.exists[f|android.support.v4.content.Loader.newTypeReference.isAssignableFrom(f.type)]
 		if (!usingSupportCallbacks && usingSupportLoaders || usingSupportCallbacks && !usingSupportLoaders)
 		{
 			clazz.addWarning(
-				"Don't mix support version and the standard version of Loaders and LoaderCallbacks"
+				String.format("Don't mix support version and the standard version of Loaders (%s) and LoaderCallbacks (%s)", Boolean.valueOf(usingSupportLoaders), Boolean.valueOf(usingSupportCallbacks))
 			)
 		}
 		
-		// Are loaders of the same type
-		var areLoadersTheSameType = false
-		for (lt : mandatoryLoaderTypes)
-		{
-			val loaderType = lt;
-			areLoadersTheSameType = areLoadersTheSameType || loaderFields.map[f|f.type.name].fold(true, [same, name| same && loaderType.equals(name)])
-		}
-		if (!areLoadersTheSameType)
-		{
-			clazz.addWarning("Loaders should be declared with the same type. (hint: mixing support.v4 with standard Loader type?)")
-		}
-		  
 		// generate ID tags with random numbers for each Loader
 		val className = clazz.simpleName // this was added to decrease the chance of collisions (but there are no guarantees)
 		val randomInitialInt = loaderFields.map[f|className + f.simpleName].join().bytes.fold(0 as int, [_1, _2| _1 as int + _2 as int])
@@ -111,17 +99,6 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 			
 		}
 
-		// add getters for Loaders (NOTE: workaround/hack, because I don't know how to evaluate initializer exprs)
-		// TODO determine how to evaluate exprs like body (method) and initializer (field)
-		loaderFields.forEach[f|
-			clazz.addMethod("get" + f.simpleName.toJavaIdentifier.toFirstUpper + "Loader")
-			[
-				visibility = Visibility.PUBLIC
-				body = f.initializer
-				returnType = f.type
-			]
-		]
-		
 		// neither an Activity nor Fragment
 		if (clazz.extendedClass.equals(Object.newTypeReference))
 		{
@@ -135,7 +112,7 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 		var isTypeFragment = false;
 		val fragmentWarning = "The initLoaders method must be invoked from the onViewCreated method.\n" +
 			"The initLoaders method must be invoked after the views are inflated, or expect crashes when the LoaderCallback attempts to access views."
-		if (clazz.extendedClass.isAssignableFrom(Activity.newTypeReference))
+		if (Activity.newTypeReference.isAssignableFrom(clazz.extendedClass))
 		{
 			val onCreateMethod = clazz.declaredMethods.findFirst[m|m.simpleName.equals('onCreate')]
 			if (onCreateMethod != null)
@@ -151,8 +128,8 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 			// NOTE: this is especially hard when I cannot (read: know not how) modify the expression of a method body
 			// that is already set.
 			isTypeActivity = true
-		} else if (clazz.extendedClass.isAssignableFrom(Fragment.newTypeReference) ||
-			clazz.extendedClass.isAssignableFrom(android.app.Fragment.newTypeReference))
+		} else if (Fragment.newTypeReference.isAssignableFrom(clazz.extendedClass) ||
+			android.app.Fragment.newTypeReference.isAssignableFrom(clazz.extendedClass))
 		{
 			val onViewCreatedMethod = clazz.declaredMethods.findFirst[m|m.simpleName.equals('onViewCreated')]
 			if (onViewCreatedMethod == null)
@@ -187,21 +164,24 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 			      «IF isTypeFragment»
 			      	getActivity().
 			      «ENDIF»
-			      get«support»LoaderManager().initLoader(«f.loaderIdFromName», null, («callbackInterface.type.simpleName») this);
+			      get«support»LoaderManager().initLoader(«f.loaderIdFromName», null, (%s) this);
 			    }
 			'''
-			if (usingSupportCallbacks && isTypeActivity)
-			{
-				if (!clazz.extendedClass.isAssignableFrom(FragmentActivity.newTypeReference))
-					clazz.addError("Your Activity type must extend android.support.v4.app.FragmentActivity, to use android.app.LoaderManager$LoaderCallbacks")
-			}
+		}
+		
+		if (usingSupportCallbacks && isTypeActivity)
+		{
+			if (!FragmentActivity.newTypeReference.isAssignableFrom(clazz.extendedClass))
+				clazz.addError("Your Activity type must extend android.support.v4.app.FragmentActivity, to use android.app.LoaderManager$LoaderCallbacks")
 		}
 	
 		// add initLoaders method
 		val String _bigString = bigString.toString
 		clazz.addMethod("initLoaders") [
 			returnType = void.newTypeReference
-			body = [_bigString]			
+			body = [
+				_bigString.toString.replaceAll("%s", toJavaCode(callbackInterface))
+			]			
 		]
 
 		// if multiple Loaders then no generic param
@@ -215,7 +195,7 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 				addParameter("LOADER_ID", int.newTypeReference)
 				addParameter("args", Bundle.newTypeReference)
 				addAnnotation(Override.newAnnotationReference)
-				returnType = Loader.newTypeReference
+				returnType = if (usingSupportCallbacks) Loader.newTypeReference else android.content.Loader.newTypeReference
 				visibility = Visibility.PUBLIC
 				body = [
 					'''
@@ -242,5 +222,18 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 					''']				
 			]
 		}
+		
+		// add getters for Loaders (NOTE: workaround/hack, because I don't know how to evaluate initializer exprs)
+		// TODO determine how to evaluate exprs like body (method) and initializer (field), like a pro
+		loaderFields.forEach[f|
+			clazz.addMethod("get" + f.simpleName.toJavaIdentifier.toFirstUpper + "Loader")
+			[
+				visibility = Visibility.PUBLIC
+				body = f.initializer
+				returnType = f.type
+			]
+		]
+		
+//		loaderFields.forEach[remove]
 	}
 }
