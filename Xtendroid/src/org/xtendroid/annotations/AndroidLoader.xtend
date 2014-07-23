@@ -35,10 +35,6 @@ annotation AndroidLoader {
 
 class AndroidLoaderProcessor extends AbstractClassProcessor {
 
-	def String getLoaderIdFromField(MutableFieldDeclaration f) {
-		return 'LOADER_' + f.simpleName.toResourceName.toUpperCase + '_ID'
-	}
-
 	def String getLoaderIdFromName(String chars) {
 		return 'LOADER_' + chars.toResourceName.toUpperCase + '_ID'
 	}
@@ -83,7 +79,7 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 			android.support.v4.content.Loader.newTypeReference.isAssignableFrom(f.type)]
 		if (!usingSupportCallbacks && usingSupportLoaders || usingSupportCallbacks && !usingSupportLoaders) {
 			val warning = String.format(
-				"Don't mix support version and the standard version of Loaders (%s) and LoaderCallbacks (%s)",
+				"Don't mix support version and the standard version of Loaders (support:%s) and LoaderCallbacks (support:%s)",
 				Boolean.valueOf(usingSupportLoaders), Boolean.valueOf(usingSupportCallbacks))
 			loaderFields.filter[f|
 				usingSupportCallbacks && android.support.v4.content.Loader.newTypeReference.isAssignableFrom(f.type)].
@@ -188,9 +184,16 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 				_initString.toString.replaceAll("%s", toJavaCode(callbackInterface))
 			]
 		]
+		
+		val onCreateLoaderMethodBody = loaderFieldNames.map[n|
+							String.format("if (%s == LOADER_ID) return get%sLoader();", n.loaderIdFromName,
+								n.toJavaIdentifier.toFirstUpper)].join("\n")
 
 		// if multiple Loaders then no generic param
-		// if single then generic param
+		// if single then generic param,
+		// this design works regardlessly at the cost of boilerplate casts
+		// or more boilerplate: one LoaderCallbacks instance per Loader...
+		
 		// if onCreateLoader method does not exist then create it
 		val onCreateLoaderMethod = clazz.declaredMethods.findFirst[m|m.simpleName.equals('onCreateLoader')]
 		val existsOnCreateLoader = onCreateLoaderMethod != null
@@ -206,13 +209,11 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 				visibility = Visibility.PUBLIC
 				body = [
 					'''
-						«loaderFieldNames.map[n|
-							String.format("if (%s == LOADER_ID) return get%sLoader();", n.loaderIdFromName,
-								n.toJavaIdentifier.toFirstUpper)].join("\n")»
+						«onCreateLoaderMethodBody»
 						return null;
 					''']
 			]
-		} else if (existsOnCreateLoader) {
+		} else /*if (existsOnCreateLoader)*/ {
 			onCreateLoaderMethod.addWarning(
 				'You must return the Loader objects here, you may use the getLoaderObject synthetic method.')
 			clazz.addMethod('getLoaderObject') [
@@ -225,9 +226,7 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 				visibility = Visibility.PRIVATE
 				body = [
 					'''
-						«loaderFieldNames.map[n|
-							String.format("if (%s == LOADER_ID) return get%sLoader();", n.loaderIdFromName,
-								n.toJavaIdentifier.toFirstUpper)].join("\n")»
+						«onCreateLoaderMethodBody»
 						return null;
 					''']
 			]

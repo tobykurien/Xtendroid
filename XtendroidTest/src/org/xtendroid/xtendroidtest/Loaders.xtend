@@ -26,6 +26,25 @@ class LoaderPayLoad implements Parcelable {
 // NOTE: the sequence of the annotations matter
 @AndroidLoader
 @AndroidActivity(layout=R.layout.activity_main)
+class LoaderTestActivity0 extends FragmentActivity implements android.support.v4.app.LoaderManager.LoaderCallbacks {
+	var BgLoader<LoaderPayLoad> something = new BgLoader<LoaderPayLoad>(this, [|new LoaderPayLoad()], [])
+	var BgLoader<LoaderPayLoad> anotherThing = new BgLoader<LoaderPayLoad>(this, [|new LoaderPayLoad()], [])
+	var BgLoader<LoaderPayLoad> babyThatsWhat = new BgLoader<LoaderPayLoad>(this, [|new LoaderPayLoad()], [])
+
+	override onLoadFinished(Loader loader, Object data) {
+		if (loader.id == LOADER_ANOTHER_THING_ID)
+		{
+			// do something
+		}
+	}
+
+	override onLoaderReset(Loader loader) {
+	}
+}
+
+// NOTE: the sequence of the annotations matter
+@AndroidLoader
+@AndroidActivity(layout=R.layout.activity_main)
 class LoaderTestActivity1 extends FragmentActivity implements android.support.v4.app.LoaderManager.LoaderCallbacks {
 	var BgLoader<LoaderPayLoad> something = new BgLoader<LoaderPayLoad>(this, [|new LoaderPayLoad()], [])
 	var BgLoader<LoaderPayLoad> anotherThing = new BgLoader<LoaderPayLoad>(this, [|new LoaderPayLoad()], [])
@@ -41,6 +60,7 @@ class LoaderTestActivity1 extends FragmentActivity implements android.support.v4
 	override onLoaderReset(Loader loader) {
 	}
 }
+
 
 // NOTE: the sequence of the annotations matter
 @AndroidActivity(layout=R.layout.activity_main)
