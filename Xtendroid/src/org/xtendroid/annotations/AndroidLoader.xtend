@@ -156,7 +156,7 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 
 		val support = if(usingSupportCallbacks) "Support" else ''
 
-		var String bigString = '''
+		var String initString = '''
 			// (re)load Loader result
 			«IF isTypeFragment»
 				final LoaderManager lm = getActivity().get«support»LoaderManager();
@@ -166,14 +166,14 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 		'''
 
 		for (n : loaderFieldNames) {
-			bigString += '''
+			initString += '''
 				if (lm.getLoader(«n.loaderIdFromName») != null)
 				{
 					lm.initLoader(«n.loaderIdFromName», null, (%s) this);
 				}
 			'''
 		}
-
+		
 		if (usingSupportCallbacks && isTypeActivity) {
 			if (!FragmentActivity.newTypeReference.isAssignableFrom(clazz.extendedClass))
 				clazz.addError(
@@ -181,11 +181,11 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 		}
 
 		// add initLoaders method
-		val String _bigString = bigString.toString
+		val String _initString = initString.toString
 		clazz.addMethod("initLoaders") [
 			returnType = void.newTypeReference
 			body = [
-				_bigString.toString.replaceAll("%s", toJavaCode(callbackInterface))
+				_initString.toString.replaceAll("%s", toJavaCode(callbackInterface))
 			]
 		]
 
