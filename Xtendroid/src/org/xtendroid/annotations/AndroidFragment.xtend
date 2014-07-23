@@ -14,6 +14,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 
+import java.lang.Override
+
 @Active(typeof(FragmentProcessor))
 annotation AndroidFragment {
 	int layout = 0
@@ -51,9 +53,9 @@ class FragmentProcessor extends AbstractClassProcessor {
 		// See if a layout is defined, then create accessors for them, if they actually exist
 		val String layoutResId = clazz.annotations.findFirst [
 			AndroidFragment.newTypeReference.type.equals(annotationTypeDeclaration)
-		].getExpression("layout").toString
+		]?.getExpression("layout")?.toString
 
-		if (layoutResId.equals("0")) {
+		if ("0".equals(layoutResId)) {
 			return;
 		}
 
