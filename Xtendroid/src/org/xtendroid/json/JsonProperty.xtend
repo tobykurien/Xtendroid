@@ -16,6 +16,8 @@ import java.util.Date
 import java.util.List
 import java.lang.annotation.ElementType
 import java.lang.annotation.Target
+import org.eclipse.xtend.lib.macro.declaration.FieldDeclaration
+import org.eclipse.xtend.lib.macro.RegisterGlobalsContext
 
 @Active(JsonPropertyProcessor)
 @Target(ElementType.FIELD)
@@ -23,6 +25,16 @@ annotation JsonProperty {
 	// Use this to explicitly state the key value (String) of the JSON Object
 	// and define the expected String for DateFormat for Date fields
 	String value = ""
+}
+
+@Active(JsonEnumPropertyProcessor)
+@Target(ElementType.FIELD)
+annotation JsonEnumProperty {
+	// Use this to explicitly state the key value (String) of the JSON Object
+	// and define the expected String for DateFormat for Date fields
+	String name = "" // enum type to generate
+	String[] values = #[] // enum type values to generate
+	Class enumType = Object // pre-defined
 }
 
 /**
@@ -49,6 +61,63 @@ annotation JsonProperty {
  * TODO #toJSON()
  * JsonProperty should also generate a #toJSON method, to do the obvious
  */
+ 
+class JsonEnumPropertyProcessor extends AbstractFieldProcessor {
+    override doRegisterGlobals(FieldDeclaration field, extension RegisterGlobalsContext context) {
+
+		// TODO determine why can't I just do this?
+//		val a = JsonEnumProperty.findTypeGlobally
+    	val annotation = field.annotations.findFirst[a | a.annotationTypeDeclaration.simpleName.equals("JsonEnumProperty")]
+    	
+    	val preDefinedEnumTypeName = annotation?.getExpression("enumType")?.toString
+    	if (!"Object".equals(preDefinedEnumTypeName)) // nothing to generate here
+    	{
+    		return
+    	}
+    	
+    	val generatedName = annotation?.getStringValue("name")?.toString
+    	val generatedValues = annotation?.getStringArrayValue("values");
+
+		if (generatedName.nullOrEmpty) {
+			return // do the error/warning in the other method
+		}
+		
+		if (generatedValues.nullOrEmpty)
+		{
+			return // do the error/warning in the other method
+		}
+
+		val fieldTypeName = field.type.name
+		val fieldTypeSimpleName = field.type.simpleName
+		val package = fieldTypeName.replace(fieldTypeSimpleName, '') // last . included
+		
+		context.registerEnumerationType(package + generatedName)
+   }
+   
+    override doTransform(MutableFieldDeclaration field, extension TransformationContext context) {
+		val annotation = field.annotations.findFirst[a | a.annotationTypeDeclaration.simpleName.equals("JsonEnumProperty")]
+    	val generatedName = annotation?.getStringValue("name")?.toString
+    	val generatedValues = annotation?.getStringArrayValue("values");
+    	val preDefinedEnumTypeName = annotation?.getExpression("enumType").toString;
+    	
+    	if (!preDefinedEnumTypeName.equals('Object'))
+    	{
+			if (generatedName.nullOrEmpty) {
+				annotation.addError("Missing enum type name in the annotation in parameter: name")
+			}
+			
+			if (generatedValues.nullOrEmpty)
+			{
+				annotation.addError("Missing enum type values in the annotation in parameter: values")
+			}
+    	}
+		
+		// TODO attempt to generate the values for the enum
+		
+		// TODO add field.simpleName + Loaded boolean, add getter
+		
+    }
+}
 
 /**
  * @JsonProperty annotation creates a "Json bean" that accepts a JSONObject
