@@ -13,7 +13,6 @@ import org.xtendroid.json.JsonPropertyProcessor
 import java.lang.annotation.Target
 import java.lang.annotation.ElementType
 import org.json.JSONObject
-import org.xtendroid.json.JsonProperty
 
 @Active(ParcelableProcessor)
 @Target(ElementType.TYPE)

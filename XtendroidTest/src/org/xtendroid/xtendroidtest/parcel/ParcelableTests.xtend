@@ -331,6 +331,7 @@ class RRR // in the android dev context, it's dangerous to name a type 'R'
 	String alpha = "a"
 	
 	@JsonEnumProperty(name="DEFEnum", values=#["d","e","f"])
+	@JsonProperty
 	String delta = "d"
 }
 
