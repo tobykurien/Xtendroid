@@ -67,16 +67,17 @@ class JsonEnumPropertyProcessor extends AbstractFieldProcessor {
 
 		// TODO determine why can't I just do this?
 //		val a = JsonEnumProperty.findTypeGlobally
-    	val annotation = field.annotations.findFirst[a | a.annotationTypeDeclaration.simpleName.equals("JsonEnumProperty")]
+    	val annotation = field.annotations.findFirst[a | "JsonEnumProperty".endsWith(a.annotationTypeDeclaration.simpleName) ]
     	
-    	val preDefinedEnumTypeName = annotation?.getExpression("enumType")?.toString
-    	if (!"Object".equals(preDefinedEnumTypeName)) // nothing to generate here
+    	val preDefinedEnumTypeName = annotation
+    		?.getExpression("enumType")
+    	if (preDefinedEnumTypeName != null) // nothing to generate here
     	{
     		return
     	}
     	
-    	val generatedName = annotation?.getStringValue("name")?.toString
-    	val generatedValues = annotation?.getStringArrayValue("values");
+    	val generatedName = annotation.getStringValue("name")?.toString
+    	val generatedValues = annotation.getStringArrayValue("values");
 
 		if (generatedName.nullOrEmpty) {
 			return // do the error/warning in the other method
@@ -95,26 +96,28 @@ class JsonEnumPropertyProcessor extends AbstractFieldProcessor {
    }
    
     override doTransform(MutableFieldDeclaration field, extension TransformationContext context) {
-		val annotation = field.annotations.findFirst[a | a.annotationTypeDeclaration.simpleName.equals("JsonEnumProperty")]
-    	val generatedName = annotation?.getStringValue("name")?.toString
-    	val generatedValues = annotation?.getStringArrayValue("values");
-    	val preDefinedEnumTypeName = annotation?.getExpression("enumType").toString;
+    	val annotation = field.annotations.findFirst[a | "JsonEnumProperty".endsWith(a.annotationTypeDeclaration.simpleName) ]
+    	val generatedName = annotation.getStringValue("name")?.toString
+    	val generatedValues = annotation.getStringArrayValue("values");
+    	val preDefinedEnumTypeName = annotation.getExpression("enumType")?.toString;
     	
-    	if (!preDefinedEnumTypeName.equals('Object'))
+    	if (preDefinedEnumTypeName == null) // not using pre-defined enum type
     	{
 			if (generatedName.nullOrEmpty) {
-				annotation.addError("Missing enum type name in the annotation in parameter: name")
+				annotation.addError("Missing enum type name in the annotation in parameter \"name\".")
 			}
 			
 			if (generatedValues.nullOrEmpty)
 			{
-				annotation.addError("Missing enum type values in the annotation in parameter: values")
+				annotation.addError("Missing enum type values in the annotation in parameter \"values\".")
 			}
+			
+			// TODO attempt to generate the values for the enum (determine if it's done here?)
+			
+			// TODO 1) add field.simpleName + Loaded boolean, 2) add getter
     	}
 		
-		// TODO attempt to generate the values for the enum
-		
-		// TODO add field.simpleName + Loaded boolean, add getter
+		// TODO 1) add field.simpleName + Loaded boolean, 2) add getter
 		
     }
 }
