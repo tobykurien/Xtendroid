@@ -126,10 +126,13 @@ class EnumPropertyProcessor extends AbstractFieldProcessor {
 		}
 		
 		val enumType = undefinedEnumType
+		val stringMethodName = String.format("to%sValue", enumType.simpleName)
+		val stringArrayMethodName = String.format("to%sArrayValue", enumType.simpleName)
+		val stringListMethodName = String.format("to%sListValue", enumType.simpleName)
 		enumType.addValue('PREVENT_NPE') []
-		if (enumType.findDeclaredMethod('fromString') == null)
+		if (enumType.findDeclaredMethod(stringMethodName) == null)
 		{
-			enumType.addMethod('fromString') [
+			enumType.addMethod(stringMethodName) [
 				addParameter('s', String.newTypeReference)
 				visibility = Visibility.PUBLIC
 				static = true
@@ -141,10 +144,10 @@ class EnumPropertyProcessor extends AbstractFieldProcessor {
 			]
 		}
 		
-		if (enumType?.findDeclaredMethod('fromStringArray') == null)
+		if (enumType?.findDeclaredMethod(stringArrayMethodName) == null)
 		{
 			val arrayEnumType = enumType.newTypeReference.newArrayTypeReference
-			enumType.addMethod('fromStringArray') [
+			enumType.addMethod(stringArrayMethodName) [
 				addParameter('s', String.newTypeReference.newArrayTypeReference)
 				visibility = Visibility.PUBLIC
 				static = true
@@ -157,17 +160,17 @@ class EnumPropertyProcessor extends AbstractFieldProcessor {
 					«toJavaCode(arrayEnumType)» enumArray = new «enumType.simpleName»[s.length];
 					for (int i=0; i<s.length; i++)
 					{
-						enumArray[i] = fromString(s[i]);
+						enumArray[i] = «stringMethodName»(s[i]);
 					}
 					return enumArray;
 				''']
 			]
 		}
 
-		if (enumType?.findDeclaredMethod('fromStringList') == null)
+		if (enumType?.findDeclaredMethod(stringListMethodName) == null)
 		{
 			val arrayEnumType = enumType.newTypeReference.newArrayTypeReference
-			enumType.addMethod('fromStringList') [
+			enumType.addMethod(stringListMethodName) [
 				addParameter('s', List.newTypeReference(String.newTypeReference))
 				visibility = Visibility.PUBLIC
 				static = true
@@ -177,7 +180,7 @@ class EnumPropertyProcessor extends AbstractFieldProcessor {
 					{
 						throw new IllegalArgumentException();
 					}
-					return «toJavaCode(Arrays.newTypeReference)».asList(fromStringArray((String[]) s.toArray()));
+					return «toJavaCode(Arrays.newTypeReference)».asList(«stringArrayMethodName»((String[]) s.toArray()));
 				''']
 			]
 		}
