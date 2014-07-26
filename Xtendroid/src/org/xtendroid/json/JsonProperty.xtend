@@ -10,9 +10,7 @@ import java.util.List
 import java.util.concurrent.ConcurrentHashMap
 import org.eclipse.xtend.lib.macro.AbstractFieldProcessor
 import org.eclipse.xtend.lib.macro.Active
-import org.eclipse.xtend.lib.macro.RegisterGlobalsContext
 import org.eclipse.xtend.lib.macro.TransformationContext
-import org.eclipse.xtend.lib.macro.declaration.FieldDeclaration
 import org.eclipse.xtend.lib.macro.declaration.MutableFieldDeclaration
 import org.eclipse.xtend.lib.macro.declaration.Visibility
 import org.json.JSONArray
@@ -27,215 +25,8 @@ annotation JsonProperty {
 	String value = ""
 }
 
-@Active(JsonEnumPropertyProcessor)
-@Target(ElementType.FIELD)
-annotation JsonEnumProperty {
-	// Use this to explicitly state the key value (String) of the JSON Object
-	// and define the expected String for DateFormat for Date fields
-	String name = "" // enum type to generate
-	String[] values = #[] // enum type values to generate
-	Class enumType = Object // pre-defined
-}
-
 /**
  * 
- * Future work:
- * annotation JsonEnumProperty
- * {
- *   String... value
- * }
- * 
- * should transpile to
- * 
- * public @interface JsonEnumProperty {
- *   String[] value() default “all”;
- * }
- * 
- * TODO either a JsonEnumProperty or add a parameter 'enums' to the existing @JsonProperty
- * 
- * So I can just define which enum values I expect from a JSON String.
- * A switch statement in getter method that returns a enum object (from a generated enum type)
- * will be generated accordingly.
- * 
- * 
- * TODO #toJSON()
- * JsonProperty should also generate a #toJSON method, to do the obvious
- */
- 
-class JsonEnumPropertyProcessor extends AbstractFieldProcessor {
-    override doRegisterGlobals(FieldDeclaration field, extension RegisterGlobalsContext context) {
-    	
-
-		// TODO determine why can't I just do this?
-//		val a = JsonEnumProperty.findTypeGlobally
-    	val annotation = field.annotations.findFirst[a | "JsonEnumProperty".endsWith(a.annotationTypeDeclaration.simpleName) ]
-    	
-    	val fieldTypeName = field.type.name
-    	if (notAStringType(fieldTypeName))
-    	{
-    		return
-    	}
-    	
-    	val preDefinedEnumTypeName = annotation
-    		?.getExpression("enumType")
-    	if (preDefinedEnumTypeName != null) // nothing to generate here
-    	{
-    		return
-    	}
-    	
-    	val generatedName = annotation.getStringValue("name")?.toString
-    	val generatedValues = annotation.getStringArrayValue("values");
-
-		if (generatedName.nullOrEmpty) {
-			return // do the error/warning in the other method
-		}
-		
-		if (generatedValues.nullOrEmpty)
-		{
-			return // do the error/warning in the other method
-		}
-
-		val package = getPackageNameFromField(field) // last . included
-		
-		context.registerEnumerationType(package + generatedName)
-   }
-			
-			def notAStringType(String fieldTypeName) {
-				!(
-				    			fieldTypeName.equals('java.lang.String') ||
-				    			fieldTypeName.equals('java.lang.String[]') ||
-				    			(fieldTypeName.startsWith('java.util.List<') && fieldTypeName.endsWith('String>'))
-				    		)
-			}
-			
-	def getPackageNameFromField(FieldDeclaration field) {
-		val fieldTypeSimpleName = field.declaringType.simpleName
-		val fieldTypeName = field.declaringType.qualifiedName
-		val package = fieldTypeName.replace(fieldTypeSimpleName, '')
-		package
-	}
-   
-    override doTransform(MutableFieldDeclaration field, extension TransformationContext context) {
-    	val fieldTypeName = field.type.name
-    	if (notAStringType(fieldTypeName))
-    	{
-    		field.addError('The type of this field must be a String-based type, scalar String, List<String> or a String array')
-    	}
-    	
-    	val annotation = field.annotations.findFirst[a | "JsonEnumProperty".endsWith(a.annotationTypeDeclaration.simpleName) ]
-    	val generatedName = annotation.getStringValue("name")?.toString
-    	val generatedValues = annotation.getStringArrayValue("values");
-    	val preDefinedEnumTypeName = annotation.getExpression("enumType")?.toString;
-    	
-    	if (preDefinedEnumTypeName == null) // not using pre-defined enum type
-    	{
-			if (generatedName.nullOrEmpty) {
-				annotation.addError("Missing enum type name in the annotation in parameter \"name\".")
-			}
-			
-			if (generatedValues.nullOrEmpty)
-			{
-				annotation.addError("Missing enum type values in the annotation in parameter \"values\".")
-			}
-			
-			
-			// TODO attempt to generate the values for the enum (determine if it's done here?)
-			val enumTypeName = field.packageNameFromField + generatedName
-			val generatedEnumType = findEnumerationType(enumTypeName)
-			val enumType = findTypeGlobally(enumTypeName)
-			
-			generatedValues.forEach[s|
-				generatedEnumType.addValue(s) [] 
-			]
-			
-			// convenience String -> Enum conversion method
-			val enumValueStaticGetterName = String.format("get%sEnumValue", generatedEnumType.simpleName)
-			val enumValueStaticGetter = field.declaringType.findDeclaredMethod(enumValueStaticGetterName)
-			if (enumValueStaticGetter == null)
-			{
-				field.declaringType.addMethod(enumValueStaticGetterName) [
-					addParameter('s', String.newTypeReference)
-					static = true
-					visibility = Visibility::PUBLIC
-					returnType = enumType.newTypeReference
-					body = ['''
-						return «generatedEnumType.qualifiedName».valueOf(s);
-					''']
-				]
-				
-				val sanitizedFieldName = field.simpleName.sanitizeFieldName.toFirstUpper
-				val convenienceMethodName = String.format("getEnumValue%sOf%s",
-					if (field.type.array || field.type.name.startsWith('java.util.List<')) 's' else '',
-					sanitizedFieldName
-				)
-				if (/*originalGetter != null && */field.declaringType.findDeclaredMethod(convenienceMethodName) == null)
-				{
-					field.declaringType.addMethod(convenienceMethodName) [
-						visibility = Visibility::PUBLIC
-						if (field.type.name.startsWith('java.util.List<'))
-						{
-							// TODO
-//							returnType = java.util.List<>
-//							body = ['''
-//							
-//							''']
-						}else if (field.type.array)
-						{
-							// TODO
-//							returnType = ...[]
-//							body = ['''
-//							
-//							''']
-							// TODO
-						}else
-						{
-							returnType = enumType.newTypeReference
-							body = ['''
-								try {
-									return «enumValueStaticGetterName»(get«sanitizedFieldName»());
-								}catch (JSONException e)
-								{
-									// sneaky throw
-									throw new RuntimeException(e);
-								}
-							''']
-						}
-					]
-				}
-				
-			}
-			
-    	}else
-		{
-			// TODO
-			// convenience String -> Enum conversion method
-//			val preDefinedType = preDefinedEnumTypeName?.findTypeGlobally
-//			val enumValueStaticGetterName = String.format("get%sEnumValue", preDefinedType?.simpleName)
-//			val enumValueStaticGetter = field.declaringType?.findDeclaredMethod(enumValueStaticGetterName)
-//			if (enumValueStaticGetter == null)
-//			{
-//				field.declaringType.addMethod(enumValueStaticGetterName) [
-//					addParameter('s', String.newTypeReference)
-//					static = true
-//					visibility = Visibility::PUBLIC
-//					returnType = preDefinedType.newTypeReference
-//					body = ['''
-//						return «preDefinedType.qualifiedName».valueOf(s);
-//					''']
-//				]
-//			}
-
-			
-		}
-    }
-    
-   def sanitizeFieldName(String name)
-   {
-        return name.replaceAll('_', '')
-   }
-}
-
-/**
  * @JsonProperty annotation creates a "Json bean" that accepts a JSONObject
  * and then parses it on-demand with getters.
  * 
@@ -329,14 +120,14 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
 			''']
          } else if (field.type.name.startsWith('java.util.Date'))
 		 {
-			exceptions = #[ java.text.ParseException.newTypeReference, org.json.JSONException.newTypeReference ]
+			exceptions = #[ ParseException.newTypeReference, JSONException.newTypeReference ]
 		 	if (field.type.array)
 		 	{
 		 		body = [
 		 		'''
 				if (!«field.simpleName»Loaded) {
-					final «JSONArray.findTypeGlobally.qualifiedName» «field.simpleName»JsonArray = «jsonObjectFieldName».getJSONArray("«jsonKey»");
-					this.«field.simpleName» = new «java.util.Date.findTypeGlobally.simpleName»[«field.simpleName»JsonArray.length()];
+					final «toJavaCode(JSONArray.newTypeReference)» «field.simpleName»JsonArray = «jsonObjectFieldName».getJSONArray("«jsonKey»");
+					this.«field.simpleName» = new «toJavaCode(Date.newTypeReference)»[«field.simpleName»JsonArray.length()];
 					for (int i=0; i<«field.simpleName»JsonArray.length(); i++)
 					{
 						this.«field.simpleName»[i] = «ConcurrentDateFormatHashMap.newTypeReference.name».convertStringToDate("«dateFormat»", «field.simpleName»JsonArray.getString(i));
@@ -412,7 +203,7 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
 				}
 				return «field.simpleName»;
 				''']
-				exceptions = #[ java.text.ParseException.newTypeReference, org.json.JSONException.newTypeReference ]
+				exceptions = #[ ParseException.newTypeReference, JSONException.newTypeReference ]
          	}else if (field.type.actualTypeArguments.exists[a | supportedTypes.containsKey(a.name)])
 			{
 				val baseTypeName = field.type.actualTypeArguments.map[a | a.name].join()
@@ -502,7 +293,7 @@ class ThreadLocalDateFormatter extends ThreadLocal<DateFormat>
 class ConcurrentDateFormatHashMap
 {
 	public val static concurrentMap = new ConcurrentHashMap<String, ThreadLocal<DateFormat>>();
-	private new() {}
+	public new() {}
 	public def static convertStringToDate(String dateFormat, String dateRaw) throws ParseException
 	{
 		if (!concurrentMap.containsKey(dateFormat))

@@ -8,7 +8,7 @@ import org.json.JSONObject
 import org.json.JSONArray
 import java.util.List
 import android.util.SparseBooleanArray
-import org.xtendroid.json.JsonEnumProperty
+import org.xtendroid.annotations.EnumProperty
 
 /**
 forbidden non-primitive types:
@@ -294,11 +294,6 @@ class C implements Parcelable
 	List<C> ourobouros
 }
 
-enum ABCEnum
-{
-	a,b,c
-}
-
 class RRR // in the android dev context, it's dangerous to name a type 'R'
 {
 	@JsonProperty
@@ -316,23 +311,31 @@ class RRR // in the android dev context, it's dangerous to name a type 'R'
 	@JsonProperty
 	JSONObject obj
 	
-	public def add_i_and_j()
-	{
-		return _i + _j
-	}
-	
 	@JsonProperty
 	int i
 	
 	@JsonProperty
 	int j
-	
-	@JsonEnumProperty(enumType=ABCEnum) // pre-defined
+}
+
+enum ABCEnum
+{
+	a,b,c
+}
+
+@AndroidParcelable
+class EnumTypesHolder implements Parcelable
+{
+	@EnumProperty(enumType=ABCEnum) // pre-defined
 	String alpha = "a"
 	
-	@JsonEnumProperty(name="DEFEnum", values=#["d","e","f"])
+	
+	@EnumProperty(name="DEFEnum", values=#["d","e","f"])
 	@JsonProperty
 	String delta = "d"
+
+	@JsonProperty
+	String epsilon = "e"
 }
 
 @AndroidParcelable
