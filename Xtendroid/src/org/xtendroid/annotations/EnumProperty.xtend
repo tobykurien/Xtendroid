@@ -132,6 +132,7 @@ class EnumPropertyProcessor extends AbstractFieldProcessor {
 			enumType.addMethod('fromString') [
 				addParameter('s', String.newTypeReference)
 				visibility = Visibility.PUBLIC
+				static = true
 				returnType = enumType.newTypeReference
 				body = ['''
 					«enumType.newTypeReference» e = «toJavaCode(enumType.newTypeReference)».valueOf(s);
@@ -146,6 +147,7 @@ class EnumPropertyProcessor extends AbstractFieldProcessor {
 			enumType.addMethod('fromStringArray') [
 				addParameter('s', String.newTypeReference.newArrayTypeReference)
 				visibility = Visibility.PUBLIC
+				static = true
 				returnType = enumType.newTypeReference.newArrayTypeReference
 				body = ['''
 					if (s == null)
@@ -168,6 +170,7 @@ class EnumPropertyProcessor extends AbstractFieldProcessor {
 			enumType.addMethod('fromStringList') [
 				addParameter('s', List.newTypeReference(String.newTypeReference))
 				visibility = Visibility.PUBLIC
+				static = true
 				returnType = List.newTypeReference(enumType.newTypeReference)
 				body = ['''
 					if (s == null)
