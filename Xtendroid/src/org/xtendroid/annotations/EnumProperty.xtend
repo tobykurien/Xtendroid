@@ -169,7 +169,6 @@ class EnumPropertyProcessor extends AbstractFieldProcessor {
 
 		if (enumType?.findDeclaredMethod(stringListMethodName) == null)
 		{
-			val arrayEnumType = enumType.newTypeReference.newArrayTypeReference
 			enumType.addMethod(stringListMethodName) [
 				addParameter('s', List.newTypeReference(String.newTypeReference))
 				visibility = Visibility.PUBLIC
