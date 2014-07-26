@@ -26,6 +26,13 @@ forbidden non-primitive types:
 */
 
 @AndroidParcelable
+class SubModel implements Parcelable
+{
+	@JsonProperty
+	boolean a
+}
+
+@AndroidParcelable
 class ModelRoot implements Parcelable
 {
 	@Property
@@ -126,13 +133,6 @@ class ModelRoot implements Parcelable
 	
 //	@Property // not supported with @AndroidParcelable
 //	Exception exception
-}
-
-@AndroidParcelable
-class SubModel implements Parcelable
-{
-	@JsonProperty
-	boolean a
 }
 
 @AndroidParcelable
