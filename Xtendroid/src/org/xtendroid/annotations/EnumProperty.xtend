@@ -16,8 +16,6 @@ import org.eclipse.xtend.lib.macro.declaration.Visibility
 @Active(EnumPropertyProcessor)
 @Target(ElementType.FIELD)
 annotation EnumProperty {
-	// Use this to explicitly state the key value (String) of the JSON Object
-	// and define the expected String for DateFormat for Date fields
 	String name = ""// enum type to generate
 	String[] values = #[] // enum type values to generate
 	Class enumType = typeof(Object) // pre-defined
