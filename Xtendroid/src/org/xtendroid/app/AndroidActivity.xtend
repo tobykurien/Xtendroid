@@ -60,9 +60,16 @@ class AndroidActivityProcessor extends AbstractClassProcessor {
       if (annotatedClass.extendedClass == Object.newTypeReference()) {
          annotatedClass.extendedClass = Activity.newTypeReference
       }
-      //TODO check for Activity super type
-      annotatedClass.implementedInterfaces = annotatedClass.implementedInterfaces + #[callBacksType.newTypeReference]
       
+      // is extendedClass the same or the super type of "android.app.Activity"
+	  if (android.app.Activity.newTypeReference.isAssignableFrom(annotatedClass.extendedClass))
+	  {
+        annotatedClass.implementedInterfaces = annotatedClass.implementedInterfaces + #[callBacksType.newTypeReference]
+	  }else
+	  {
+	  	annotatedClass.addWarning("This class is not an Android Activity.")
+	  	return;
+	  }
       
       // create onCreate if not present
       if (annotatedClass.findDeclaredMethod("onCreate", Bundle.newTypeReference()) == null) {
@@ -94,7 +101,7 @@ class AndroidActivityProcessor extends AbstractClassProcessor {
          ]
       }
       
-      
+      // TODO also read the includes (recursively) for deeper structures
       // read the XML
       val viewType = View.newTypeReference
       xmlFile.contentsAsStream.getDocument.traverseAllNodes[
