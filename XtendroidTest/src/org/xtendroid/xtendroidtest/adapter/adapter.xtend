@@ -1,21 +1,19 @@
 package org.xtendroid.xtendroidtest.adapter
 
-import android.widget.BaseAdapter
-import org.xtendroid.annotations.AndroidAdapter
-import java.util.List
-import org.xtendroid.parcel.AndroidParcelable
+import android.content.Context
 import android.os.Parcelable
+import android.widget.BaseAdapter
+import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
-import org.xtendroid.annotations.CustomViewGroup
-import org.xtendroid.annotations.CustomView
 import android.widget.TextView
-import android.widget.ImageView
-import org.xtendroid.annotations.AndroidView
-import android.content.Context
-import org.xtendroid.xtendroidtest.R;
+import java.util.List
+import org.xtendroid.annotations.AndroidAdapter
+import org.xtendroid.annotations.CustomView
+import org.xtendroid.annotations.CustomViewGroup
 import org.xtendroid.json.JsonProperty
-import android.widget.Button
+import org.xtendroid.parcel.AndroidParcelable
+import org.xtendroid.xtendroidtest.R
 
 /**
  * This Bean is responsible for all the data in the following
@@ -33,6 +31,15 @@ class Payload implements Parcelable
 	
 	@JsonProperty
 	var String d 
+	
+	@JsonProperty
+	var String ppp
+	@JsonProperty
+	var String qqq
+	@JsonProperty
+	var int rrr
+	@JsonProperty
+	var String sss
 }
 
 /**
@@ -156,15 +163,6 @@ class XtendAdapter6 extends BaseAdapter {
 @CustomViewGroup(layout = R.layout.custom_adapter_view)
 abstract class CustomAdapterView1 extends LinearLayout
 {
-//	@AndroidView
-//	TextView  a
-//	@AndroidView
-//	TextView  b
-//	@AndroidView
-//	ImageView c
-//	@AndroidView
-//	TextView  d
-	
 	def abstract void show(Payload input)
 
 	def void initViewGroup(Context context) {
@@ -192,15 +190,6 @@ abstract class CustomAdapterView1 extends LinearLayout
 @CustomViewGroup(layout = R.layout.custom_adapter_view2)
 abstract class CustomAdapterView2 extends RelativeLayout
 {
-//	@AndroidView
-//	TextView  a
-//	@AndroidView
-//	TextView  b
-//	@AndroidView
-//	ImageView c
-//	@AndroidView
-//	TextView  d
-	
 	def abstract void show(Payload input)
 
 	def void initViewGroup2(Context context) {
@@ -211,15 +200,6 @@ abstract class CustomAdapterView2 extends RelativeLayout
 @CustomViewGroup(layout = R.layout.custom_adapter_view2)
 abstract class CustomAdapterView3 extends RelativeLayout
 {
-//	@AndroidView
-//	TextView  a
-//	@AndroidView
-//	TextView  b
-//	@AndroidView
-//	ImageView c
-//	@AndroidView
-//	TextView d
-	
 	def abstract void show(Payload input)
 
 	def void initViewGroup2(Context context) {
