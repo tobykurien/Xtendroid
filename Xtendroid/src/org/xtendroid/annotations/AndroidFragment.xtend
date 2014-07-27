@@ -57,14 +57,14 @@ class FragmentProcessor extends AbstractClassProcessor {
 			return;
 		}
 
-		val viewFileName = layoutResId?.substring(layoutResId.lastIndexOf('.') + 1)
-		if (viewFileName == null) {
+		val layoutFileName = layoutResId?.substring(layoutResId.lastIndexOf('.') + 1)
+		if (layoutFileName == null) {
 			return;
 		}
 
 		val pathToCU = clazz.compilationUnit.filePath
 		// TODO support res/layout-{suffix} 
-		val xmlFile = pathToCU.projectFolder.append("res/layout/" + viewFileName + ".xml")
+		val xmlFile = pathToCU.projectFolder.append("res/layout/" + layoutFileName + ".xml")
 
 		// error handling, there is no file
 		if (!xmlFile.exists) {

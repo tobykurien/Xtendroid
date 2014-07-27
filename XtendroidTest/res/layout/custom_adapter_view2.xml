@@ -5,5 +5,5 @@
     <TextView android:id="@+id/b" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_toRightOf="@id/a"/>
     <ImageView android:id="@+id/c" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_toLeftOf="@id/b" android:contentDescription="@null"/>
     <org.xtendroid.xtendroidtest.adapter.CustomView3 android:id="@+id/d" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_alignParentLeft="true" />
-    
+    <include layout="@layout/include_custom_adapter_view3"/>
 </merge>
