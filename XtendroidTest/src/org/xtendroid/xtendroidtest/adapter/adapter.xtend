@@ -156,14 +156,14 @@ class XtendAdapter6 extends BaseAdapter {
 @CustomViewGroup(layout = R.layout.custom_adapter_view)
 abstract class CustomAdapterView1 extends LinearLayout
 {
-	@AndroidView
-	TextView  a
-	@AndroidView
-	TextView  b
-	@AndroidView
-	ImageView c
-	@AndroidView
-	TextView  d
+//	@AndroidView
+//	TextView  a
+//	@AndroidView
+//	TextView  b
+//	@AndroidView
+//	ImageView c
+//	@AndroidView
+//	TextView  d
 	
 	def abstract void show(Payload input)
 
@@ -192,14 +192,14 @@ abstract class CustomAdapterView1 extends LinearLayout
 @CustomViewGroup(layout = R.layout.custom_adapter_view2)
 abstract class CustomAdapterView2 extends RelativeLayout
 {
-	@AndroidView
-	TextView  a
-	@AndroidView
-	TextView  b
-	@AndroidView
-	ImageView c
-	@AndroidView
-	TextView  d
+//	@AndroidView
+//	TextView  a
+//	@AndroidView
+//	TextView  b
+//	@AndroidView
+//	ImageView c
+//	@AndroidView
+//	TextView  d
 	
 	def abstract void show(Payload input)
 
@@ -211,14 +211,14 @@ abstract class CustomAdapterView2 extends RelativeLayout
 @CustomViewGroup(layout = R.layout.custom_adapter_view2)
 abstract class CustomAdapterView3 extends RelativeLayout
 {
-	@AndroidView
-	TextView  a
-	@AndroidView
-	TextView  b
-	@AndroidView
-	ImageView c
-	@AndroidView
-	TextView d
+//	@AndroidView
+//	TextView  a
+//	@AndroidView
+//	TextView  b
+//	@AndroidView
+//	ImageView c
+//	@AndroidView
+//	TextView d
 	
 	def abstract void show(Payload input)
 

@@ -1,20 +1,16 @@
 package org.xtendroid.annotations
 
+import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import org.eclipse.xtend.lib.macro.AbstractClassProcessor
 import org.eclipse.xtend.lib.macro.Active
 import org.eclipse.xtend.lib.macro.TransformationContext
 import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
 import org.eclipse.xtend.lib.macro.declaration.Visibility
-import org.w3c.dom.Element
-import static extension org.xtendroid.utils.NamingUtils.*
 
-import static extension org.xtendroid.utils.XmlUtils.*
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.ViewGroup
-
-import java.lang.Override
+import static extension org.xtendroid.utils.AnnotationLayoutUtils.*
 
 @Active(typeof(FragmentProcessor))
 annotation AndroidFragment {
@@ -51,11 +47,13 @@ class FragmentProcessor extends AbstractClassProcessor {
 		}
 
 		// See if a layout is defined, then create accessors for them, if they actually exist
+		// TODO I suspect that @CustomViewGroup in AndroidAdapter can reuse the layout parameter getter method
 		val String layoutResId = clazz.annotations.findFirst [
 			AndroidFragment.newTypeReference.type.equals(annotationTypeDeclaration)
 		]?.getExpression("layout")?.toString
 
-		if ("0".equals(layoutResId)) {
+		if (layoutResId == null || "0".equals(layoutResId) || !layoutResId.contains('R.layout')) {
+			clazz.addWarning('You may add a layout resource id to the annotation, like this: @AndroidFragment(layout=R.layout...).')
 			return;
 		}
 
@@ -63,7 +61,9 @@ class FragmentProcessor extends AbstractClassProcessor {
 		if (viewFileName == null) {
 			return;
 		}
+
 		val pathToCU = clazz.compilationUnit.filePath
+		// TODO support res/layout-{suffix} 
 		val xmlFile = pathToCU.projectFolder.append("res/layout/" + viewFileName + ".xml")
 
 		// error handling, there is no file
@@ -87,68 +87,6 @@ class FragmentProcessor extends AbstractClassProcessor {
 					''']
 			]
 
-		// TODO also read the includes (recursively) for deeper structures
-		// read the XML
-		xmlFile.contentsAsStream.getDocument.traverseAllNodes [
-			// check for ids
-			val id = getId(it)
-			val name = getFieldName(it)
-			val fieldType = getFieldType(it)?.newTypeReference
-			if (name != null && fieldType != null) {
-				clazz.addField('m' + name.toFirstUpper) [
-					final = false
-					static = false
-					type = fieldType
-					initializer = [
-						'''
-							null
-						''']
-				]
-				// lazy getter
-				clazz.addMethod('get' + name.toFirstUpper) [
-					returnType = fieldType
-					body = [
-						'''
-							if (m«name.toFirstUpper» ==  null)
-								m«name.toFirstUpper» = («toJavaCode(fieldType)») findViewById(R.id.«id»);
-							return m«name.toFirstUpper»;
-						''']
-				]
-			}
-		]
+		context.createViewGetters(xmlFile, clazz)
 	}
-
-	def getFieldType(Element e) {
-		val clazz = try {
-			Class.forName("android.widget." + e.nodeName)
-		} catch (ClassNotFoundException exception) {
-			try {
-				Class.forName("android.view." + e.nodeName)
-			} catch (ClassNotFoundException exception1) {
-				try {
-					Class.forName(e.nodeName)
-				} catch (ClassNotFoundException exception2) {
-					null
-				}
-			}
-		}
-
-		if (clazz != null && View.isAssignableFrom(clazz)) {
-			return clazz
-		}
-		return null
-	}
-
-	def getFieldName(Element e) {
-		return e?.id?.toJavaIdentifier
-	}
-
-	def getId(Element e) {
-		val id = e.getAttribute("android:id")
-		if (id.startsWith("@+id/")) {
-			return id.substring(5)
-		}
-		return null
-	}
-
 }

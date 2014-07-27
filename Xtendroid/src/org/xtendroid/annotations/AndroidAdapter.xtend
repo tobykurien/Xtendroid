@@ -16,6 +16,7 @@ import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
 import org.eclipse.xtend.lib.macro.declaration.Visibility
 
 import static extension org.xtendroid.utils.NamingUtils.*
+import static extension org.xtendroid.utils.AnnotationLayoutUtils.*
 import android.widget.TextView
 import android.widget.ImageView
 import org.eclipse.xtend.lib.macro.declaration.TypeReference
@@ -295,18 +296,18 @@ class CustomViewGroupProcessor extends AbstractClassProcessor {
 
 	// blatantly stolen from @AndroidActivity
 	// Caveat: This -ing thing cost me an hour of my life, apparently you need @Target(ElementType.TYPE) to get to the expression
-	def String getValue(MutableClassDeclaration clazz, extension TransformationContext context) {
+	def static String getAnnotationValue(extension TransformationContext context, MutableClassDeclaration clazz) {
 		var value = clazz.annotations.findFirst [
 			annotationTypeDeclaration.equals(CustomViewGroup.newTypeReference.type)
-		]?.getExpression("layout")
+		]?.getExpression("layout")?.toString
 
-		if (value == null) {
+		if (value.equals('0') || !value.contains('R.layout')) {
 			clazz.addError(
 				"You must enter the layout resource id like this: " + CustomViewGroup.newTypeReference.name +
 					("(layout = R.layout.something)"))
 		}
 
-		return value?.toString
+		return value
 	}
 
 	override doTransform(MutableClassDeclaration clazz, extension TransformationContext context) {
@@ -316,13 +317,6 @@ class CustomViewGroupProcessor extends AbstractClassProcessor {
 		if (!androidViewGroupType.isAssignableFrom(clazz.extendedClass)) {
 			clazz.addError(
 				String.format("%s must extend an extending type of %s.", clazz.simpleName, androidViewGroupType.name))
-		}
-
-		// determine there is at least one View type (e.g. ImageView or TextView) field that is contained within the custom layout
-		val androidViewFields = clazz.declaredFields.filter[f|View.newTypeReference.isAssignableFrom(f.type)]
-		if (androidViewFields.nullOrEmpty) {
-			clazz.addError(
-				"You must have at least one field of the type TextView or ImageView type or some customized type of those.")
 		}
 
 		clazz.addConstructor [
@@ -366,7 +360,25 @@ class CustomViewGroupProcessor extends AbstractClassProcessor {
 		val hasInitMethod = clazz.declaredMethods.exists[m|
 			m.simpleName.equalsIgnoreCase("init") && m.parameters.size == 1 &&
 				m.parameters?.head.type.equals(Context.newTypeReference)]
-		val layoutResourceID = getValue(clazz, context)
+		val layoutResourceID = context.getAnnotationValue(clazz)
+		
+		// add fields and lazy getters for the nested views
+		val viewFileName = layoutResourceID?.substring(layoutResourceID.lastIndexOf('.') + 1)
+		if (viewFileName == null) {
+			return;
+		}
+
+		val pathToCU = clazz.compilationUnit.filePath
+		val xmlFile = pathToCU.projectFolder.append("res/layout/" + viewFileName + ".xml")
+		
+		context.createViewGetters(xmlFile, clazz)
+
+		// determine there is at least one View type (e.g. ImageView or TextView) field that is contained within the custom layout
+		val androidViewFields = clazz.declaredFields.filter[f|View.newTypeReference.isAssignableFrom(f.type)]
+		if (androidViewFields.nullOrEmpty) {
+			clazz.addError(
+				"You must have at least one field of the type TextView or ImageView type or some customized type of those.")
+		}
 
 		if (!hasInitMethod) // I know: the name is very ObjC-ish.
 		{
@@ -422,6 +434,7 @@ class CustomViewGroupProcessor extends AbstractClassProcessor {
 		}
 	}
 
+	// TODO we should really stop renaming fields and get rid of stuff like this...
 	def String sanitizeName(String s) {
 		return s.replaceFirst("^_+", "")
 	}
