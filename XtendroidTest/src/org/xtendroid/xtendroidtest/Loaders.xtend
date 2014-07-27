@@ -1,20 +1,16 @@
 package org.xtendroid.xtendroidtest
 
-import org.xtendroid.app.AndroidActivity
-import org.xtendroid.xtendroidtest.R
-import android.os.Bundle
-//import android.content.Loader
-import org.xtendroid.parcel.AndroidParcelable
-import android.os.Parcelable
-import org.xtendroid.utils.BgLoader
-import org.xtendroid.annotations.AndroidLoader
 import android.app.Activity
-import org.xtendroid.annotations.AndroidFragment
 import android.app.Fragment
-import android.support.v4.app.FragmentActivity
-import android.support.v4.app.LoaderManager.LoaderCallbacks
-import android.support.v4.content.Loader
 import android.app.LoaderManager
+import android.content.Loader
+import android.os.Parcelable
+import android.support.v4.app.FragmentActivity
+import org.xtendroid.annotations.AndroidFragment
+import org.xtendroid.annotations.AndroidLoader
+import org.xtendroid.app.AndroidActivity
+import org.xtendroid.parcel.AndroidParcelable
+import org.xtendroid.utils.BgLoader
 
 @AndroidParcelable
 class LoaderPayLoad implements Parcelable {
@@ -31,14 +27,14 @@ class LoaderTestActivity0 extends FragmentActivity implements android.support.v4
 	var BgLoader<LoaderPayLoad> anotherThing = new BgLoader<LoaderPayLoad>(this, [|new LoaderPayLoad()], [])
 	var BgLoader<LoaderPayLoad> babyThatsWhat = new BgLoader<LoaderPayLoad>(this, [|new LoaderPayLoad()], [])
 
-	override onLoadFinished(Loader loader, Object data) {
+	override onLoadFinished(android.support.v4.content.Loader loader, Object data) {
 		if (loader.id == LOADER_ANOTHER_THING_ID)
 		{
 			// do something
 		}
 	}
 
-	override onLoaderReset(Loader loader) {
+	override onLoaderReset(android.support.v4.content.Loader loader) {
 	}
 }
 
@@ -50,14 +46,14 @@ class LoaderTestActivity1 extends FragmentActivity implements android.support.v4
 	var BgLoader<LoaderPayLoad> anotherThing = new BgLoader<LoaderPayLoad>(this, [|new LoaderPayLoad()], [])
 	var BgLoader<LoaderPayLoad> babyThatsWhat = new BgLoader<LoaderPayLoad>(this, [|new LoaderPayLoad()], [])
 
-	override onLoadFinished(Loader loader, Object data) {
+	override onLoadFinished(android.support.v4.content.Loader loader, Object data) {
 		if (loader.id == LOADER_ANOTHER_THING_ID)
 		{
 			// do something
 		}
 	}
 
-	override onLoaderReset(Loader loader) {
+	override onLoaderReset(android.support.v4.content.Loader loader) {
 	}
 }
 
@@ -65,14 +61,14 @@ class LoaderTestActivity1 extends FragmentActivity implements android.support.v4
 // NOTE: the sequence of the annotations matter
 @AndroidActivity(layout=R.layout.activity_main)
 @AndroidLoader
-class LoaderTestActivity2 extends android.app.Activity implements android.app.LoaderManager.LoaderCallbacks {
+class LoaderTestActivity2 extends Activity implements LoaderManager.LoaderCallbacks {
 
-	var android.content.Loader<LoaderPayLoad> a = new android.content.Loader<LoaderPayLoad>(this)
+	var Loader<LoaderPayLoad> a = new Loader<LoaderPayLoad>(this)
 	
-	override onLoadFinished(android.content.Loader loader, Object data) {
+	override onLoadFinished(Loader loader, Object data) {
 	}
 
-	override onLoaderReset(android.content.Loader loader) {
+	override onLoaderReset(Loader loader) {
 	}
 	
 }
@@ -84,26 +80,26 @@ class LoaderTestFragment1 extends android.support.v4.app.Fragment implements and
 	val BgLoader<LoaderPayLoad> anotherThing = new BgLoader<LoaderPayLoad>(this.activity, [|new LoaderPayLoad()], [])
 	val BgLoader<LoaderPayLoad> babyThatsWhat = new BgLoader<LoaderPayLoad>(this.activity, [|new LoaderPayLoad()], [])
 	
-	override onLoadFinished(Loader arg0, Object arg1) {
+	override onLoadFinished(android.support.v4.content.Loader arg0, Object arg1) {
 		throw new UnsupportedOperationException("TODO: auto-generated method stub")
 	}
 	
-	override onLoaderReset(Loader arg0) {
+	override onLoaderReset(android.support.v4.content.Loader arg0) {
 		throw new UnsupportedOperationException("TODO: auto-generated method stub")
 	}
 }
 
 @AndroidLoader
 @AndroidFragment
-class LoaderTestFragment2 extends Fragment implements android.app.LoaderManager.LoaderCallbacks {
-	var android.content.Loader<LoaderPayLoad> a = new android.content.Loader<LoaderPayLoad>(activity)
-	var android.content.Loader<LoaderPayLoad> b = new android.content.Loader<LoaderPayLoad>(activity)
+class LoaderTestFragment2 extends Fragment implements LoaderManager.LoaderCallbacks {
+	var Loader<LoaderPayLoad> a = new Loader<LoaderPayLoad>(activity)
+	var Loader<LoaderPayLoad> b = new Loader<LoaderPayLoad>(activity)
 	
-	override onLoadFinished(android.content.Loader loader, Object data) {
+	override onLoadFinished(Loader loader, Object data) {
 		throw new UnsupportedOperationException("TODO: auto-generated method stub")
 	}
 	
-	override onLoaderReset(android.content.Loader loader) {
+	override onLoaderReset(Loader loader) {
 		throw new UnsupportedOperationException("TODO: auto-generated method stub")
 	}
 	

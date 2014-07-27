@@ -2,19 +2,16 @@ package org.xtendroid.app
 
 import android.app.Activity
 import android.os.Bundle
-import android.view.View
+import java.lang.annotation.ElementType
+import java.lang.annotation.Target
 import org.eclipse.xtend.lib.macro.AbstractClassProcessor
 import org.eclipse.xtend.lib.macro.Active
 import org.eclipse.xtend.lib.macro.RegisterGlobalsContext
 import org.eclipse.xtend.lib.macro.TransformationContext
 import org.eclipse.xtend.lib.macro.declaration.ClassDeclaration
 import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
-import org.w3c.dom.Element
-import org.xtendroid.utils.NamingUtils
 
-import static extension org.xtendroid.utils.XmlUtils.*
-import java.lang.annotation.Target
-import java.lang.annotation.ElementType
+import static extension org.xtendroid.utils.AnnotationLayoutUtils.*
 
 /**
  * An active annotation for Android activities.
@@ -50,6 +47,8 @@ class AndroidActivityProcessor extends AbstractClassProcessor {
          return;
       }
       val pathToCU = annotatedClass.compilationUnit.filePath
+      
+      // TODO support res/layout-{suffix} 
       val xmlFile = pathToCU.projectFolder.append("res/layout/"+viewFileName+".xml")
       if (!xmlFile.exists) {
          annotatedClass.annotations.head.addError("There is no file in '"+xmlFile+"'.")
@@ -62,7 +61,7 @@ class AndroidActivityProcessor extends AbstractClassProcessor {
       }
       
       // is extendedClass the same or the super type of "android.app.Activity"
-	  if (android.app.Activity.newTypeReference.isAssignableFrom(annotatedClass.extendedClass))
+	  if (Activity.newTypeReference.isAssignableFrom(annotatedClass.extendedClass))
 	  {
         annotatedClass.implementedInterfaces = annotatedClass.implementedInterfaces + #[callBacksType.newTypeReference]
 	  }else
@@ -101,33 +100,10 @@ class AndroidActivityProcessor extends AbstractClassProcessor {
          ]
       }
       
-      // TODO also read the includes (recursively) for deeper structures
-      // read the XML
-      val viewType = View.newTypeReference
-      xmlFile.contentsAsStream.getDocument.traverseAllNodes[
-         // check for ids
-         val id = getId(it)
-         val name = getFieldName(it)
-         val fieldType = getFieldType(it)?.newTypeReference
-         if (name != null && fieldType != null) {
-            annotatedClass.addMethod('get'+name.toFirstUpper) [
-               returnType = fieldType
-               body = ['''
-                  return («toJavaCode(fieldType)») findViewById(R.id.«id»);
-               ''']
-            ]
-         }
-         
-         // check for strings
-         val onClick  = getAttribute("android:onClick")
-         if (!onClick.nullOrEmpty && fieldType != null) {
-            callBacksType.addMethod(NamingUtils.toJavaIdentifier(onClick)) [
-               addParameter("element", viewType)
-            ]
-         }
-      ]
+      context.createViewGettersWithCallBack(xmlFile, annotatedClass, callBacksType)
    }
    
+   // TODO unify and refactor out with @CustomViewGroup, @AndroidFragment 
    def String getValue(MutableClassDeclaration annotatedClass, extension TransformationContext context) {
       var value = annotatedClass.annotations.findFirst[
          annotationTypeDeclaration==AndroidActivity.newTypeReference.type
@@ -143,43 +119,5 @@ class AndroidActivityProcessor extends AbstractClassProcessor {
          }
       }
       return value.toString
-   }
-     
-   def getFieldType(Element e) {
-      val clazz = try {
-         Class.forName("android.widget."+e.nodeName)
-      } catch (ClassNotFoundException exception) {
-         try {
-            Class.forName("android.view."+e.nodeName)
-         } catch (ClassNotFoundException exception1) {
-            try {
-            	Class.forName(e.nodeName)
-	         } catch (ClassNotFoundException exception2) {
-	         	null
-             }
-         }
-      }
-      
-      
-      if (clazz != null && View.isAssignableFrom(clazz)) {
-         return clazz
-      }
-      return null
-   }
-   
-   def getFieldName(Element e) {
-      val id = getId(e)
-      if (id != null) {
-         return NamingUtils.toJavaIdentifier(id)
-      }
-      return null
-   }
-   
-   def getId(Element e) {
-      val id = e.getAttribute("android:id")
-      if (id.startsWith("@+id/")) {
-         return id.substring(5)
-      }
-      return null
    }
 }
