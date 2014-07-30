@@ -14,7 +14,9 @@ import android.text.TextUtils
 
 @Active(BundlePropertyProcessor)
 @Target(ElementType.FIELD)
-annotation BundleProperty {}
+annotation BundleProperty {
+	String value = ''
+}
 
 class BundlePropertyProcessor extends AbstractFieldProcessor {
 	
@@ -105,11 +107,11 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
 //		]
 		val intentField = clazz.declaredFields.findFirst[f|f.type.equals(Intent.newTypeReference)]
 		
-		var _prefix = context.determinePrefix(field, isDataSourceActivity, isDataSourceFragment, intentField/*, bundleField*/)
+		var _prefix = context.determinePrefix(field, isDataSourceActivity, isDataSourceFragment, intentField)
 		
 		val prefix = _prefix
 		
-//		val extraAnnotation = field.findAnnotation(BundleProperty.findTypeGlobally) // TODO use this for the default value
+		val alias = field.findAnnotation(BundleProperty.findTypeGlobally)?.getStringValue('value')
 
 		val fieldName = field.simpleName.santizedName
     	
@@ -121,7 +123,7 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
     		]
     	}
 
-    	if (!isDataSourceFragment && !clazz.declaredFields.exists[f| f.simpleName.equalsIgnoreCase('_intentHolder') && f.type.equals(Intent.newTypeReference)])
+    	if (intentField == null && !isDataSourceFragment && !clazz.declaredFields.exists[f| f.simpleName.equalsIgnoreCase('_intentHolder') && f.type.equals(Intent.newTypeReference)])
     	{
     		clazz.addField('_intentHolder') [
 	    		visibility = Visibility.PRIVATE
@@ -134,53 +136,29 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
     	
     	// add get method
     	val getterMethodName = "get" + fieldName.toFirstUpper
+    	val keyValue = if (alias.nullOrEmpty) fieldName else alias
     	if (!clazz.declaredMethods.exists[m|m.simpleName.equalsIgnoreCase(getterMethodName)])
     	{
 	    	clazz.addMethod(getterMethodName) [
 	    		visibility = Visibility.PUBLIC
 	    		returnType = field.type
 				body =['''
-					«IF isDataSourceActivity»
-						if (_intentHolder == null)
-						{
-							_intentHolder = getIntent();
-						}
-«««						// TODO primitives require default value
-						return _intentHolder.get«mapTypeToMethodName.get(field.type.simpleName)»Extra("«fieldName»"«IF field.type.primitive», «getterMethodDefaultName»()«ENDIF»);
-					«ELSEIF isDataSourceFragment»
-							if (_bundleHolder == null)
-							{
-								_bundleHolder = «prefix»;
-							}
-						«IF !field.type.primitive»
-							if («field.simpleName» == «mapTypeToNilValue.get(field.type.simpleName)»)
-							{
-								«field.simpleName» = _bundleHolder.get«mapTypeToMethodName.get(field.type.simpleName)»("«fieldName»");
-								«IF fieldInitializer != null»
-			«««						// this really looks fugly for primitive types..., so there's a specialized String/CharSequence clause
-									«IF field.type.simpleName.endsWith('String') || field.type.simpleName.endsWith('CharSequence')»
-										if («toJavaCode(TextUtils.newTypeReference)».isEmpty(«field.simpleName»))
-										{
-											«field.simpleName» = «getterMethodDefaultName»(); 
-										}
-									«ELSE»
-										if («field.simpleName» == «mapTypeToNilValue.get(field.type.simpleName)»)
-										{
-											«field.simpleName» = «getterMethodDefaultName»(); 
-										}
-									«ENDIF»
-								«ENDIF»
-							}
-							return «field.simpleName»;
+					«IF isDataSourceFragment»
+						«IF field.type.primitive || fieldInitializer != null»
+							«field.simpleName» = «prefix».get«mapTypeToMethodName.get(field.type.simpleName)»("«keyValue»");
+							return «field.simpleName» == «mapTypeToNilValue.get(field.type.simpleName)» ? «field.simpleName» : «getterMethodDefaultName»();
 						«ELSE»
-							return _bundleHolder.get«mapTypeToMethodName.get(field.type.simpleName)»("«fieldName»");
+							return «prefix».get«mapTypeToMethodName.get(field.type.simpleName)»("«keyValue»");
 						«ENDIF»
-					«ELSE»						
-						if (_intentHolder == null)
-						{
-							_intentHolder = «intentField.simpleName»;
-						}
-						return _intentHolder.get«mapTypeToMethodName.get(field.type.simpleName)»Extra("«fieldName»"«IF field.type.primitive», «getterMethodDefaultName»()«ENDIF»);
+					«ELSE»
+						«IF field.type.primitive»
+							return «prefix».get«mapTypeToMethodName.get(field.type.simpleName)»Extra("«keyValue»", «getterMethodDefaultName»());
+						«ELSEIF fieldInitializer != null»
+							«fieldName» = «prefix».get«mapTypeToMethodName.get(field.type.simpleName)»Extra("«keyValue»");
+							return «field.simpleName» == null ? «getterMethodDefaultName»() : «field.simpleName»;
+						«ELSE»
+							return «prefix».get«mapTypeToMethodName.get(field.type.simpleName)»Extra("«keyValue»");
+						«ENDIF»
 					«ENDIF»
 				''']    		
 	    	]
@@ -204,20 +182,10 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
     		returnType = clazz.newTypeReference
     		addParameter("value", field.type)
 			body =['''
-				«IF isDataSourceActivity»
-					if (_intentHolder == null)
-					{
-						_intentHolder = getIntent();
-					}
-					_intentHolder.putExtra("«fieldName»", value);
-				«ELSEIF isDataSourceFragment»
-					if (_bundleHolder == null)
-					{
-						_bundleHolder = «prefix»;
-					}
-					_bundleHolder.put«mapTypeToMethodName.get(field.type.simpleName)»("«fieldName»", value);
+				«IF isDataSourceFragment»
+					«prefix».put«mapTypeToMethodName.get(field.type.simpleName)»("«keyValue»", value);
 				«ELSE»
-					«intentField.simpleName».putExtra("«fieldName»", value);
+					«prefix».putExtra("«keyValue»", value);
 				«ENDIF»
 				return this;
 			''']    		
@@ -228,22 +196,18 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
 		var _prefix = ''
 		if (isDataSourceActivity)
 		{
-			return 'getIntent().getExtras()'
+			return 'getIntent()'
 		}else if(isDataSourceFragment)
 		{
 			return 'getArguments()'
-		}/*if (bundleField != null)
+		}else if (intentField != null)
 		{
-			return bundleField.simpleName 
-		}*/ if (intentField != null)
-		{
-			return intentField.simpleName + '.getExtras()' 
+			return intentField.simpleName
 		} else
 		{
 			field.declaringType.addError('You must provide an instantiated member of type Intent, if the declaring type of this field is not an Activity or Fragment.')
-			// TODO change this to clazz
 		}
-		_prefix
+		return _prefix
 	}
     
     def santizedName(String name)
