@@ -6,6 +6,7 @@ import org.eclipse.xtend.lib.macro.TransformationContext
 import org.eclipse.xtend.lib.macro.declaration.MutableFieldDeclaration
 import org.eclipse.xtend.lib.macro.declaration.TypeReference
 import org.eclipse.xtend.lib.macro.declaration.Visibility
+import org.xtendroid.utils.BasePreferences
 import org.xtendroid.utils.Utils
 
 import static extension org.xtendroid.utils.Utils.*
@@ -18,7 +19,16 @@ class AndroidPreferenceProcessor extends AbstractFieldProcessor {
 
    override doTransform(MutableFieldDeclaration field, extension TransformationContext context) {
       if (field.initializer == null)
-         field.addError("A Preference field must have an initializer.")
+      {
+         field.addError("A Preference field must have an initializer.")      	
+      }
+      
+      val clazz = field.declaringType
+      val isTypeOfBasePreferences = BasePreferences.newTypeReference.isAssignableFrom(clazz.newTypeReference)
+		if (!isTypeOfBasePreferences)
+		{
+			clazz.addError('This class must extend org.xtendroid.utils.BasePreferences')
+		}
 
       // add synthetic init-method
       var getter = if(field.type.simpleName.equalsIgnoreCase("Boolean")) "is" else "get"
