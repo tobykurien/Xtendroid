@@ -140,29 +140,48 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
 	    		visibility = Visibility.PUBLIC
 	    		returnType = field.type
 				body =['''
-					if (_bundleHolder == null)
-					{
-						_bundleHolder = «prefix»;
-					}
-					if («field.simpleName» == «mapTypeToNilValue.get(field.type.simpleName)»)
-					{
-						«field.simpleName» = _bundleHolder.get«mapTypeToMethodName.get(field.type.simpleName)»("«fieldName»");
-						«IF fieldInitializer != null»
-«««							// this really looks fugly for primitive types..., so there's a specialized String/CharSequence clause
-							«IF field.type.simpleName.endsWith('String') || field.type.simpleName.endsWith('CharSequence')»
-								if («toJavaCode(TextUtils.newTypeReference)».isEmpty(«field.simpleName»))
-								{
-									«field.simpleName» = «getterMethodDefaultName»(); 
-								}
-							«ELSE»
-								if («field.simpleName» == «mapTypeToNilValue.get(field.type.simpleName)»)
-								{
-									«field.simpleName» = «getterMethodDefaultName»(); 
-								}
-							«ENDIF»
+					«IF isDataSourceActivity»
+						if (_intentHolder == null)
+						{
+							_intentHolder = getIntent();
+						}
+«««						// TODO primitives require default value
+						return _intentHolder.get«mapTypeToMethodName.get(field.type.simpleName)»Extra("«fieldName»"«IF field.type.primitive», «getterMethodDefaultName»()«ENDIF»);
+					«ELSEIF isDataSourceFragment»
+							if (_bundleHolder == null)
+							{
+								_bundleHolder = «prefix»;
+							}
+						«IF !field.type.primitive»
+							if («field.simpleName» == «mapTypeToNilValue.get(field.type.simpleName)»)
+							{
+								«field.simpleName» = _bundleHolder.get«mapTypeToMethodName.get(field.type.simpleName)»("«fieldName»");
+								«IF fieldInitializer != null»
+			«««						// this really looks fugly for primitive types..., so there's a specialized String/CharSequence clause
+									«IF field.type.simpleName.endsWith('String') || field.type.simpleName.endsWith('CharSequence')»
+										if («toJavaCode(TextUtils.newTypeReference)».isEmpty(«field.simpleName»))
+										{
+											«field.simpleName» = «getterMethodDefaultName»(); 
+										}
+									«ELSE»
+										if («field.simpleName» == «mapTypeToNilValue.get(field.type.simpleName)»)
+										{
+											«field.simpleName» = «getterMethodDefaultName»(); 
+										}
+									«ENDIF»
+								«ENDIF»
+							}
+							return «field.simpleName»;
+						«ELSE»
+							return _bundleHolder.get«mapTypeToMethodName.get(field.type.simpleName)»("«fieldName»");
 						«ENDIF»
-					}
-					return «field.simpleName»;
+					«ELSE»						
+						if (_intentHolder == null)
+						{
+							_intentHolder = «intentField.simpleName»;
+						}
+						return _intentHolder.get«mapTypeToMethodName.get(field.type.simpleName)»Extra("«fieldName»"«IF field.type.primitive», «getterMethodDefaultName»()«ENDIF»);
+					«ENDIF»
 				''']    		
 	    	]
     	}
@@ -174,6 +193,9 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
 	    		returnType = field.type
     			body = fieldInitializer
     		]
+    	}else if (field.type.primitive && isDataSourceActivity)
+    	{
+    		field.addError('You must provide a default value for this primitive type. Or declare a function that provides this default value.')
     	}
 
 		// add put method, with chainable invocation

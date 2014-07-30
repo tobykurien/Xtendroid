@@ -26,13 +26,14 @@ class BundleBean
 	boolean[] bs = newBooleanArrayOfSize(5)
 	
 	@BundleProperty
-	byte bite
+	byte bite = 0 as byte
 	
 	@BundleProperty
 	byte[] bites
 	
 	@BundleProperty
-	char c
+	char c = "\\0".charAt(0)
+	
 	@BundleProperty
 	char[] cs
 	
@@ -46,19 +47,19 @@ class BundleBean
 	ArrayList<CharSequence> evenMore
 	
 	@BundleProperty
-	double d
+	double d = 0.0
 	
 	@BundleProperty
 	double[] ds
 	
 	@BundleProperty
-	float f
+	float f = 0.0f
 	
 	@BundleProperty
 	float[] fs
 	
 	@BundleProperty
-	int i
+	int i = 0
 	
 	@BundleProperty
 	int[] is
@@ -67,7 +68,7 @@ class BundleBean
 	ArrayList<Integer> iss
 	
 	@BundleProperty
-	long l
+	long l = 0
 	
 	@BundleProperty
 	long[] ls
@@ -85,14 +86,11 @@ class BundleBean
 	Serializable szszsz
 	
 	@BundleProperty
-	short sh
+	short sh = 0 as short
 	
 	@BundleProperty
 	short[] shshshshshs
 
-	@BundleProperty
-	short s
-	
 //	@BundleProperty // breaks in java, the Intent does not support this
 //	SparseArray<? extends Parcelable> sparpa
 	
@@ -123,13 +121,14 @@ class BundleActivity extends Activity {
 	boolean[] bs = newBooleanArrayOfSize(5)
 	
 	@BundleProperty
-	byte bite
+	byte bite = 0 as byte
 	
 	@BundleProperty
 	byte[] bites
 	
 	@BundleProperty
-	char c
+	char c = 0 as char
+	
 	@BundleProperty
 	char[] cs
 	
@@ -143,19 +142,19 @@ class BundleActivity extends Activity {
 	ArrayList<CharSequence> evenMore
 	
 	@BundleProperty
-	double d
+	double d = 0.0
 	
 	@BundleProperty
 	double[] ds
 	
 	@BundleProperty
-	float f
+	float f = 0.0f
 	
 	@BundleProperty
 	float[] fs
 	
 	@BundleProperty
-	int i
+	int i = 0
 	
 	@BundleProperty
 	int[] is
@@ -164,7 +163,7 @@ class BundleActivity extends Activity {
 	ArrayList<Integer> iss
 	
 	@BundleProperty
-	long l
+	long l = 0
 	
 	@BundleProperty
 	long[] ls
@@ -182,13 +181,13 @@ class BundleActivity extends Activity {
 	Serializable szszsz
 	
 	@BundleProperty
-	short sh
+	short sh = 0 as short
 	
 	@BundleProperty
 	short[] shshshshshs
 
 	@BundleProperty
-	short s
+	short s = 0 as byte
 	
 //	@BundleProperty // breaks in java, the Intent does not support this
 //	SparseArray<? extends Parcelable> sparpa
@@ -201,14 +200,13 @@ class BundleActivity extends Activity {
 	
 	@BundleProperty
 	ArrayList<String> mrstrs
-	
 }
 
 @AndroidFragment(layout=R.layout.activity_main)
 class BundleFragment1 extends android.app.Fragment {
 	
-//	@BundleProperty
-//	var Bundle bundle
+	@BundleProperty
+	var Bundle bundle
 	
 //	@BundleProperty
 //	var IBinder binder
@@ -303,8 +301,8 @@ class BundleFragment1 extends android.app.Fragment {
 @AndroidFragment(layout=R.layout.activity_main)
 class BundleFragment2 extends android.support.v4.app.Fragment {
 	
-//	@BundleProperty
-//	var Bundle bundle
+	@BundleProperty
+	var Bundle bundle
 	
 //	@BundleProperty
 //	var IBinder binder
