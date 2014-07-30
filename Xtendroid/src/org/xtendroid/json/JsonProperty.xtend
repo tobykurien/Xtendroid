@@ -1,21 +1,21 @@
 package org.xtendroid.json
 
-import org.eclipse.xtend.lib.macro.AbstractFieldProcessor
-import org.eclipse.xtend.lib.macro.Active
-import org.eclipse.xtend.lib.macro.TransformationContext
-import org.eclipse.xtend.lib.macro.declaration.MutableFieldDeclaration
-import org.eclipse.xtend.lib.macro.declaration.Visibility
-import org.json.JSONObject
-import org.json.JSONException
-import org.json.JSONArray
-import java.util.concurrent.ConcurrentHashMap
+import java.lang.annotation.ElementType
+import java.lang.annotation.Target
 import java.text.DateFormat
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.List
-import java.lang.annotation.ElementType
-import java.lang.annotation.Target
+import java.util.concurrent.ConcurrentHashMap
+import org.eclipse.xtend.lib.macro.AbstractFieldProcessor
+import org.eclipse.xtend.lib.macro.Active
+import org.eclipse.xtend.lib.macro.TransformationContext
+import org.eclipse.xtend.lib.macro.declaration.MutableFieldDeclaration
+import org.eclipse.xtend.lib.macro.declaration.Visibility
+import org.json.JSONArray
+import org.json.JSONException
+import org.json.JSONObject
 
 @Active(JsonPropertyProcessor)
 @Target(ElementType.FIELD)
@@ -27,30 +27,6 @@ annotation JsonProperty {
 
 /**
  * 
- * Future work:
- * annotation JsonEnumProperty
- * {
- *   String... value
- * }
- * 
- * should transpile to
- * 
- * public @interface JsonEnumProperty {
- *   String[] value() default “all”;
- * }
- * 
- * TODO either a JsonEnumProperty or add a parameter 'enums' to the existing @JsonProperty
- * 
- * So I can just define which enum values I expect from a JSON String.
- * A switch statement in getter method that returns a enum object (from a generated enum type)
- * will be generated accordingly.
- * 
- * 
- * TODO #toJSON()
- * JsonProperty should also generate a #toJSON method, to do the obvious
- */
-
-/**
  * @JsonProperty annotation creates a "Json bean" that accepts a JSONObject
  * and then parses it on-demand with getters.
  * 
@@ -144,14 +120,14 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
 			''']
          } else if (field.type.name.startsWith('java.util.Date'))
 		 {
-			exceptions = #[ java.text.ParseException.newTypeReference, org.json.JSONException.newTypeReference ]
+			exceptions = #[ ParseException.newTypeReference, JSONException.newTypeReference ]
 		 	if (field.type.array)
 		 	{
 		 		body = [
 		 		'''
 				if (!«field.simpleName»Loaded) {
-					final «JSONArray.findTypeGlobally.qualifiedName» «field.simpleName»JsonArray = «jsonObjectFieldName».getJSONArray("«jsonKey»");
-					this.«field.simpleName» = new «java.util.Date.findTypeGlobally.simpleName»[«field.simpleName»JsonArray.length()];
+					final «toJavaCode(JSONArray.newTypeReference)» «field.simpleName»JsonArray = «jsonObjectFieldName».getJSONArray("«jsonKey»");
+					this.«field.simpleName» = new «toJavaCode(Date.newTypeReference)»[«field.simpleName»JsonArray.length()];
 					for (int i=0; i<«field.simpleName»JsonArray.length(); i++)
 					{
 						this.«field.simpleName»[i] = «ConcurrentDateFormatHashMap.newTypeReference.name».convertStringToDate("«dateFormat»", «field.simpleName»JsonArray.getString(i));
@@ -227,7 +203,7 @@ class JsonPropertyProcessor extends AbstractFieldProcessor {
 				}
 				return «field.simpleName»;
 				''']
-				exceptions = #[ java.text.ParseException.newTypeReference, org.json.JSONException.newTypeReference ]
+				exceptions = #[ ParseException.newTypeReference, JSONException.newTypeReference ]
          	}else if (field.type.actualTypeArguments.exists[a | supportedTypes.containsKey(a.name)])
 			{
 				val baseTypeName = field.type.actualTypeArguments.map[a | a.name].join()
@@ -317,7 +293,7 @@ class ThreadLocalDateFormatter extends ThreadLocal<DateFormat>
 class ConcurrentDateFormatHashMap
 {
 	public val static concurrentMap = new ConcurrentHashMap<String, ThreadLocal<DateFormat>>();
-	private new() {}
+	public new() {}
 	public def static convertStringToDate(String dateFormat, String dateRaw) throws ParseException
 	{
 		if (!concurrentMap.containsKey(dateFormat))

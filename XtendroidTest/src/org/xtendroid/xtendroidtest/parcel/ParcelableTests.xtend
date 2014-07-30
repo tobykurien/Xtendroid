@@ -8,6 +8,7 @@ import org.json.JSONObject
 import org.json.JSONArray
 import java.util.List
 import android.util.SparseBooleanArray
+import org.xtendroid.annotations.EnumProperty
 
 /**
 forbidden non-primitive types:
@@ -24,6 +25,13 @@ forbidden non-primitive types:
 	Boolean BO
 	Boolean[] BOBO
 */
+
+@AndroidParcelable
+class SubModel implements Parcelable
+{
+	@JsonProperty
+	boolean a
+}
 
 @AndroidParcelable
 class ModelRoot implements Parcelable
@@ -126,13 +134,6 @@ class ModelRoot implements Parcelable
 	
 //	@Property // not supported with @AndroidParcelable
 //	Exception exception
-}
-
-@AndroidParcelable
-class SubModel implements Parcelable
-{
-	@JsonProperty
-	boolean a
 }
 
 @AndroidParcelable
@@ -310,17 +311,31 @@ class RRR // in the android dev context, it's dangerous to name a type 'R'
 	@JsonProperty
 	JSONObject obj
 	
-	public def add_i_and_j()
-	{
-		return _i + _j
-	}
-	
 	@JsonProperty
 	int i
 	
 	@JsonProperty
 	int j
+}
+
+enum ABCEnum
+{
+	a,b,c
+}
+
+@AndroidParcelable
+class EnumTypesHolder implements Parcelable
+{
+	@EnumProperty(enumType=ABCEnum) // pre-defined
+	String alpha = "a"
 	
+	
+	@EnumProperty(name="DEFEnum", values=#["d","e","f"])
+	@JsonProperty
+	String delta = "d"
+
+	@JsonProperty
+	String epsilon = "e"
 }
 
 @AndroidParcelable
