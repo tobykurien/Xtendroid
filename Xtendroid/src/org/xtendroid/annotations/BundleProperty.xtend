@@ -1,6 +1,7 @@
 package org.xtendroid.annotations
 
 import android.app.Activity
+import android.app.Fragment
 import android.content.Intent
 import android.os.Bundle
 import java.lang.annotation.ElementType
@@ -10,7 +11,6 @@ import org.eclipse.xtend.lib.macro.Active
 import org.eclipse.xtend.lib.macro.TransformationContext
 import org.eclipse.xtend.lib.macro.declaration.MutableFieldDeclaration
 import org.eclipse.xtend.lib.macro.declaration.Visibility
-import android.text.TextUtils
 
 @Active(BundlePropertyProcessor)
 @Target(ElementType.FIELD)
@@ -100,7 +100,7 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
     	}
 
 		val isDataSourceActivity = Activity.findTypeGlobally.isAssignableFrom(clazz)
-		val isDataSourceFragment = android.app.Fragment.findTypeGlobally.isAssignableFrom(clazz) ||
+		val isDataSourceFragment = Fragment.findTypeGlobally.isAssignableFrom(clazz) ||
 			 android.support.v4.app.Fragment.findTypeGlobally.isAssignableFrom(clazz)
 //		val bundleField = clazz.declaredFields.findFirst[f|f.type.equals(Bundle.newTypeReference)
 //			&& (f.annotations.findFirst[a|a.equals(BundleProperty.newAnnotationReference)] == null)
