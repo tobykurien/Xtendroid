@@ -10,6 +10,7 @@ import org.eclipse.xtend.lib.macro.Active
 import org.eclipse.xtend.lib.macro.TransformationContext
 import org.eclipse.xtend.lib.macro.declaration.MutableFieldDeclaration
 import org.eclipse.xtend.lib.macro.declaration.Visibility
+import android.text.TextUtils
 
 @Active(BundlePropertyProcessor)
 @Target(ElementType.FIELD)
@@ -99,12 +100,12 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
 		val isDataSourceActivity = Activity.findTypeGlobally.isAssignableFrom(clazz)
 		val isDataSourceFragment = android.app.Fragment.findTypeGlobally.isAssignableFrom(clazz) ||
 			 android.support.v4.app.Fragment.findTypeGlobally.isAssignableFrom(clazz)
-		val bundleField = clazz.declaredFields.findFirst[f|f.type.equals(Bundle.newTypeReference)
-			&& (f.annotations.findFirst[a|a.equals(BundleProperty.newAnnotationReference)] == null)
-		]
+//		val bundleField = clazz.declaredFields.findFirst[f|f.type.equals(Bundle.newTypeReference)
+//			&& (f.annotations.findFirst[a|a.equals(BundleProperty.newAnnotationReference)] == null)
+//		]
 		val intentField = clazz.declaredFields.findFirst[f|f.type.equals(Intent.newTypeReference)]
 		
-		var _prefix = context.determinePrefix(field, isDataSourceActivity, isDataSourceFragment, intentField, bundleField)
+		var _prefix = context.determinePrefix(field, isDataSourceActivity, isDataSourceFragment, intentField/*, bundleField*/)
 		
 		val prefix = _prefix
 		
@@ -112,11 +113,19 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
 
 		val fieldName = field.simpleName.santizedName
     	
-    	if (!clazz.declaredFields.exists[f| f.simpleName.equalsIgnoreCase('_bundleHolder')] && bundleField == null)
+    	if (!clazz.declaredFields.exists[f| f.simpleName.equalsIgnoreCase('_bundleHolder') && f.type.equals(Bundle.newTypeReference)])
     	{
     		clazz.addField('_bundleHolder') [
 	    		visibility = Visibility.PRIVATE
     			type = Bundle.newTypeReference
+    		]
+    	}
+
+    	if (!isDataSourceFragment && !clazz.declaredFields.exists[f| f.simpleName.equalsIgnoreCase('_intentHolder') && f.type.equals(Intent.newTypeReference)])
+    	{
+    		clazz.addField('_intentHolder') [
+	    		visibility = Visibility.PRIVATE
+    			type = Intent.newTypeReference
     		]
     	}
     	
@@ -139,10 +148,18 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
 					{
 						«field.simpleName» = _bundleHolder.get«mapTypeToMethodName.get(field.type.simpleName)»("«fieldName»");
 						«IF fieldInitializer != null»
-							if («field.simpleName» == «mapTypeToNilValue.get(field.type.simpleName)»)
-							{
-								«field.simpleName» = «getterMethodDefaultName»(); 
-							}
+«««							// this really looks fugly for primitive types..., so there's a specialized String/CharSequence clause
+							«IF field.type.simpleName.endsWith('String') || field.type.simpleName.endsWith('CharSequence')»
+								if («toJavaCode(TextUtils.newTypeReference)».isEmpty(«field.simpleName»))
+								{
+									«field.simpleName» = «getterMethodDefaultName»(); 
+								}
+							«ELSE»
+								if («field.simpleName» == «mapTypeToNilValue.get(field.type.simpleName)»)
+								{
+									«field.simpleName» = «getterMethodDefaultName»(); 
+								}
+							«ENDIF»
 						«ENDIF»
 					}
 					return «field.simpleName»;
@@ -165,17 +182,27 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
     		returnType = clazz.newTypeReference
     		addParameter("value", field.type)
 			body =['''
-				if (_bundleHolder == null)
-				{
-					_bundleHolder = «prefix»;
-				}
-				_bundleHolder.put«mapTypeToMethodName.get(field.type.simpleName)»("«fieldName»", value);
+				«IF isDataSourceActivity»
+					if (_intentHolder == null)
+					{
+						_intentHolder = getIntent();
+					}
+					_intentHolder.putExtra("«fieldName»", value);
+				«ELSEIF isDataSourceFragment»
+					if (_bundleHolder == null)
+					{
+						_bundleHolder = «prefix»;
+					}
+					_bundleHolder.put«mapTypeToMethodName.get(field.type.simpleName)»("«fieldName»", value);
+				«ELSE»
+					«intentField.simpleName».putExtra("«fieldName»", value);
+				«ENDIF»
 				return this;
 			''']    		
     	]
     }
 				
-	def determinePrefix(extension TransformationContext context, MutableFieldDeclaration field, boolean isDataSourceActivity, boolean isDataSourceFragment, MutableFieldDeclaration intentField, MutableFieldDeclaration bundleField) {
+	def determinePrefix(extension TransformationContext context, MutableFieldDeclaration field, boolean isDataSourceActivity, boolean isDataSourceFragment, MutableFieldDeclaration intentField/*, MutableFieldDeclaration bundleField*/) {
 		var _prefix = ''
 		if (isDataSourceActivity)
 		{
@@ -186,10 +213,10 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
 		}/*if (bundleField != null)
 		{
 			return bundleField.simpleName 
-		} if (intentField != null)
+		}*/ if (intentField != null)
 		{
 			return intentField.simpleName + '.getExtras()' 
-		}*/ else
+		} else
 		{
 			field.declaringType.addError('You must provide an instantiated member of type Intent, if the declaring type of this field is not an Activity or Fragment.')
 			// TODO change this to clazz
