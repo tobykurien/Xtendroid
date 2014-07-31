@@ -11,7 +11,7 @@ Introduction
 If you display toasts often, you know that typing out ```Toast.makeText(...).show();``` is a pain, and it's not easy to add it to a base class, since Activities (and Fragments) may extend multiple base classes (like ListActivity, FragmentActivity, etc.). Here's the easy way using Xtendroid:
 
 ```xtend
-import static extension org.xtendroid.utils.AlertUtils.*  // mix-in out alert utils
+import static extension org.xtendroid.utils.AlertUtils.*  // mix-in our alert utils
 
 // elsewhere
 toast("My short message")

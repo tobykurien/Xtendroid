@@ -3,12 +3,13 @@ Documentation
 
 Contents
 
-- [Activities and Fragments](#activities_and_fragments)
-- [Background Tasks and multi-threading](#background-tasks-and-multi-threading)
+- [Activities and Fragments](#activities-and-fragments)
+- [Background Tasks and multi-threading](#background-tasks-using-asynctask)
 - [Shared Preferences](#shared-preferences)
-- [Database](#datebase)
+- [Adapters](#generic-list-adapter)
+- [Database](#database)
 - [JSON handling](#json-handling)
-- [Bundles and Parcelables]()
+- [Bundles and Parcelables](#bundles-and-parcelables)
 - [Utilities](#utilities)
 
 
