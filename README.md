@@ -1,7 +1,9 @@
 Xtendroid
 =========
 
-Xtendroid is an Android library that combines the power of [Xtend][] (think: CoffeeScript for Java) with some utility classes/annotations for productive Android development. With Xtendroid, you can spend a lot less time writing boilerplate code and benefit from the tooling support provided by the Xtend framework.
+Xtendroid is an Android library that combines the power of [Xtend][] (think: CoffeeScript for Java) with some utility classes/annotations for productive Android development. With Xtendroid, you can spend a lot less time writing boilerplate code and benefit from the tooling support provided by the Xtend framework and Eclipse IDE. 
+
+Xtend code looks like Ruby or Groovy code, but is fully statically-typed and compiles to readable Java code. Infact most Java code is valid Xtend code too, making the learning curve very easy for Java developers. You can debug the original Xtend code or the generated Java code. The runtime library is very thin and includes [Google Guava][]. Xtend's extension methods and active annotations gives it meta-programming capabilities that are perfectly suited for Android development, and this is what Xtendroid takes advantage of. Xtend also provides lambdas, functional programming constructs, string templating, [and more][xtend-doc]. You could say that Xtend is Swift for Android.
 
 Note that Xtend and Xtendroid are currently only supported in Eclipse (Xtend is an Eclipse project), although projects using them can be compiled with Maven or Gradle.
 
@@ -104,4 +106,6 @@ Here are the current bugs you should know about:
 - [Android: R$array does not allow dot notation, although R$string and others do](https://bugs.eclipse.org/bugs/show_bug.cgi?id=437660)
 
 [Xtend]: http://xtend-lang.org
+[xtend-doc]: http://www.eclipse.org/xtend/documentation.html
+[Google Guava]: https://code.google.com/p/guava-libraries/
 [Active Annotations]: http://www.eclipse.org/xtend/documentation.html#activeAnnotation
