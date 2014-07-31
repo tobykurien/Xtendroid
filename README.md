@@ -1,20 +1,17 @@
 Xtendroid
 =========
 
-Xtendroid is an Android library that combines the power of [Xtend][] 
-(think: CoffeeScript for Java) with some utility classes/annotations for productive Android development. With Xtendroid, 
-you can spend a lot less time writing boilerplate code and benefit from the tooling support 
-provided by the Xtend framework. Xtendroid is based on the convention-over-configuration 
-philosophy, so resources in Android map automatically to Java getters and setters by name 
-(CamelCase to resource_name mapping).
+Xtendroid is an Android library that combines the power of [Xtend][] (think: CoffeeScript for Java) with some utility classes/annotations for productive Android development. With Xtendroid, you can spend a lot less time writing boilerplate code and benefit from the tooling support provided by the Xtend framework.
+
+Note that Xtend and Xtendroid are currently only supported in Eclipse (Xtend is an Eclipse project), although projects using them can be compiled with Maven or Gradle.
 
 Introduction
 ------------
 
-If you display toasts often, you know that typing out Toast.makeText... is a pain, and it's not easy to add it to a base class, since Activities may extend multiple base classes (like ListActivity, FragmentActivity, etc.) Here's the easy way using Xtendroid:
+If you display toasts often, you know that typing out ```Toast.makeText(...).show();``` is a pain, and it's not easy to add it to a base class, since Activities (and Fragments) may extend multiple base classes (like ListActivity, FragmentActivity, etc.). Here's the easy way using Xtendroid:
 
 ```xtend
-import static extension org.xtendroid.utils.AlertUtils.*
+import static extension org.xtendroid.utils.AlertUtils.*  // mix-in out alert utils
 
 // elsewhere
 toast("My short message")
@@ -27,7 +24,7 @@ Where is the reference to the Context object? It is implicit, thanks to Xtend:
 // this:
 toast(context, "My message")
 
-// is equivalent to:
+// in Xtend is equivalent to:
 context.toast("My message")
 
 // which, in an Activity is the same as:
@@ -37,9 +34,9 @@ this.toast("My message")
 toast("My message")
 ```
 
-The above magic, as well as the mix-in style ability of the "import static extension" of Xtend, is used to great effect in Xtendroid. 
+The above magic, as well as the mix-in style ability of the ```import static extension``` of Xtend, is used to great effect in Xtendroid. 
 
-In addition, Xtendroid implements several [Active Annotations][] (think of them as code generators) which remove most of the boilerplate-code that's associated with Android development. Here's an example of one of the most powerful Xtendroid annotations, ```@AndroidActivity```, which automatically extends the ```Activity``` class, loads the layout into the activity, parses the specified layout file, and creates getters/setters for each of the views contained there-in, at **edit-time** (not compile-time or runtime)! Once everything is ready, the method annotated with ```@OnCreate``` is called, to set up your views, although as with everything in Xtendroid, you are free to implement the ```onCreate()``` method yourself.
+In addition, Xtendroid implements several [Active Annotations][] (think of them as code generators) which remove most of the boilerplate-code that's associated with Android development. Here's an example of one of the most powerful Xtendroid annotations, ```@AndroidActivity```, which automatically extends the ```Activity``` class, loads the layout into the activity, parses the specified layout file, and creates getters/setters for each of the views contained there-in, at **edit-time**! You will immediately get code-completion and outline for your views! Any method annotated with ```@OnCreate``` is called at runtime once the views are ready, although as with everything in Xtendroid, you are free to implement the ```onCreate()``` method yourself.
 
 ```xtend
 @AndroidActivity(R.layout.my_activity) class MyActivity {
@@ -52,9 +49,9 @@ In addition, Xtendroid implements several [Active Annotations][] (think of them 
 }
 ``` 
 
-View this video of how this works and how well it integrates with the IDE: http://vimeo.com/77024959
+Note that the Active Annotations run at compile-time and simply generate the usual Java code for you, so there is no runtime performance impact. View this video of how this works and how well it integrates with the Eclipse IDE: http://vimeo.com/77024959
 
-Xtendroid combines extension methods, active annotations, and convention-over-configuration (convention-over-code) to provide you with a highly productive environment for Android development, where you are still writing standard Android code, but without boilerplate code.
+Xtendroid combines extension methods, active annotations, and convention-over-configuration (convention-over-code) to provide you with a highly productive environment for Android development, where you are still writing standard Android code, but without all that boilerplate.
 
 Documentation
 -------------
@@ -66,7 +63,7 @@ Samples
 
 There are several examples in the examples folder: https://github.com/tobykurien/Xtendroid/tree/master/examples
 
-For an example of a live project that uses this library, see the Webapps project https://github.com/tobykurien/webapps
+For an example of a live project that uses this library, see the Webapps project: https://github.com/tobykurien/webapps
 
 Getting Started
 ===============

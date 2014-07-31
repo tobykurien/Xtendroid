@@ -3,48 +3,17 @@ Documentation
 
 Contents
 
-- Introduction
-- Activities and Fragments
-- Background Tasks and multi-threading
-- Shared Preferences
-- Database
-- JSON handling
-- Bundles and Parcelables
+- [Activities and Fragments](#activities_and_fragments)
+- [Background Tasks and multi-threading](#background-tasks-and-multi-threading)
+- [Shared Preferences](#shared-preferences)
+- [Database](#datebase)
+- [JSON handling](#json-handling)
+- [Bundles and Parcelables]()
+- [Utilities](#utilities)
 
 
-Toasts
-------
-
-If you display toasts often, you know that typing out Toast.makeText... is a pain, and it's not easy to add it to a base class, since Activities may extend multiple base classes (like ListActivity, FragmentActivity, etc.) Here's the easy way using Xtendroid:
-
-```xtend
-import static extension org.xtendroid.utils.AlertUtils.*
-
-// elsewhere
-toast("My short message")
-toastLong("This message displays for longer")
-```
-
-Where is the reference to the Context object? It is implicit, thanks to Xtend:
-
-```xtend
-// this:
-toast(context, "My message")
-
-// is equivalent to:
-context.toast("My message")
-
-// which, in an Activity is the same as:
-this.toast("My message")
-
-// But "this" is implicit, so we can shorten it to:
-toast("My message")
-```
-
-The above magic, as well as the mix-in style ability of the "import static extension" of Xtend, is used to great effect in Xtendroid.
-
-Android view resources
-----------------------
+Activities and Fragments
+------------------------
 
 Want to access a view in your Activity? Instead of
 
@@ -380,6 +349,11 @@ Currently, nested JSON beans are not yet supported, although you can declare
 ```@JsonProperty JSONObject user`` for example. See the 
 [JsonTest](https://github.com/tobykurien/Xtendroid/blob/master/XtendroidTest/XtendroidTestCasesTest/src/org/xtendroid/xtendroidtest/test/JsonTest.xtend)
 for more.
+
+Bundles and Parcelables
+-----------------------
+
+Coming soon...
 
 
 Utilities
