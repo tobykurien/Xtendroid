@@ -3,14 +3,14 @@ Xtendroid
 
 Xtendroid is an Android library that combines the power of [Xtend][] (think: CoffeeScript for Java) with some utility classes/annotations for productive Android development. With Xtendroid, you can spend a lot less time writing boilerplate code and benefit from the tooling support provided by the Xtend framework and Eclipse IDE. 
 
-Xtend code looks like Ruby or Groovy code, but is fully statically-typed and compiles to readable Java code. Infact most Java code is valid Xtend code too, making the learning curve very easy for Java developers. You can debug the original Xtend code or the generated Java code. The runtime library is very thin and includes [Google Guava][]. Xtend's extension methods and active annotations gives it meta-programming capabilities that are perfectly suited for Android development, and this is what Xtendroid takes advantage of. Xtend also provides lambdas, functional programming constructs, string templating, [and more][xtend-doc]. You could say that Xtend is Swift for Android.
+Xtend code looks like Ruby or Groovy code, but is fully statically-typed and compiles to readable Java code. Infact most Java code is valid Xtend code too, making the learning curve very easy for Java developers. You can debug the original Xtend code or the generated Java code. The runtime library is very thin and includes [Google Guava][]. Xtend's extension methods and active annotations gives it meta-programming capabilities that are perfectly suited for Android development, and this is what Xtendroid takes advantage of. Xtend also provides lambdas and other functional programming constructs, string templating, [and more][xtend-doc]. You could say that Xtend is Swift for Android.
 
 Note that Xtend and Xtendroid are currently only supported in Eclipse (Xtend is an Eclipse project), although projects using them can be compiled with Maven or Gradle.
 
 Introduction
 ------------
 
-If you display toasts often, you know that typing out ```Toast.makeText(...).show();``` is a pain, and it's not easy to add it to a base class, since Activities (and Fragments) may extend multiple base classes (like ListActivity, FragmentActivity, etc.). Here's the easy way using Xtendroid:
+If you display toasts often, you know that typing out ```Toast.makeText(msg, Toast.LENGTH_SHORT).show();``` is a pain, and it's not easy to add it to a base class, since Activities (and Fragments) may extend multiple base classes (like ListActivity, FragmentActivity, etc.). Here's the easy way using Xtendroid:
 
 ```xtend
 import static extension org.xtendroid.utils.AlertUtils.*  // mix-in our alert utils
@@ -53,12 +53,12 @@ In addition, Xtendroid implements several [Active Annotations][] (think of them 
 
 Note that the Active Annotations run at compile-time and simply generate the usual Java code for you, so there is no runtime performance impact. View this video of how this works and how well it integrates with the Eclipse IDE: http://vimeo.com/77024959
 
-Xtendroid combines extension methods, active annotations, and convention-over-configuration (convention-over-code) to provide you with a highly productive environment for Android development, where you are still writing standard Android code, but without all that boilerplate.
+Xtendroid combines extension methods, active annotations, and convention-over-configuration to provide you with a highly productive environment for Android development, where you are still writing standard Android code, but without all that boilerplate.
 
 Documentation
 -------------
 
-View the documentation [here](/Xtendroid/docs/index.md).
+View the documentation [here][doc].
 
 Samples
 -------
@@ -77,7 +77,7 @@ Method 1:
 - If you are using an existing or new Android project:
 -- Right-click on your project -> Properties -> Java Build Path 
 -- Click Libraries -> Add library -> Xtend Library
-- Now you can use it as shown in the examples above.
+- Now you can use it as documented [here][doc].
 
 
 Method 2:
@@ -88,7 +88,7 @@ Method 2:
 - If you are using an existing or new Android project:
 -- Right-click on your project -> Properties -> Java Build Path 
 -- Click Libraries -> Add library -> Xtend Library
-- Now you can use it as shown in the examples above.
+- Now you can use it as documented [here][doc].
 
 Xtend
 =====
@@ -105,7 +105,10 @@ Here are the current bugs you should know about:
 - [Android: First-opened Xtend editor shows many errors and never clears those errors after build ](https://bugs.eclipse.org/bugs/show_bug.cgi?id=433589)
 - [Android: R$array does not allow dot notation, although R$string and others do](https://bugs.eclipse.org/bugs/show_bug.cgi?id=437660)
 
+If in doubt, clean the project, and re-open the editor.
+
 [Xtend]: http://xtend-lang.org
 [xtend-doc]: http://www.eclipse.org/xtend/documentation.html
 [Google Guava]: https://code.google.com/p/guava-libraries/
 [Active Annotations]: http://www.eclipse.org/xtend/documentation.html#activeAnnotation
+[doc]: /Xtendroid/docs/index.md

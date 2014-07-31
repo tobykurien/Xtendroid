@@ -16,60 +16,10 @@ Contents
 Activities and Fragments
 ------------------------
 
-Want to access a view in your Activity? Instead of
-
-```java
-TextView myTextView;
-
-// elsewhere
-myTextView = (TextView) findViewById(R.id.my_text_view);
-myTextView.setText("some text");
-```
-
-do this using Xtendroid in an Activity:
+You can bind all the view widgets in an Activity layout file to the code automatically by using the @AndroidActivity annotation, as follows:
 
 ```xtend
-@AndroidView TextView myTextView // maps to R.id.my_text_view
-
-// elsewhere
-myTextView.text = "some text" // uses a getter for lazy-loading the actual view
-```
-
-The reference to the R class could be missing if you have not used it anywhere in
-your Activity or Fragment, in which case you can specify it as follows:
-```xtend
-   val r = R // field declaration to import and reference correct R class
-```
-
-In a ```Fragment```, you can use the same code, but add the ```@AndroidFragment``` annotation, 
-and ensure that you only reference your widgets after onCreateView() is called, otherwise the 
-widgets will still be null. Typically, you can initialize your widget in ```onActivityCreated()```. 
-Here is an example of a Fragment:
-
-```xtend
-@AndroidFragment class MyFragment extends Fragment {
-	@AndroidView TextView myText // references R.id.my_text
-	
-	override onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-	   // inflate and return our layout here
-		inflater.inflate(R.layout.fragment_myfragment, container, false)
-	}
-	
-	override onActivityCreated(Bundle savedInstanceState) {
-		super.onActivityCreated(savedInstanceState)
-		
-		// initialize our widgets
-		myText.text = "Hello, fragment!"
-	}  		
-}
-```
-
-As an alternative to using individual ```@AndroidView``` annotations, you can bind all the controls in an 
-Activity layout file to the code automatically by using the @AndroidActivity annotation, as follows (this is 
-not currently supported in Fragments):
-
-```xtend
-@AndroidActivity(layout=R.layout.my_activity) class MyActivity {
+@AndroidActivity(R.layout.my_activity) class MyActivity {
 
 	@OnCreate
 	def init(Bundle savedInstanceState) {
@@ -82,13 +32,25 @@ not currently supported in Fragments):
 
 Here, you specify the layout resource using the ```@AndroidActivity``` annotation, and Xtendroid will automatically parse the layout file and create getters for all the controls within the layout. This will be immediately accessible in the IDE (you will see the controls in your outline view and code-complete list). It will also auto-generate the ```onCreate()``` method if it doesn't exist, extend from ```Activity``` class, and load the layout into the Activity. Finally, it will look for any method with the ```@OnCreate``` annotation, and call them within the ```onCreate()``` method once the controls are ready to be accessed.
 
-View this video of how this works and how well it integrates with the IDE: http://vimeo.com/77024959
+You can do something similar in a fragment using the ```@AndroidFragment``` annotation, but beware that in a fragment, the layout is loaded in the ```onCreateView()``` method and the controls are only ready to be accessed in ```onCreateView()``` or ```onCreateActivity()``` methods. If you simply use the ```@OnCreate``` annotation on your method that instantiates the fragment, this will all be taken care of for you:
+
+```xtend
+@AndroidFragment(R.layout.my_fragment) class MyFragment {
+
+	@OnCreate
+	def init(Bundle savedInstanceState) {
+		myTextView.text = "some text"
+	}
+
+}
+
+```
 
 
 Background tasks using AsyncTask
 --------------------------------
 
-Do you find the AsyncTask boilerplate code too messy? Try the BgTask class:
+A class called ```BgTask``` is provided, that extends the standard ```AsyncTask``` and works in much the same way, but provides lambda parameters for the background task and the UI task, thus reducing boilerplate:
 
 ```xtend
 new BgTask<String>.runInBg([|
@@ -108,15 +70,18 @@ val progressBar = new ProgressDialog(...)
 new BgTask<String>.runInBgWithProgress(progressBar, [|
    // this bit runs in a background thread, progressDialog automatically displayed
    var retVal = fetchStringFromSomewhere()
-   runOnUiThread[| progressBar.progress = 10 ] // update UI
-   retVal
+   
+   // update progress UI from background thread
+   runOnUiThread[| progressBar.progress = 10 ] 
+   
+   return retVal // return keyword is optional
 ],[result|
    // this runs in the UI thread, progressDialog automatically dismissed afterwards
    toast("Got back: " + result)
 ])
 ```
 
-Handling errors in a background task is made easy: you can simply pass a third lambda function that will be executed if an error occurs during the background task:
+No ```onProgressUpdate`` method is needed, since it is trivial to use the ```runOnUiThread``` method instead, as shown above.  Handling errors in a background task is made easy: you can simply pass a third lambda function that will be executed if an error occurs during the background task:
 
 ```xtend
 new BgTask<String>.runInBg([|
@@ -137,9 +102,9 @@ Since Honeycomb, Android has defaulted to using a single thread for all AsyncTas
 Shared Preferences
 ------------------
 
-If you are using SharedPreferences, and you have a PreferenceActivity to allow the user to change app settings, then the BasePreferences class and @AndroidPreference annotation makes it super-easy to access the settings in your Activity:
+If you are using ```SharedPreferences```, and you have a ```PreferenceActivity``` to allow the user to change app settings, then the ```BasePreferences``` class and ```@AndroidPreference``` annotation makes it super-easy to access the settings in your activity:
 
-Create a Settings class:
+Create a ```Settings``` class:
 ```xtend
 class Settings extends BasePreferences {
    @AndroidPreference boolean enabled = true // maps to preference "enabled"
@@ -172,6 +137,16 @@ if (settings.enabled) {
 }
 ```
 
+In a fragment or wherever a ```Context``` object is available, you can simply append the context object as follows:
+```xtend
+import static extension Settings.*
+
+// elsewhere in the fragment
+if (activity.settings.enabled) {
+   activity.settings.authToken = "new auth token"
+}
+```
+
 Generic list adapter
 --------------------
 
@@ -197,12 +172,11 @@ class User {
 
 The Activity:
 ```xtend
-@AndroidView ListView userList // maps to R.id.user_list
-
-// in onCreate
-var List<User> users = getUsers(...) // load the beans from somewhere
-var adapter = new BeanAdapter<User>(this, R.layout.row_user, users)
-userList.adapter = adapter
+@OnCreate def init(Bundle instanceState) {
+	var List<User> users = getUsers(...) // load the beans from somewhere
+	var adapter = new BeanAdapter<User>(this, R.layout.row_user, users)
+	userList.adapter = adapter // assuming the ListView is R.id.user_list
+}
 ```
 
 The list will now display the data. If you need to add some presentation logic, for 
