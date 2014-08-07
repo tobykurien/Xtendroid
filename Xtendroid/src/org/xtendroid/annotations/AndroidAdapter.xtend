@@ -69,14 +69,36 @@ class AdapterizeProcessor extends AbstractClassProcessor {
 		]
 
 		val dataContainerField = dataContainerFields.head
+		val dataContainerFieldTypeConst = dataContainerField.type
 		clazz.addConstructor [
 			visibility = Visibility::PUBLIC
 			body = [
 				'''
-					this.«dataContainerField.simpleName» = data;
 					this.mContext = context;
+					this.«dataContainerField.simpleName» = data;
 				''']
-			addParameter("data", dataContainerField.type)
+			addParameter("context", Context.newTypeReference)
+			addParameter("data", dataContainerFieldTypeConst)
+		]
+		
+		// ctor with empty data container
+		clazz.addConstructor [
+			visibility = Visibility::PUBLIC
+			if (dataContainerFieldTypeConst.simpleName.contains("ArrayList"))
+			{
+				body = [
+					'''
+						this(context, new «toJavaCode(dataContainerFieldTypeConst)»());
+					''']
+			}else
+			{
+				body = [
+					// if the type is List, you also must initialize your own
+					'''
+						this(context, null); // allocate your own array
+					'''
+				]
+			}
 			addParameter("context", Context.newTypeReference)
 		]
 
