@@ -20,6 +20,7 @@ import static extension org.xtendroid.utils.AnnotationLayoutUtils.*
 import android.widget.TextView
 import android.widget.ImageView
 import org.eclipse.xtend.lib.macro.declaration.TypeReference
+import java.util.ArrayList
 
 /**
  * 
@@ -52,7 +53,7 @@ class AdapterizeProcessor extends AbstractClassProcessor {
 
 		// determine data container
 		val dataContainerFields = clazz.declaredFields.filter[f|
-			(f.type.name.startsWith(List.newTypeReference.name) || f.type.array) && !f.final]
+			(f.type.name.contains(ArrayList.newTypeReference.name) || f.type.name.contains(List.newTypeReference.name) || f.type.array) && !f.final]
 
 		// determine if it provides an aggregate data object
 		if (dataContainerFields.empty) {
@@ -84,7 +85,9 @@ class AdapterizeProcessor extends AbstractClassProcessor {
 		// ctor with empty data container
 		clazz.addConstructor [
 			visibility = Visibility::PUBLIC
-			if (dataContainerFieldTypeConst.simpleName.contains("ArrayList"))
+			// TODO e.g. HashMaps etc. should all be supported; maybe later
+			// when there's an overwhelming demand.		
+			if (dataContainerFieldTypeConst.name.contains("ArrayList"))
 			{
 				body = [
 					'''
@@ -176,6 +179,8 @@ class AdapterizeProcessor extends AbstractClassProcessor {
 			addAnnotation(Override.newAnnotationReference)
 			body = [
 				'''
+«««					// this one is for the case that the data container has not been initialized
+					if («dataContainerField.simpleName» == null) return 0;
 					«IF dataContainerField.type.array»
 						return «dataContainerField.simpleName».length;
 					«ELSE»
