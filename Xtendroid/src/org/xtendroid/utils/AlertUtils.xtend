@@ -48,14 +48,22 @@ class AlertUtils {
       toastLong(fragment.activity, message)
    }
    
-   def static confirm(Context context, String message, ()=>void confirmed) {
+   def static confirm(Context context, String message, ()=>void confirmed, ()=>void cancelled) {
       new AlertDialog.Builder(context)
          .setMessage(message)
-         .setPositiveButton(R.string.ok, [a,b| confirmed.apply() ])
-         .setNegativeButton(R.string.cancel, [a,b| a.dismiss ])
+         .setPositiveButton(R.string.ok, [a,b| confirmed?.apply(); a.dismiss; ])
+         .setNegativeButton(R.string.cancel, [a,b| cancelled?.apply(); a.dismiss; ])
          .create.show
    }
+
+   def static confirm(Context context, String message, ()=>void confirmed) {
+   	confirm(context, message, confirmed, null)
+	}
    
+   def static confirm(Fragment fragment, String message, ()=>void confirmed, ()=>void cancelled) {
+      confirm(fragment.activity, message, confirmed, cancelled)
+   }   
+
    def static confirm(Fragment fragment, String message, ()=>void confirmed) {
       confirm(fragment.activity, message, confirmed)
    }   
