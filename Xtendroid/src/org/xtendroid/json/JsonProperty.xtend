@@ -31,6 +31,7 @@ annotation JsonProperty {
  * and then parses it on-demand with getters.
  * 
  */
+@Deprecated
 class JsonPropertyProcessor extends AbstractFieldProcessor {
    // types supported by JSONObject
    val static supportedTypes = #{

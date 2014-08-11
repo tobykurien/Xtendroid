@@ -163,7 +163,7 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 
 		for (n : loaderFieldNames) {
 			initString += '''
-				if (lm.getLoader(«n.loaderIdFromName») != null)
+				if (lm.getLoader(«n.loaderIdFromName») == null)
 				{
 					lm.initLoader(«n.loaderIdFromName», null, (%s) this);
 				}
