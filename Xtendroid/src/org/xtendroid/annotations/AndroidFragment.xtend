@@ -11,10 +11,12 @@ import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
 import org.eclipse.xtend.lib.macro.declaration.Visibility
 
 import static extension org.xtendroid.utils.AnnotationLayoutUtils.*
+import org.xtendroid.utils.AnnotationLayoutUtils
 
 @Active(typeof(FragmentProcessor))
 annotation AndroidFragment {
-	int layout = 0
+	int layout = -1
+	int value = -1
 }
 
 class FragmentProcessor extends AbstractClassProcessor {
@@ -48,9 +50,7 @@ class FragmentProcessor extends AbstractClassProcessor {
 
 		// See if a layout is defined, then create accessors for them, if they actually exist
 		// TODO I suspect that @CustomViewGroup in AndroidAdapter can reuse the layout parameter getter method
-		val String layoutResId = clazz.annotations.findFirst [
-			AndroidFragment.newTypeReference.type.equals(annotationTypeDeclaration)
-		]?.getExpression("layout")?.toString
+		val String layoutResId = AnnotationLayoutUtils.getLayoutValue(clazz, context, AndroidFragment.newTypeReference)
 
 		if (layoutResId == null || "0".equals(layoutResId) || !layoutResId.contains('R.layout')) {
 			clazz.addWarning('You may add a layout resource id to the annotation, like this: @AndroidFragment(layout=R.layout...).')

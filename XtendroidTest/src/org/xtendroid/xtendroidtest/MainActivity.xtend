@@ -10,7 +10,7 @@ import org.xtendroid.xtendroidtest.models.ManyItem
 
 import static extension org.xtendroid.xtendroidtest.db.DbService.*
 
-@AndroidActivity(layout=R.layout.activity_main) class MainActivity {
+@AndroidActivity(R.layout.activity_main) class MainActivity {
 	@OnCreate
 	def create() {
 		mainHello.text = getString(R.string.hello_world)

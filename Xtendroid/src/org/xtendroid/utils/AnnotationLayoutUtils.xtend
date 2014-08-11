@@ -8,6 +8,8 @@ import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
 import org.eclipse.xtend.lib.macro.TransformationContext
 import org.eclipse.xtend.lib.macro.file.Path
 import org.eclipse.xtend.lib.macro.declaration.MutableInterfaceDeclaration
+import org.xtendroid.app.AndroidActivity
+import org.eclipse.xtend.lib.macro.declaration.TypeReference
 
 class AnnotationLayoutUtils {
 	def static getFieldType(Element e) {
@@ -145,4 +147,21 @@ class AnnotationLayoutUtils {
 		]
 	}
 
+   // TODO unify and refactor out with @CustomViewGroup, @AndroidFragment 
+   def public static String getLayoutValue(MutableClassDeclaration annotatedClass, extension TransformationContext context, TypeReference typeRef) {
+      var value = annotatedClass.annotations.findFirst[
+         annotationTypeDeclaration==typeRef.type
+      ].getExpression("layout")
+      
+      if (value == null || value.toString.trim == "-1") {
+      	value = annotatedClass.annotations.findFirst[
+            annotationTypeDeclaration==typeRef.type
+         ].getExpression("value")
+         
+         if (value == null) {
+            return null
+         }
+      }
+      return value.toString
+   }
 }
