@@ -51,9 +51,7 @@ class FragmentProcessor extends AbstractClassProcessor {
 		}
 
 		// See if a layout is defined, then create accessors for them, if they actually exist
-		// TODO I suspect that @CustomViewGroup in AndroidAdapter can reuse the layout parameter getter method
 		val String layoutResId = AnnotationLayoutUtils.getLayoutValue(clazz, context, AndroidFragment.newTypeReference)
-
 		if (layoutResId == null || "0".equals(layoutResId) || !layoutResId.contains('R.layout')) {
 			clazz.addWarning('You may add a layout resource id to the annotation, like this: @AndroidFragment(layout=R.layout...).')
 			return;
@@ -79,8 +77,8 @@ class FragmentProcessor extends AbstractClassProcessor {
 			return;
 		}
 
-      // create onCreate if not present
-      if (clazz.findDeclaredMethod("onCreate", Bundle.newTypeReference()) == null) {
+      // create onViewCreated if not present
+      if (clazz.findDeclaredMethod("onViewCreated", Bundle.newTypeReference()) == null) {
          // prepare @OnCreate methods
          val onCreateAnnotation = OnCreate.newTypeReference.type
          val onCreateMethods = clazz.declaredMethods.filter[annotations.exists[annotationTypeDeclaration==onCreateAnnotation]]
