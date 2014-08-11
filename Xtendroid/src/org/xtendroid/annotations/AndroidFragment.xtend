@@ -12,6 +12,8 @@ import org.eclipse.xtend.lib.macro.declaration.Visibility
 
 import static extension org.xtendroid.utils.AnnotationLayoutUtils.*
 import org.xtendroid.utils.AnnotationLayoutUtils
+import android.app.Fragment
+import org.xtendroid.app.OnCreate
 
 @Active(typeof(FragmentProcessor))
 annotation AndroidFragment {
@@ -57,6 +59,11 @@ class FragmentProcessor extends AbstractClassProcessor {
 			return;
 		}
 
+      // add 'extends Fragment' if necessary
+      if (clazz.extendedClass == Object.newTypeReference()) {
+         clazz.extendedClass = Fragment.newTypeReference
+      }
+
 		val layoutFileName = layoutResId?.substring(layoutResId.lastIndexOf('.') + 1)
 		if (layoutFileName == null) {
 			return;
@@ -72,20 +79,49 @@ class FragmentProcessor extends AbstractClassProcessor {
 			return;
 		}
 
-		// if the user supplied a layout, inflate it
-		if (!clazz.declaredMethods.exists[simpleName.equals("onCreateView")])
-			clazz.addMethod("onCreateView") [
-				addAnnotation(Override.newAnnotationReference)
-				returnType = View.newTypeReference
-				addParameter("inflater", LayoutInflater.newTypeReference)
-				addParameter("container", ViewGroup.newTypeReference)
-				addParameter("savedInstanceState", Bundle.newTypeReference)
-				body = [
-					'''
-						View view = inflater.inflate(«layoutResId», container, false);
-						return view;
-					''']
-			]
+      // create onCreate if not present
+      if (clazz.findDeclaredMethod("onCreate", Bundle.newTypeReference()) == null) {
+         // prepare @OnCreate methods
+         val onCreateAnnotation = OnCreate.newTypeReference.type
+         val onCreateMethods = clazz.declaredMethods.filter[annotations.exists[annotationTypeDeclaration==onCreateAnnotation]]
+         for (m : onCreateMethods) {
+            if (m.parameters.empty) {
+               m.addParameter("savedInstanceState", Bundle.newTypeReference)
+            } else {
+               if (m.parameters.size > 1) {
+                  m.parameters.get(1).addError("Methods annotated with @OnCreate might only have zero or one parameter.")
+               } else {
+                  if (m.parameters.head.type != Bundle.newTypeReference) {
+                     m.parameters.head.addError("The single parameter type must be of type Bundle.")
+                  }
+               }
+            }
+         }
+         
+         clazz.addMethod("onViewCreated") [
+            addParameter("view", View.newTypeReference)
+            addParameter("savedInstanceState", Bundle.newTypeReference)
+            body = ['''
+               super.onViewCreated(view, savedInstanceState);
+               «FOR method : onCreateMethods»
+                  «method.simpleName»(savedInstanceState);
+               «ENDFOR»
+            ''']
+         ]
+      }
+         
+		clazz.addMethod("onCreateView") [
+			addAnnotation(Override.newAnnotationReference)
+			returnType = View.newTypeReference
+			addParameter("inflater", LayoutInflater.newTypeReference)
+			addParameter("container", ViewGroup.newTypeReference)
+			addParameter("savedInstanceState", Bundle.newTypeReference)
+			body = [
+				'''
+					View view = inflater.inflate(«layoutResId», container, false);
+					return view;
+				''']
+      ]
 
 		context.createViewGetters(xmlFile, clazz)
 	}

@@ -22,10 +22,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
         <activity android:name="org.xtendroid.xtendroidtest.MainActivity2" />
-        
         <activity android:name="org.xtendroid.xtendroidtest.SettingsActivity" />
+        <activity android:name="org.xtendroid.xtendroidtest.FragmentActivity" />
     </application>
 
 </manifest>

@@ -130,7 +130,7 @@ class BundleBean
 	
 }
 
-@AndroidActivity(layout=R.layout.activity_main)
+@AndroidActivity(layout=R.layout.activity_bundle)
 class BundleActivity extends Activity {
 
 	@BundleProperty
@@ -230,7 +230,7 @@ class BundleActivity extends Activity {
 	ArrayList<String> mrstrs
 }
 
-@AndroidFragment(layout=R.layout.activity_main)
+@AndroidFragment(layout=R.layout.activity_bundle)
 class BundleFragment1 extends android.app.Fragment {
 	
 	@BundleProperty
@@ -331,7 +331,7 @@ class BundleFragment1 extends android.app.Fragment {
 	
 }
 
-@AndroidFragment(layout=R.layout.activity_main)
+@AndroidFragment(layout=R.layout.activity_bundle)
 class BundleFragment2 extends android.support.v4.app.Fragment {
 	
 	@BundleProperty

@@ -9,6 +9,7 @@ import org.xtendroid.app.OnCreate
 import org.xtendroid.xtendroidtest.models.ManyItem
 
 import static extension org.xtendroid.xtendroidtest.db.DbService.*
+import android.view.View
 
 @AndroidActivity(R.layout.activity_main) class MainActivity {
 	@OnCreate
@@ -34,6 +35,11 @@ import static extension org.xtendroid.xtendroidtest.db.DbService.*
 		}
 		
 		super.onOptionsItemSelected(item)
+	}
+	
+	override loadFragmentActivity(View element) {
+		var intent = new Intent(this, FragmentActivity)
+		startActivity(intent)
 	}
 	
 }

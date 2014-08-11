@@ -21,7 +21,7 @@ class LoaderPayLoad implements Parcelable {
 
 // NOTE: the sequence of the annotations matter
 @AndroidLoader
-@AndroidActivity(layout=R.layout.activity_main)
+@AndroidActivity(layout=R.layout.activity_bundle)
 class LoaderTestActivity0 extends FragmentActivity implements android.support.v4.app.LoaderManager.LoaderCallbacks {
 	var BgLoader<LoaderPayLoad> something = new BgLoader<LoaderPayLoad>(this, [|new LoaderPayLoad()], [])
 	var BgLoader<LoaderPayLoad> anotherThing = new BgLoader<LoaderPayLoad>(this, [|new LoaderPayLoad()], [])
@@ -40,7 +40,7 @@ class LoaderTestActivity0 extends FragmentActivity implements android.support.v4
 
 // NOTE: the sequence of the annotations matter
 @AndroidLoader
-@AndroidActivity(layout=R.layout.activity_main)
+@AndroidActivity(layout=R.layout.activity_bundle)
 class LoaderTestActivity1 extends FragmentActivity implements android.support.v4.app.LoaderManager.LoaderCallbacks {
 	var BgLoader<LoaderPayLoad> something = new BgLoader<LoaderPayLoad>(this, [|new LoaderPayLoad()], [])
 	var BgLoader<LoaderPayLoad> anotherThing = new BgLoader<LoaderPayLoad>(this, [|new LoaderPayLoad()], [])
@@ -59,7 +59,7 @@ class LoaderTestActivity1 extends FragmentActivity implements android.support.v4
 
 
 // NOTE: the sequence of the annotations matter
-@AndroidActivity(layout=R.layout.activity_main)
+@AndroidActivity(layout=R.layout.activity_bundle)
 @AndroidLoader
 class LoaderTestActivity2 extends Activity implements LoaderManager.LoaderCallbacks {
 
