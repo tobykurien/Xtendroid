@@ -78,6 +78,11 @@ class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDec
 		if (unsupportedTypes.exists[t|field.type.name.startsWith(t)])
 			field.addError(field.type + " is not supported for @AndroidJson.")
 
+		val jsonPropertyAnnotation = JsonProperty.newTypeReference().type
+		if (field.annotations.exists[annotationTypeDeclaration == jsonPropertyAnnotation]){
+			return			
+		}
+
 		// The ctor is added if the raw JSON string container needs to be generated
 		if (!field.declaringType.declaredFields.exists[it.simpleName.equals(jsonObjectFieldName)]) {
 
