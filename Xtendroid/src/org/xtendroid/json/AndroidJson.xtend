@@ -65,7 +65,18 @@ class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDec
 	}
 
 	def dispatch void transform(MutableClassDeclaration it, extension TransformationContext context) {
-		it.declaredFields.forEach[f| f.doTransform(context)]
+		val jsonPropertyAnnotation = JsonProperty.newTypeReference().type
+		val androidJsonAnnotation = AndroidJson.newTypeReference().type
+
+		it.declaredFields.forEach[f| 
+			if (f.annotations.exists[
+				annotationTypeDeclaration == jsonPropertyAnnotation ||
+				annotationTypeDeclaration == androidJsonAnnotation ]){
+				return			
+			} else {
+				f.doTransform(context)
+			}
+		]
 	}
 
 	def dispatch void transform(MutableFieldDeclaration it, extension TransformationContext context) {
@@ -77,11 +88,6 @@ class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDec
 		// startsWith because float[] and Float[] are also disallowed
 		if (unsupportedTypes.exists[t|field.type.name.startsWith(t)])
 			field.addError(field.type + " is not supported for @AndroidJson.")
-
-		val jsonPropertyAnnotation = JsonProperty.newTypeReference().type
-		if (field.annotations.exists[annotationTypeDeclaration == jsonPropertyAnnotation]){
-			return			
-		}
 
 		// The ctor is added if the raw JSON string container needs to be generated
 		if (!field.declaringType.declaredFields.exists[it.simpleName.equals(jsonObjectFieldName)]) {

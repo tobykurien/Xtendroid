@@ -1,12 +1,11 @@
 package org.xtendroid.xtendroidtest.test
 
 import android.test.AndroidTestCase
+import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.List
 import org.json.JSONObject
 import org.xtendroid.json.AndroidJson
-import org.xtendroid.json.JsonProperty
-import java.text.SimpleDateFormat
 
 /**
  * 
@@ -34,13 +33,13 @@ import java.text.SimpleDateFormat
 }
 
 class DateTypes {
-	@JsonProperty("yyyy-MM-dd")
+	@AndroidJson("yyyy-MM-dd")
 	var Date scalar
 
-	@JsonProperty("yyyy-MM-dd")
+	@AndroidJson("yyyy-MM-dd")
 	var Date[] array
 
-	@JsonProperty("yyyy-MM-dd")
+	@AndroidJson("yyyy-MM-dd")
 	var List<Date> list
 }
 
@@ -73,7 +72,7 @@ class DateTypes {
 	var Double ddt
 	var double dt
 
-	@JsonProperty("it")
+	@AndroidJson("it")
 	var int it_is_a_reserved_keyword = 0
 
 	var Integer iit = 0

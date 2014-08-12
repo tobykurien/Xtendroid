@@ -29,8 +29,9 @@ annotation JsonProperty {
  * 
  * @JsonProperty annotation creates a "Json bean" that accepts a JSONObject
  * and then parses it on-demand with getters.
- * 
+ * @deprecated Use @AndroidJson instead, does the same thing, and more
  */
+@Deprecated
 class JsonPropertyProcessor extends AbstractFieldProcessor {
    // types supported by JSONObject
    val static supportedTypes = #{

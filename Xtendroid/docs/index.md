@@ -30,7 +30,7 @@ You can bind all the view widgets in an Activity layout file to the code automat
 
 ```
 
-Here, you specify the layout resource using the ```@AndroidActivity``` annotation, and Xtendroid will automatically parse the layout file and create getters for all the controls within the layout. This will be immediately accessible in the IDE (you will see the controls in your outline view and code-complete list). It will also auto-generate the ```onCreate()``` method if it doesn't exist, extend from ```Activity``` class, and load the layout into the Activity. Finally, it will look for any method with the ```@OnCreate``` annotation, and call them within the ```onCreate()``` method once the controls are ready to be accessed.
+Here, you specify the layout resource using the ```@AndroidActivity``` annotation, and Xtendroid will automatically parse the layout file and create getters for all the controls within the layout. This will be immediately accessible in the IDE (you will see the controls in your outline view and code-complete list). It will also auto-generate the ```onCreate()``` method if it doesn't exist, extend from ```Activity``` class, and load the layout into the Activity. Finally, it will look for any methods with the ```@OnCreate``` annotation, and call them within the ```onCreate()``` method once the controls are ready to be accessed. This annotation also ensures that all ```android:onClick``` method references in the layout exist in the activity, and if not, marks the activity with an error.
 
 You can do something similar in a fragment using the ```@AndroidFragment``` annotation, but beware that in a fragment, the layout is loaded in the ```onCreateView()``` method and the controls are only ready to be accessed in ```onViewCreated()``` or ```onActivityCreated()``` methods. If you simply use the ```@OnCreate``` annotation on your method that instantiates the fragment, this will all be taken care of for you:
 
@@ -81,7 +81,7 @@ new BgTask<String>.runInBgWithProgress(progressBar, [|
 ])
 ```
 
-No ```onProgressUpdate`` method is needed, since it is trivial to use the ```runOnUiThread``` method instead, as shown above.  Handling errors in a background task is made easy: you can simply pass a third lambda function that will be executed if an error occurs during the background task:
+No ```onProgressUpdate`` method is needed, since it is trivial to use the ```runOnUiThread``` method instead, as shown above.  Handling errors in a background task is made easy: you can simply pass a third lambda function that will be executed (in the UI thread) if an error occurs during the background task:
 
 ```xtend
 new BgTask<String>.runInBg([|
@@ -301,18 +301,18 @@ This can become memory-inefficient if you only need a small amount of data from 
 (and you discard the rest), but in that case, you are wasting the user's bandwidth and 
 should seek to improve the JSON API call.
 
-Creating a JSON bean is done as in this example:
+Creating a JSON bean is done using the ```@AndroidJson``` annotation, as in this example:
 
 ```xtend
-class NewsItem {
-	@JsonProperty String url
-	@JsonProperty String title
-	@JsonProperty long id
-	@JsonProperty boolean published
+@AndroidJson class NewsItem {
+	String url
+	String title
+	long id
+	boolean published
 }
 ```
 
-You can then load JSON into the bean as in this example:
+The annotation creates a constructor (that takes the JSONObject), and generates lazy-parsing getters for each private field. You can then load JSON into the bean and use it, as in this example:
 
 ```xtend
 var jsonResponse = '''{"url":"http://one.com", "title": "One", "id": 1, "published": true}'''
@@ -320,10 +320,25 @@ var newsItem = new NewsItem(new JSONObject(jsonResponse))
 toast(newsItem.title) // JSON parsed here and cached for later use
 ```
 
-Currently, nested JSON beans are not yet supported, although you can declare
-```@JsonProperty JSONObject user`` for example. See the 
+Nested JSON beans are supported (you can have a field that is another bean annotated with the ```@AndroidJson``` annotation. See the 
 [JsonTest](https://github.com/tobykurien/Xtendroid/blob/master/XtendroidTest/XtendroidTestCasesTest/src/org/xtendroid/xtendroidtest/test/JsonTest.xtend)
 for more.
+
+In addition to using it at the class-level, you can also use it at the field-level to specify additional parameters, like date format or property name, as in this example:
+
+```xtend
+@AndroidJson JsonData {
+	String title
+	
+	@AndroidJson("yyyy-MM-dd") // date format
+	Date createdAt
+	
+	@AndroidJson("createdBy") // we want to map "createdBy" json property to "author" field
+	String author	
+}
+```
+
+Note: The ```@JsonProperty``` annotation has been deprecated in favour of ```@AndroidJson```.
 
 Bundles and Parcelables
 -----------------------
