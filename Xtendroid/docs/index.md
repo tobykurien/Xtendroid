@@ -106,44 +106,53 @@ If you are using ```SharedPreferences```, and you have a ```PreferenceActivity``
 
 Create a ```Settings``` class:
 ```xtend
-class Settings extends BasePreferences {
-   @AndroidPreference boolean enabled = true // maps to preference "enabled"
-   @AndroidPreference String authToken = ""  // maps to preference "auth_token"
-
-   /** 
-    * convenience method to get instance:
-    *   var s = Settings.getSettings(context)
-    *   s.XXX()
-    * can be shortened as (using import static extension):
-    *   context.getSettings().XXX()
-    * which can further be shortened in an Activity or other context as:
-    *   getSettings().XXX()
-    * which can be shortened further as:
-    *   settings.XXX 
-    */
-   def static Settings getSettings(Context context) {
-      return getPreferences(context, Settings)
-   }
+@AndroidPreference class Settings {
+   boolean enabled = true // maps to preference "enabled"
+   String authToken = ""  // maps to preference "auth_token"
 }
 ```
+
+The ```@AndroidPreference``` annotation will automatically make the class extend ```BasePreferences```, add getters/setters for each field that maps by name to the appropriate resource in your settings XML file, and finally creates a static getter method named ```get[Your class name]``` that gives you the syntactic sugar to use it in any activity or fragment, as follows:
 
 Now you can use the Settings class in any Activity:
 ```xtend
 import static extension Settings.*
 
-// elsewhere
+// elsewhere in activity or fragment
 if (settings.enabled) {
    settings.authToken = "new auth token" // How cool is this?
 }
 ```
 
-In a fragment or wherever a ```Context``` object is available, you can simply append the context object as follows:
+Whoa! Where did the ```settings``` object/keyword come from in the code above? It is a reference to the static ```getSettings(Context context)``` method that was automatically added to the ```Settings``` class by the annotation, and then statically imported as an extension method. In Xtend:
+
+```xtend
+// this
+Settings.getSettings(context).enabled = true
+
+// can be reduced to this by import static extension Settings.*
+getSettings(context).enabled = true
+
+// which is the same as this (extension method)
+context.getSettings().enabled = true
+
+// which, in an activity is the same as
+this.getSettings().enabled = true
+
+// since "this" is implicit, that becomes
+getSettings().enabled = true
+
+// and Xtend gives further syntax sugar for that, so it becomes
+settings.enabled = true
+```
+
+Outside an activity or fragment, when a ```Context``` object is available, you can simply append the context object as follows:
 ```xtend
 import static extension Settings.*
 
-// elsewhere in the fragment
-if (activity.settings.enabled) {
-   activity.settings.authToken = "new auth token"
+// elsewhere in the service/receiver
+if (context.settings.enabled) {
+   context.settings.authToken = "new auth token"
 }
 ```
 
@@ -320,7 +329,7 @@ var newsItem = new NewsItem(new JSONObject(jsonResponse))
 toast(newsItem.title) // JSON parsed here and cached for later use
 ```
 
-Nested JSON beans are supported (you can have a field that is another bean annotated with the ```@AndroidJson``` annotation. See the 
+Nested JSON beans are supported (you can have a field that is another bean annotated with the ```@AndroidJson``` annotation). See the 
 [JsonTest](https://github.com/tobykurien/Xtendroid/blob/master/XtendroidTest/XtendroidTestCasesTest/src/org/xtendroid/xtendroidtest/test/JsonTest.xtend)
 for more.
 

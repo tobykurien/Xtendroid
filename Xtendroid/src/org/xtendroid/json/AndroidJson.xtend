@@ -61,7 +61,7 @@ class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDec
 	val public static jsonObjectFieldName = "_jsonObj"
 
 	override doTransform(List<? extends MutableMemberDeclaration> elements, TransformationContext context) {
-		elements.forEach[e|e.transform(context)]
+		elements.forEach[e| e.transform(context) ]
 	}
 
 	def dispatch void transform(MutableClassDeclaration it, extension TransformationContext context) {
@@ -74,7 +74,7 @@ class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDec
 				annotationTypeDeclaration == androidJsonAnnotation ]){
 				return			
 			} else {
-				f.doTransform(context)
+				if (f.visibility == Visibility.PRIVATE) f.doTransform(context)
 			}
 		]
 	}
