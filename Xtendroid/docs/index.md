@@ -112,7 +112,7 @@ Create a ```Settings``` class:
 }
 ```
 
-The ```@AndroidPreference``` annotation will automatically make the class extend ```BasePreferences```, add getters/setters for each field that maps by name to the appropriate resource in your settings XML file, and finally creates a static getter method named ```get[Your class name]``` that gives you the syntactic sugar to use it in any activity or fragment, as follows:
+The ```@AndroidPreference``` annotation will automatically make the class extend ```BasePreferences```, add getters/setters for each *private* and *non-annotated* field that maps by name to the appropriate resource in your settings XML file, and finally creates a static getter method named ```get[Your class name]``` that gives you the syntactic sugar to use it in any activity or fragment, as follows:
 
 Now you can use the Settings class in any Activity:
 ```xtend
@@ -326,7 +326,7 @@ Creating a JSON bean is done using the ```@AndroidJson``` annotation, as in this
 }
 ```
 
-The annotation creates a constructor (that takes the JSONObject), and generates lazy-parsing getters for each private field. You can then load JSON into the bean and use it, as in this example:
+The annotation creates a constructor (that takes the JSONObject), and generates lazy-parsing getters for each *private* and *non-annotated* field. You can then load JSON into the bean and use it, as in this example:
 
 ```xtend
 var jsonResponse = '''{"url":"http://one.com", "title": "One", "id": 1, "published": true}'''
@@ -335,8 +335,7 @@ toast(newsItem.title) // JSON parsed here and cached for later use
 ```
 
 Nested JSON beans are supported (you can have a field that is another bean annotated with the ```@AndroidJson``` annotation). See the 
-[JsonTest](https://github.com/tobykurien/Xtendroid/blob/master/XtendroidTest/XtendroidTestCasesTest/src/org/xtendroid/xtendroidtest/test/JsonTest.xtend)
-for more.
+[JsonTest](../../XtendroidTest/XtendroidTestCasesTest/src/org/xtendroid/xtendroidtest/test/JsonTest.xtend) for more.
 
 In addition to using it at the class-level, you can also use it at the field-level to specify additional parameters, like date format or property name, as in this example:
 
