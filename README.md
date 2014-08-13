@@ -101,12 +101,12 @@ Now the activity class to fetch the quote from the internet (in a background thr
 
 *MainActivity.xtend*
 ```xtend
-@AndroidActivity(layout=R.layout.activity_main) class MainActivity {
+@AndroidActivity(R.layout.activity_main) class MainActivity {
 
    @OnCreate
    def init() {
       // set up the button to load quotes
-      mainLoadQuote.setOnClickListener([
+      mainLoadQuote.onClickListener = [
          // show progress
          val pd = new ProgressDialog(this)
          pd.message = "Loading quote..."
@@ -122,7 +122,7 @@ Now the activity class to fetch the quote from the internet (in a background thr
             // handle any errors by toasting it
             toast("Error: " + error.message)
          ])
-      ])
+      ]
    }
 
    /**
