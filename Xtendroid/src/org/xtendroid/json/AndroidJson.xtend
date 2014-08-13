@@ -65,17 +65,9 @@ class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDec
 	}
 
 	def dispatch void transform(MutableClassDeclaration it, extension TransformationContext context) {
-		val jsonPropertyAnnotation = JsonProperty.newTypeReference().type
-		val androidJsonAnnotation = AndroidJson.newTypeReference().type
-
 		it.declaredFields.forEach[f| 
-			if (f.annotations.exists[
-				annotationTypeDeclaration == jsonPropertyAnnotation ||
-				annotationTypeDeclaration == androidJsonAnnotation ]){
-				return			
-			} else {
-				if (f.visibility == Visibility.PRIVATE && f.annotations.empty) f.doTransform(context)
-			}
+			if (f.visibility == Visibility.PRIVATE && f.annotations.empty) 
+				f.doTransform(context)		
 		]
 	}
 

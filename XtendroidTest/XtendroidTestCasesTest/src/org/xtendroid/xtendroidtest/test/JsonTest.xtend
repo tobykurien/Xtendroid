@@ -6,6 +6,9 @@ import java.util.Date
 import java.util.List
 import org.json.JSONObject
 import org.xtendroid.json.AndroidJson
+import org.xtendroid.annotations.BundleProperty
+import java.lang.annotation.Documented
+import android.annotation.SuppressLint
 
 /**
  * 
@@ -69,13 +72,13 @@ class DateTypes {
 
 @AndroidJson class Response {
 	ResultHolder responseData = null
-	var Double ddt
-	var double dt
-
 	@AndroidJson("it")
 	var int it_is_a_reserved_keyword = 0
 
-	var Integer iit = 0
+	var protected Double ddt // this gets left alone
+	var package double dt // this gets left alone
+	var public Integer iit = 0 // this gets left alone
+	
 	var long lt = 0
 	var Long llt = null
 	var boolean bt = false
@@ -145,8 +148,11 @@ class JsonTest extends AndroidTestCase {
 		assertEquals(ret.get(0).published, true)
 		assertEquals(ret.get(3).published, false)
 
-		assertEquals(response.ddt, 0.01)
-		assertEquals(response.dt, 0.01)
+		// these fields should have been left alone
+		assertNull(response.ddt) //assertEquals(response.ddt, 0.01)
+		assertEquals(0.0, response.dt) //assertEquals(response.dt, 0.01)
+		assertEquals(0, response.iit)
+		
 		assertEquals(response.itisareservedkeyword, 1234)
 		assertEquals(response.lt, 2345)
 		assertTrue(response.bt)
