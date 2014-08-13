@@ -52,7 +52,7 @@ class AndroidPreferenceProcessor implements TransformationParticipant<MutableMem
       ]
  
  		clazz.declaredFields.forEach[f| 
-			if (f.visibility == Visibility.PRIVATE) f.doTransform(context)
+			if (f.visibility == Visibility.PRIVATE && f.annotations.empty) f.doTransform(context)
 		]
 	}
 

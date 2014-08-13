@@ -74,7 +74,7 @@ class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDec
 				annotationTypeDeclaration == androidJsonAnnotation ]){
 				return			
 			} else {
-				if (f.visibility == Visibility.PRIVATE) f.doTransform(context)
+				if (f.visibility == Visibility.PRIVATE && f.annotations.empty) f.doTransform(context)
 			}
 		]
 	}
