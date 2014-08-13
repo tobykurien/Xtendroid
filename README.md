@@ -3,7 +3,7 @@ Xtendroid
 
 Xtendroid is an Android library that combines the power of [Xtend][] (think: CoffeeScript for Java) with some utility classes and annotations for productive Android development. With Xtendroid, you can spend a lot less time writing boilerplate code and benefit from the tooling support provided by the Xtend framework and Eclipse IDE.
 
-Xtend code looks like Ruby or Groovy code, but is fully statically-typed and compiles to readable Java code. Most Java code is valid Xtend code too, making the learning curve very easy for Java developers. You can debug the original Xtend code or the generated Java code. The runtime library is very thin and includes [Google Guava][]. Xtend's *extension methods* and *active annotations* gives it meta-programming capabilities that are perfectly suited for Android development, and this is what Xtendroid takes advantage of. Xtend also provides lambdas and other functional programming constructs, string templating, [and more][xtend-doc]. You could say that Xtend is [Swift][] for Android.
+Xtend code looks like Ruby or Groovy code, but is fully statically-typed and compiles to readable Java code. Most Java code is valid Xtend code too, making the learning curve very easy for Java developers. You can debug the original Xtend code or the generated Java code. The runtime library is very thin and includes [Google Guava][]. Xtend's *extension methods* and *active annotations* gives it meta-programming capabilities that are perfectly suited for Android development, and this is what Xtendroid takes advantage of. Xtend also provides lambdas and other functional programming constructs, string templating, type inference, [and more][xtend-doc]. You could say that Xtend is [Swift][] for Android.
 
 Note that Xtend and Xtendroid are currently only supported in Eclipse (Xtend is an Eclipse project), although projects using them can be compiled with Maven or Gradle.
 
@@ -137,7 +137,7 @@ Now the activity class to fetch the quote from the internet (in a background thr
       if (c.responseCode == HttpURLConnection.HTTP_OK) {
          // read data into a buffer
          var os = new ByteArrayOutputStream
-			 ByteStreams.copy(c.inputStream, os) // Guava utility            
+         ByteStreams.copy(c.inputStream, os) // Guava utility            
          return os.toString
       }
 
@@ -146,7 +146,7 @@ Now the activity class to fetch the quote from the internet (in a background thr
 }
 ```
 
-That's it! Note the lack of boilerplate code as well as Java verbosity in things like exception handling. 
+Declare the activity in your ```AndroidManifest.xml``` file, add the internet permission, and that's it! Note the lack of boilerplate code and Java verbosity in things like exception handling and implementing anonymous inner classes for handlers. 
 
 This and other examples are in the [examples folder][examples].
 
