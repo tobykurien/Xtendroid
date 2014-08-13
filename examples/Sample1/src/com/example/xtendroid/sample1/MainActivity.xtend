@@ -62,6 +62,6 @@ import com.google.common.io.ByteStreams
          return os.toString
       }
 
-      throw new Exception("Error from server, status " + c.responseCode + " " + c.responseMessage)
+      throw new Exception("[" + c.responseCode + "] " + c.responseMessage)
    }
 }
