@@ -63,7 +63,12 @@ Documentation
 
 Xtendroid has helpers for things like activities and fragments (as shown above), background processing, shared preferences, adapters, database handling, JSON handling, and more. Combining these, you get concise and expressive code.
 
-As an example, here's an app that fetches a quote from the internet and displays it. First, the activity layout:
+View the full reference documentation for Xtendroid [here][doc].
+
+Samples
+-------
+
+Here's an example of an app that fetches a quote from the internet and displays it. First, the activity layout:
 
 *res/layout/activity_main.xml*
 ```xml
@@ -92,7 +97,7 @@ As an example, here's an app that fetches a quote from the internet and displays
 
 ```
 
-Now the activity to fetch the quote from the internet (in a background thread), handle any errors, and display the result. Imports and package declaration omitted.
+Now the activity class to fetch the quote from the internet (in a background thread), handle any errors, and display the result. Imports and package declaration omitted.
 
 *MainActivity.xtend*
 ```xtend
@@ -141,14 +146,9 @@ Now the activity to fetch the quote from the internet (in a background thread), 
 }
 ```
 
-That's it! Note the lack of boilerplate code as well as Java verbosity in things like exception handling.
+That's it! Note the lack of boilerplate code as well as Java verbosity in things like exception handling. 
 
-View the full reference documentation for Xtendroid [here][doc].
-
-Samples
--------
-
-There are several examples in the examples folder: https://github.com/tobykurien/Xtendroid/tree/master/examples
+This and other examples are in the [examples folder][examples].
 
 For an example of a live project that uses this library, see the Webapps project: https://github.com/tobykurien/webapps
 
@@ -160,8 +160,8 @@ Method 1:
 - Download the latest release from https://github.com/tobykurien/Xtendroid/tree/master/Xtendroid/release
 - Copy the JAR file into your Android project's `libs` folder
 - If you are using an existing or new Android project:
--- Right-click on your project -> Properties -> Java Build Path
--- Click Libraries -> Add library -> Xtend Library
+  - Right-click on your project -> Properties -> Java Build Path
+  - Click Libraries -> Add library -> Xtend Library
 - Now you can use it as documented [here][doc].
 
 
@@ -169,10 +169,10 @@ Method 2:
 ---------
 - Git clone this repository and import it using Eclipse.
 - Add it as a library project to your Android project:
--- Right-click your project -> Properties -> Android -> (Library) Add -> Xtendroid
+  - Right-click your project -> Properties -> Android -> (Library) Add -> Xtendroid
 - If you are using an existing or new Android project:
--- Right-click on your project -> Properties -> Java Build Path
--- Click Libraries -> Add library -> Xtend Library
+  - Right-click on your project -> Properties -> Java Build Path
+  - Click Libraries -> Add library -> Xtend Library
 - Now you can use it as documented [here][doc].
 
 Xtend
@@ -198,3 +198,4 @@ If in doubt, clean the project, and re-open the editor.
 [Active Annotations]: http://www.eclipse.org/xtend/documentation.html#activeAnnotation
 [Swift]: https://developer.apple.com/swift/
 [doc]: /Xtendroid/docs/index.md
+[examples]: /examples
