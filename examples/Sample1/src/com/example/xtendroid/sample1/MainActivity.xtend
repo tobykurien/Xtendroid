@@ -1,32 +1,27 @@
 package com.example.xtendroid.sample1
 
-import android.app.Activity
 import android.app.ProgressDialog
 import android.os.Bundle
 import android.text.Html
-import android.widget.Button
-import android.widget.TextView
 import java.io.ByteArrayOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
-import org.xtendroid.annotations.AndroidView
+import org.xtendroid.app.AndroidActivity
+import org.xtendroid.app.OnCreate
 import org.xtendroid.utils.BgTask
 
 import static extension org.xtendroid.utils.AlertUtils.*
+import com.google.common.io.ByteStreams
 
 /**
- * Sample 1a - simple sample to show the usage of basic UI helpers as well as 
+ * Simple sample to show the usage of basic UI helpers as well as 
  * asynchronous processing. This example fetches a random quote from the internet
- * when a button is pressed, and displays it in a TextView.
+ * when a button is pressed, and displays it in a TextView. 
  */
-class MainActivity extends Activity {
-   @AndroidView TextView mainQuote // loads from R.id.main_quote
-   @AndroidView Button mainLoadQuote // loads from R.id.main_load_quote
+@AndroidActivity(layout=R.layout.activity_main) class MainActivity {
 
-   override protected onCreate(Bundle savedInstanceState) {
-      super.onCreate(savedInstanceState)
-      contentView = R.layout.activity_main // same as setContentView(R.layout.activity_main)
-
+   @OnCreate
+   def init(Bundle savedInstanceState) {
       // set up the button to load quotes
       mainLoadQuote.setOnClickListener([
          // show progress
@@ -63,18 +58,10 @@ class MainActivity extends Activity {
       if (c.responseCode == HttpURLConnection.HTTP_OK) {
          // read data into a buffer
          var os = new ByteArrayOutputStream
-         var is = c.inputStream
-         var int oneChar
-         while ((oneChar = is.read) > 0) {
-            os.write(oneChar)
-         }
-         is.close
-         os.close
-         
-         // return the data as a String
+			ByteStreams.copy(c.inputStream, os)            
          return os.toString
       }
 
-      return null
+      throw new Exception("Error from server, status " + c.responseCode + " " + c.responseMessage)
    }
 }
