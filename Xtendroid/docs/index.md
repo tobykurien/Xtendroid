@@ -242,10 +242,15 @@ class DbService extends BaseDbService {
    // convenience method for syntactic sugar (as per above example of Settings class)
    def static getDb(Context context) {
       return new DbService(context)
-   }   
+   }
+   
+   // another method to provide the same syntax to fragments
+   def static getDb(Fragment fragment) {
+      return getDb(fragment.activity)
+   }     
 }
 ```
-Note that DbService ultimately extends android.database.sqlite.SQLiteOpenHelper, so you can use your normal Android database code too.
+Note that DbService ultimately extends ```android.database.sqlite.SQLiteOpenHelper```, so you can use your normal Android database code too.
 
 Now you are ready to play! Here are some examples:
 ```xtend
