@@ -5,11 +5,16 @@ Contents
 
 - [Activities and Fragments](?#activities-and-fragments)
 - [Background Tasks and multi-threading](?#background-tasks-using-asynctask)
+- [AsyncTaskLoaders and LoaderCallbacks](?#asynctaskloaders-and-loadercallbacks)
 - [Shared Preferences](?#shared-preferences)
 - [Adapters](?#generic-list-adapter)
+- [Base Adapter](?#base-adapter)
 - [Database](?#database)
 - [JSON handling](?#json-handling)
-- [Bundles and Parcelables](?#bundles-and-parcelables)
+- [Enum types](?#enums-types)
+- [Parcelables](?#parcelables)
+- [Intents and Bundles](?#intent-and-bundles)
+- [Custom Views and ViewGroups](?#custom-views-and-viewgroups)
 - [Utilities](?#utilities)
 
 
@@ -98,6 +103,52 @@ new BgTask<String>.runInBg([|
 
 Since Honeycomb, Android has defaulted to using a single thread for all AsyncTasks, because too many developers were writing non-thread-safe code. BgTask changes that, so that multiple AsyncTasks will run simultaneously using the THREAD_POOL_EXECUTOR, so be careful to write thread-safe code.
 
+AsyncTaskLoaders and LoaderCallbacks
+------------------------------------
+
+If you prefer to tightly bind your background tasks to the Activity's or Fragment's lifecycle, then you can use `BgLoader` to get things done.
+
+```xtend
+new BgLoader<String>([|
+   // this runs in the background thread, e.g. http call
+],
+[
+   // this is responsible for clean up duties
+   // e.g. to prevent memory leaks
+])
+```
+
+The result can be fetched by extending your Activity or Fragment with a LoaderCallback. Setting up the callback and the loader requires plenty of boilerplate code.
+
+It requires the following actions:
+
+* Create an integer ID for the LoaderManager to identify a Loader with
+* Write code to initialize a loader
+* Setup the callback to receive the results from the Loader
+
+All of this is taken care of by the `@AndroidLoader` annotation.
+All you need to do is place this annotation on top of your Fragment or Activity and implement `LoaderManager.Callbacks`. 
+
+Also, use your IDE's auto-implement function to generate the other 2 callback methods, i.e. `onLoadFinished` and `onLoaderReset`.
+
+You're free to implement as many Loaders as you require. You may use your own Loader implementation, it's not necessary to use `BgLoader` with `@AndroidLoader`.
+
+```xtend
+@AndroidLoader
+class MyActivity extends Activity implements LoaderManager.LoaderCallbacks {
+
+	var Loader<MyBean> loader = new MyLoader<MyBean>(this)
+	var MyBean bean = null
+	
+	override onLoadFinished(Loader loader, Object data) {
+		bean = new MyBean(data)
+	}
+
+	override onLoaderReset(Loader loader) {
+	}
+	
+}
+```
 
 Shared Preferences
 ------------------
@@ -353,11 +404,120 @@ In addition to using it at the class-level, you can also use it at the field-lev
 
 Note: The ```@JsonProperty``` annotation has been deprecated in favour of ```@AndroidJson```.
 
-Bundles and Parcelables
------------------------
+Enum types
+----------
 
-Coming soon...
+There is an annotation to generate enum types or reuse pre-defined enum types, that generates the convenience methods to convert Strings to enum types.
 
+Like this:
+
+```xtend
+enum ABCEnum
+{
+	a,b,c
+}
+
+class MyBean
+{
+	@EnumProperty(enumType=ABCEnum) // pre-defined
+	var String alpha
+	
+	
+	@EnumProperty(name="DEFEnum", values=#["d","e","f"])
+	var String delta
+}
+```
+
+Later on you can use the generated methods as extension methods, this is especially handy when you're converting string to enums, e.g. from a JSON object.
+
+Custom Views and ViewGroups
+---------------------------
+
+The annotation `@CustomView` and `@CustomViewGroup` are capable of generating the boilerplate code involved with creating custom views.
+
+`@CustomViewGroup` will create getters and setters for the `@+id/...` ids for the nested views.
+
+Both annotations setup the required constructors for custom views.
+
+Setting up a custom `ViewGroup` is slightly more involved. So this is how you set it up:
+
+```xtend
+@CustomViewGroup(layout = R.layout.my_merge_layout)
+abstract class MyCustomViewGroup extends RelativeLayout
+{
+	def abstract void showWithData(Payload input)
+
+	def void init(Context context) {
+		// ... set defaults .text, .textColor etc.
+	}
+}
+```
+
+For example, this class is defined as an abstract class containing an abstract method, but these will no longer be abstract, after the annotation has done its work.
+
+The abstract method, will try to match the names of the ids, with members of the `Payload` bean. In the non-abstract resulting method of `showWithData`. This method name is just an example, nhe abstract method can assume any name. This method can be used to inject `String` values to `TextView`s and resource ids to `ImageView`s, contained in the custom `ViewGroup`.
+
+For instance, the `Payload` type in this example could be a bean annotated with `@AndroidJson`.
+
+Any number of methods containing one single parameter accepting a `Context` object, will be automagically invoked in the generated constructors. This can be used to initialize the custom `View` or `ViewGroup`.
+
+All of the methods mentioned above are not required, to use both annotations.
+
+BaseAdapter
+-----------
+
+Implementing BaseAdapters with custom views has never been so easy.
+
+```xtend
+@AndroidAdapter
+class MyAdapter extends BaseAdapter {
+	var List<Payload> data
+	var MyViewGroup showWithData
+}
+```
+
+The constructor is generated, and all the other things required, to use a working BaseAdapter.
+
+The member `showWithData` is a placeholder for the name of the method that will be used to inject data into the custom ViewGroup, i.e. MyViewGroup object in the previous example.
+
+You can use an `@Accessor` or `@Property` annotation to access the data.
+
+Parcelables
+-----------
+
+Currently, the `@AndroidParcelable` is a type-level (read: class) annotation that ensures that all the member fields will be serialized using the android Parcel way of serializing stuff.
+
+All you need to do is just slap the annotation on top of the bean, and pass the Parcelable through an Intent.
+
+There are plans to change `@AndroidParcelable` to also become a member-level type annotation.
+
+Intents and Bundles
+-------------------
+
+The member-level `@BundleProperty` annotation, will create a convenience methods for extracting a value from a Bundle or Intent.
+
+If a `@BundleProperty` is applied to a member of an Activity then the generated convenience method will be applied to the intent of the Activity.
+
+If applied to a Fragment, then it will be applied to the Bundle (through the `getArguments` method).
+
+If applied to a bean or a Service or any other type other than an Activity or Fragment, then the annotation will attempt to find an Intent among the members and do the same.
+
+```xtend
+class MyActivity extends Activity 
+{
+	@BundleProperty
+	String myString
+}
+
+class MyFragment extends Fragment
+{
+	@BundleProperty
+	int myInt // the member name is the name of the key in the Bundle
+}
+
+```
+
+It's important to define the type of the member, so the correct methods will be invoked to fetch the value contained within the Bundle.
 
 Utilities
 ---------
