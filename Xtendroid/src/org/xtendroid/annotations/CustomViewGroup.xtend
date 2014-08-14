@@ -17,31 +17,16 @@ import org.eclipse.xtend.lib.macro.declaration.Visibility
 
 import static extension org.xtendroid.utils.AnnotationLayoutUtils.*
 import static extension org.xtendroid.utils.NamingUtils.*
+import org.xtendroid.utils.AnnotationLayoutUtils
 
 @Active(typeof(CustomViewGroupProcessor))
 @Target(ElementType.TYPE)
 annotation CustomViewGroup {
-	int layout = 0 // -1 could theoretically be an existing layout
+	int layout = -1
+	int value = -1
 }
 
 class CustomViewGroupProcessor extends AbstractClassProcessor {
-
-	// blatantly stolen from @AndroidActivity
-	// Caveat: This -ing thing cost me an hour of my life, apparently you need @Target(ElementType.TYPE) to get to the expression
-	def static String getAnnotationValue(extension TransformationContext context, MutableClassDeclaration clazz) {
-		var value = clazz.annotations.findFirst [
-			annotationTypeDeclaration.equals(CustomViewGroup.newTypeReference.type)
-		]?.getExpression("layout")?.toString
-
-		if (value.equals('0') || !value.contains('R.layout')) {
-			clazz.addError(
-				"You must enter the layout resource id like this: " + CustomViewGroup.newTypeReference.name +
-					("(layout = R.layout.something)"))
-		}
-
-		return value
-	}
-
 	override doTransform(MutableClassDeclaration clazz, extension TransformationContext context) {
 
 		// determine if clazz extends ViewGroup
@@ -92,10 +77,16 @@ class CustomViewGroupProcessor extends AbstractClassProcessor {
 		val hasInitMethod = clazz.declaredMethods.exists[m|
 			m.simpleName.equalsIgnoreCase("init") && m.parameters.size == 1 &&
 				m.parameters?.head.type.equals(Context.newTypeReference)]
-		val layoutResourceID = context.getAnnotationValue(clazz)
 		
+		// See if a layout is defined, then create accessors for them, if they actually exist
+		val String layoutResId = AnnotationLayoutUtils.getLayoutValue(clazz, context, CustomViewGroup.newTypeReference)
+		if (layoutResId == null || "0".equals(layoutResId) || !layoutResId.contains('R.layout')) {
+			clazz.addWarning('You may add a layout resource id to the annotation, like this: @AndroidFragment(layout=R.layout...).')
+			return;
+		}
+				
 		// add fields and lazy getters for the nested views
-		val viewFileName = layoutResourceID?.substring(layoutResourceID.lastIndexOf('.') + 1)
+		val viewFileName = layoutResId?.substring(layoutResId.lastIndexOf('.') + 1)
 		if (viewFileName == null) {
 			return;
 		}
@@ -120,8 +111,8 @@ class CustomViewGroupProcessor extends AbstractClassProcessor {
 				addParameter("context", Context.newTypeReference)
 				body = [
 					'''
-						«IF !layoutResourceID.nullOrEmpty»
-							«LayoutInflater.newTypeReference.name».from(context).inflate(«layoutResourceID», this, true);
+						«IF !layoutResId.nullOrEmpty»
+							«LayoutInflater.newTypeReference.name».from(context).inflate(«layoutResId», this, true);
 						«ENDIF»
 						«androidViewFields.map[f|
 							String.format("this.%s = (%s) findViewById(R.id.%s);", f.simpleName, f.type.name,
