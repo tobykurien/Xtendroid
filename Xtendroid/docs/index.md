@@ -253,6 +253,26 @@ userList.adapter = adapter // assuming the ListView is R.id.user_list
 
 The list will now display the data. If you need to add some presentation logic, for example to display a formatted date, simply add a method to the bean (or a presenter sub-class) to do it (e.g. ```def getFormattedDate() {...}``` and then display it in the list by naming your view appropriately, e.g. ```<TextView android:id="@+id/formatted_date" .../>```
 
+Adapter with custom view group
+------------------------------
+
+
+Implementing BaseAdapters with custom views has never been so easy.
+
+```xtend
+@AndroidAdapter
+class MyAdapter {
+   var List<Payload> data         // first list used as adapter data
+   var MyViewGroup showWithData   // "showWithData" viewgroup will display data
+}
+```
+
+The constructor is generated, and all the other things required, to use a working BaseAdapter.
+
+The member `showWithData` is a placeholder for the name of the method that will be used to inject data into the custom ViewGroup, i.e. MyViewGroup object in the previous example.
+
+You can use an `@Accessor` or `@Property` annotation to access the data.
+
 Database
 --------
 
@@ -443,25 +463,6 @@ For instance, the `Payload` type in this example could be a bean annotated with 
 Any number of methods containing one single parameter accepting a `Context` object, will be automagically invoked in the generated constructors. This can be used to initialize the custom `View` or `ViewGroup`.
 
 All of the methods mentioned above are not required, to use both annotations.
-
-Base Adapter
--------------
-
-Implementing BaseAdapters with custom views has never been so easy.
-
-```xtend
-@AndroidAdapter
-class MyAdapter extends BaseAdapter {
-	var List<Payload> data
-	var MyViewGroup showWithData
-}
-```
-
-The constructor is generated, and all the other things required, to use a working BaseAdapter.
-
-The member `showWithData` is a placeholder for the name of the method that will be used to inject data into the custom ViewGroup, i.e. MyViewGroup object in the previous example.
-
-You can use an `@Accessor` or `@Property` annotation to access the data.
 
 Parcelables
 -----------

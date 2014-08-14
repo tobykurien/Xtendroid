@@ -9,7 +9,7 @@ import org.xtendroid.app.OnCreate
 import org.xtendroid.utils.BgLoader
 import org.xtendroid.xtendroidtest.R
 
-@AndroidLoader
+//@AndroidLoader
 @AndroidFragment(R.layout.fragment_test) 
 class FragmentWithLoader implements LoaderCallbacks<String> {
 	var BgLoader<String> loader

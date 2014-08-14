@@ -2,8 +2,8 @@ package org.xtendroid.xtendroidtest.test
 
 import android.test.ActivityInstrumentationTestCase2
 import android.widget.TextView
-import org.xtendroid.xtendroidtest.MainActivity
 import org.xtendroid.xtendroidtest.R
+import org.xtendroid.xtendroidtest.activities.MainActivity
 
 class ActivityAnnotation extends ActivityInstrumentationTestCase2<MainActivity> {
 	

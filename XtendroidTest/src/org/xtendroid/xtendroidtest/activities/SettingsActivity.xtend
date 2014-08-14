@@ -1,7 +1,8 @@
-package org.xtendroid.xtendroidtest
+package org.xtendroid.xtendroidtest.activities
 
 import android.os.Bundle
 import android.preference.PreferenceActivity
+import org.xtendroid.xtendroidtest.R
 
 class SettingsActivity extends PreferenceActivity {
    

@@ -37,9 +37,7 @@ annotation AndroidAdapter {
 class AdapterizeProcessor extends AbstractClassProcessor {
 
 	override doTransform(MutableClassDeclaration clazz, extension TransformationContext context) {
-
-		// TODO support other types of Adapters
-		// determine if clazz extends BaseAdapter		
+		// auto-extend BaseAdapter if necessary
 		if (clazz.extendedClass.equals(Object.newTypeReference())) {
 			clazz.extendedClass = BaseAdapter.newTypeReference()
 		}

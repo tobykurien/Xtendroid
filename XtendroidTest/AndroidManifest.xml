@@ -14,17 +14,17 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="org.xtendroid.xtendroidtest.MainActivity"
+            android:name="org.xtendroid.xtendroidtest.activities.MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="org.xtendroid.xtendroidtest.MainActivity2" />
-        <activity android:name="org.xtendroid.xtendroidtest.SettingsActivity" />
-        <activity android:name="org.xtendroid.xtendroidtest.FragmentActivity" />
+        <activity android:name="org.xtendroid.xtendroidtest.activities.DbTestActivity" />
+        <activity android:name="org.xtendroid.xtendroidtest.activities.SettingsActivity" />
+        <activity android:name="org.xtendroid.xtendroidtest.activities.FragmentActivity" />
+        <activity android:name="org.xtendroid.xtendroidtest.activities.AndroidAdapterActivity"/>
     </application>
 
 </manifest>

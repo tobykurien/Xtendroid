@@ -1,10 +1,12 @@
 package org.xtendroid.xtendroidtest.fragments
 
-import android.os.Bundle
 import org.xtendroid.annotations.AndroidFragment
 import org.xtendroid.app.OnCreate
 import org.xtendroid.xtendroidtest.R
 
+/**
+ * Fragment to test the @AndroidFragment annotation
+ */
 @AndroidFragment(R.layout.fragment_test) class TestFragment {
 
 	@OnCreate

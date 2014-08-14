@@ -1,4 +1,4 @@
-package org.xtendroid.xtendroidtest
+package org.xtendroid.xtendroidtest.loaders
 
 import android.app.Activity
 import android.app.Fragment
@@ -11,6 +11,7 @@ import org.xtendroid.annotations.AndroidLoader
 import org.xtendroid.app.AndroidActivity
 import org.xtendroid.parcel.AndroidParcelable
 import org.xtendroid.utils.BgLoader
+import org.xtendroid.xtendroidtest.R
 
 @AndroidParcelable
 class LoaderPayLoad implements Parcelable {
