@@ -8,7 +8,7 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import java.util.List
-import org.xtendroid.annotations.AndroidAdapter
+import org.xtendroid.adapter.AndroidAdapter
 import org.xtendroid.annotations.CustomView
 import org.xtendroid.annotations.CustomViewGroup
 import org.xtendroid.json.JsonProperty
