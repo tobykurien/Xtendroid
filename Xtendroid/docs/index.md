@@ -1,21 +1,25 @@
 Documentation
 =============
 
-Contents
+**Contents**
 
-- [Activities and Fragments](?#activities-and-fragments)
-- [Background Tasks and multi-threading](?#background-tasks-using-asynctask)
-- [AsyncTaskLoaders and LoaderCallbacks](?#asynctaskloaders-and-loadercallbacks)
-- [Shared Preferences](?#shared-preferences)
-- [Adapters](?#generic-list-adapter)
-- [Base Adapter](?#base-adapter)
-- [Database](?#database)
-- [JSON handling](?#json-handling)
-- [Enum types](?#enums-types)
-- [Parcelables](?#parcelables)
-- [Intents and Bundles](?#intent-and-bundles)
-- [Custom Views and ViewGroups](?#custom-views-and-viewgroups)
-- [Utilities](?#utilities)
+- [Activities and Fragments](#activities-and-fragments)
+- Background Tasks
+  - [BgTask](#background-tasks-using-asynctask)
+  - [AsyncTaskLoaders and LoaderCallbacks](#asynctaskloaders-and-loadercallbacks)
+- Data storage
+  - [Shared Preferences](#shared-preferences)
+  - [Database](#database)
+- Adapters
+  - [Bean Adapter](#bean-adapter)
+  - [Base Adapter](#base-adapter)
+- Passing data around
+  - [JSON handling](#json-handling)
+  - [Enum types](#enums-types)
+  - [Parcelables](#parcelables)
+  - [Intents and Bundles](#intent-and-bundles)
+- [Custom Views and ViewGroups](#custom-views-and-viewgroups)
+- [Utilities](#utilities)
 
 
 Activities and Fragments
@@ -51,6 +55,18 @@ You can do something similar in a fragment using the ```@AndroidFragment``` anno
 
 ```
 
+The ```@AndroidView``` annotation is a simple way to access your views inside an activity or fragment, without using the above class-level annotations, e.g.
+
+```xtend
+class MyActivity extends Activity {
+   @AndroidView TextView myTextView  // maps to R.id.my_text_view
+
+   override onCreate(Bundle savedInstanceState) {
+      setContentView(R.layout.my_fragment)
+      myTextView.text = "Hello, world!"
+   }
+}
+```
 
 Background tasks using AsyncTask
 --------------------------------
@@ -75,10 +91,10 @@ val progressBar = new ProgressDialog(...)
 new BgTask<String>.runInBgWithProgress(progressBar, [|
    // this bit runs in a background thread, progressDialog automatically displayed
    var retVal = fetchStringFromSomewhere()
-   
+
    // update progress UI from background thread
-   runOnUiThread[| progressBar.progress = 10 ] 
-   
+   runOnUiThread[| progressBar.progress = 10 ]
+
    return retVal // return keyword is optional
 ],[result|
    // this runs in the UI thread, progressDialog automatically dismissed afterwards
@@ -86,7 +102,7 @@ new BgTask<String>.runInBgWithProgress(progressBar, [|
 ])
 ```
 
-No ```onProgressUpdate`` method is needed, since it is trivial to use the ```runOnUiThread``` method instead, as shown above.  Handling errors in a background task is made easy: you can simply pass a third lambda function that will be executed (in the UI thread) if an error occurs during the background task:
+No ```onProgressUpdate``` method is needed, since it is trivial to use the ```runOnUiThread``` method instead, as shown above.  Handling errors in a background task is made easy: you can simply pass a third lambda function that will be executed (in the UI thread) if an error occurs during the background task:
 
 ```xtend
 new BgTask<String>.runInBg([|
@@ -109,10 +125,9 @@ AsyncTaskLoaders and LoaderCallbacks
 If you prefer to tightly bind your background tasks to the Activity's or Fragment's lifecycle, then you can use `BgLoader` to get things done.
 
 ```xtend
-new BgLoader<String>([|
+new BgLoader<String>(context, [|
    // this runs in the background thread, e.g. http call
-],
-[
+],[
    // this is responsible for clean up duties
    // e.g. to prevent memory leaks
 ])
@@ -126,8 +141,7 @@ It requires the following actions:
 * Write code to initialize a loader
 * Setup the callback to receive the results from the Loader
 
-All of this is taken care of by the `@AndroidLoader` annotation.
-All you need to do is place this annotation on top of your Fragment or Activity and implement `LoaderManager.Callbacks`. 
+All of this is taken care of by the `@AndroidLoader` annotation. All you need to do is place this annotation on top of your Fragment or Activity and implement `LoaderManager.Callbacks`.
 
 Also, use your IDE's auto-implement function to generate the other 2 callback methods, i.e. `onLoadFinished` and `onLoaderReset`.
 
@@ -137,16 +151,16 @@ You're free to implement as many Loaders as you require. You may use your own Lo
 @AndroidLoader
 class MyActivity extends Activity implements LoaderManager.LoaderCallbacks {
 
-	var Loader<MyBean> loader = new MyLoader<MyBean>(this)
+	var loader = new MyLoader<MyBean>(this)
 	var MyBean bean = null
-	
+
 	override onLoadFinished(Loader loader, Object data) {
-		bean = new MyBean(data)
+		bean = data as MyBean
 	}
 
 	override onLoaderReset(Loader loader) {
 	}
-	
+
 }
 ```
 
@@ -207,10 +221,10 @@ if (context.settings.enabled) {
 }
 ```
 
-Generic list adapter
---------------------
+Bean adapter
+------------
 
-Do you have a list of Java beans that you want to display inside a ListView? The BeanAdapter makes this super easy!
+Do you have a list of Java beans that you want to display inside a ListView? The `BeanAdapter` makes this super easy!
 
 Layout for each row - row_user.xml:
 ```xml
@@ -230,19 +244,14 @@ class User {
 }
 ```
 
-The Activity:
+In the Activity:
 ```xtend
-@OnCreate def init(Bundle instanceState) {
-	var List<User> users = getUsers(...) // load the beans from somewhere
-	var adapter = new BeanAdapter<User>(this, R.layout.row_user, users)
-	userList.adapter = adapter // assuming the ListView is R.id.user_list
-}
+var List<User> users = getUsers(...) // load the beans from somewhere
+var adapter = new BeanAdapter<User>(this, R.layout.row_user, users)
+userList.adapter = adapter // assuming the ListView is R.id.user_list
 ```
 
-The list will now display the data. If you need to add some presentation logic, for 
-example display a formatted date, simply add a method to the bean to do it (e.g.
-```def getFormattedDate() {...}``` and then display it in the list by naming your 
-view appropriately, e.g. ```<TextView android:id="@+id/formatted_date" .../>```
+The list will now display the data. If you need to add some presentation logic, for example to display a formatted date, simply add a method to the bean (or a presenter sub-class) to do it (e.g. ```def getFormattedDate() {...}``` and then display it in the list by naming your view appropriately, e.g. ```<TextView android:id="@+id/formatted_date" .../>```
 
 Database
 --------
@@ -255,7 +264,7 @@ class User {
   @Property String firstName
   @Property String lastName
   @Property int age
-  
+
   override toString() {
       firstName + " " + lastName
   }
@@ -285,23 +294,19 @@ Note that the column names in the database are exactly the same as the field nam
 
 Create a DbService class you will use to interact with the database:
 ```xtend
-class DbService extends BaseDbService {
-   protected new(Context context) {
+@AndroidDatabase class DbService {
+
+   new(Context context) {
       super(context, "mydatabase", 1) // mydatabase.db is created with version 1
    }
 
-   // convenience method for syntactic sugar (as per above example of Settings class)
-   def static getDb(Context context) {
-      return new DbService(context)
-   }
-   
-   // another method to provide the same syntax to fragments
-   def static getDb(Fragment fragment) {
-      return getDb(fragment.activity)
-   }     
+   // override onUpgrade() to manage database migrations
+
+   // add DAO methods here, e.g. findUsers(), saveUser(), etc.
 }
 ```
-Note that DbService ultimately extends ```android.database.sqlite.SQLiteOpenHelper```, so you can use your normal Android database code too.
+
+The `@AndroidDatabase` annotation will automatically extend the `BaseDbService` class, make the constructor protected, and add two `getDb()` convenience methods for you for use in activities and fragments. Note that `BaseDbService` ultimately extends `android.database.sqlite.SQLiteOpenHelper`, so you can use your normal Android database code too.
 
 Now you are ready to play! Here are some examples:
 ```xtend
@@ -314,7 +319,7 @@ users.forEach [user|
 ]
 
 // get all users older than 18 (uses SQL defined above)
-var adults = db.executeForBeanList(R.string.dbGetOlderThan, 
+var adults = db.executeForBeanList(R.string.dbGetOlderThan,
    #{ 'age' -> 18 }, User)
 adults.forEach [adult|
    Log.d("db", "Got user: " + adult)
@@ -338,13 +343,13 @@ var johnId = db.insert("users", #{
 
 // get back this user
 var john = db.findById("users", johnId, User)
-toast("Hi " + john)   
+toast("Hi " + john)
 
 // update this user
 db.update("users", #{'lastName' -> 'Smith'}, johnId)
 
 // delete this user
-db.delete("users", johnId) 
+db.delete("users", johnId)
 
 // Suppose you have a million users and want to display them in a list.
 // You can do so using the optimized lazyFindAll() and lazyFindByFields() methods
@@ -357,13 +362,13 @@ listView.adapter = new BeanAdapter(activity, R.layout.list_row, aMillionUsers)
 JSON handling
 -------------
 
-You can easily create a bean to hold and parse JSON data. This bean will simply 
-store the JSONObject passed into the constructor without parsing the data into fields. 
-The data is then parsed on-demand and cached, which makes it more efficient for use in 
-```Adapter``` classes (quick load time, minimal garbage collection, parse on-demand). 
+You can easily create a bean to hold and parse JSON data. This bean will simply
+store the JSONObject passed into the constructor without parsing the data into fields.
+The data is then parsed on-demand and cached, which makes it more efficient for use in
+```Adapter``` classes (quick load time, minimal garbage collection, parse on-demand).
 
-This can become memory-inefficient if you only need a small amount of data from the JSON response 
-(and you discard the rest), but in that case, you are wasting the user's bandwidth and 
+This can become memory-inefficient if you only need a small amount of data from the JSON response
+(and you discard the rest), but in that case, you are wasting the user's bandwidth and
 should seek to improve the JSON API call.
 
 Creating a JSON bean is done using the ```@AndroidJson``` annotation, as in this example:
@@ -385,7 +390,7 @@ var newsItem = new NewsItem(new JSONObject(jsonResponse))
 toast(newsItem.title) // JSON parsed here and cached for later use
 ```
 
-Nested JSON beans are supported (you can have a field that is another bean annotated with the ```@AndroidJson``` annotation). See the 
+Nested JSON beans are supported (you can have a field that is another bean annotated with the ```@AndroidJson``` annotation). See the
 [JsonTest](../../XtendroidTest/XtendroidTestCasesTest/src/org/xtendroid/xtendroidtest/test/JsonTest.xtend) for more.
 
 In addition to using it at the class-level, you can also use it at the field-level to specify additional parameters, like date format or property name, as in this example:
@@ -393,12 +398,12 @@ In addition to using it at the class-level, you can also use it at the field-lev
 ```xtend
 @AndroidJson JsonData {
 	String title
-	
+
 	@AndroidJson("yyyy-MM-dd") // date format
 	Date createdAt
-	
+
 	@AndroidJson("createdBy") // we want to map "createdBy" json property to "author" field
-	String author	
+	String author
 }
 ```
 
@@ -407,28 +412,35 @@ Note: The ```@JsonProperty``` annotation has been deprecated in favour of ```@An
 Enum types
 ----------
 
-There is an annotation to generate enum types or reuse pre-defined enum types, that generates the convenience methods to convert Strings to enum types.
+The `@EnumProperty` annotation allows you to generate enum types or reuse pre-defined enum types, and generates the convenience methods to convert Strings to enum types.
 
 Like this:
 
 ```xtend
-enum ABCEnum
-{
+enum ABCEnum {
 	a,b,c
 }
 
-class MyBean
-{
+class MyBean {
 	@EnumProperty(enumType=ABCEnum) // pre-defined
 	var String alpha
-	
-	
+
 	@EnumProperty(name="DEFEnum", values=#["d","e","f"])
 	var String delta
 }
 ```
 
-Later on you can use the generated methods as extension methods, this is especially handy when you're converting string to enums, e.g. from a JSON object.
+Now you can use the generated methods as extension methods:
+
+```xtend
+alpha = ABCEnum.a.toString
+delta = DEFEnum.d.toString
+
+assertEquals(alpha, DEFEnum.a)
+assertEquals(DEFEnum.toDEFEnumValue(delta), DEFEnum.d)
+```
+
+This is especially handy when you're converting string to enums, e.g. from a JSON object.
 
 Custom Views and ViewGroups
 ---------------------------
@@ -463,8 +475,8 @@ Any number of methods containing one single parameter accepting a `Context` obje
 
 All of the methods mentioned above are not required, to use both annotations.
 
-BaseAdapter
------------
+Base Adapter
+-------------
 
 Implementing BaseAdapters with custom views has never been so easy.
 
@@ -503,7 +515,7 @@ If applied to a Fragment, then it will be applied to the Bundle (through the `ge
 If applied to a bean or a Service or any other type other than an Activity or Fragment, then the annotation will attempt to find an Intent among the members and do the same.
 
 ```xtend
-class MyActivity extends Activity 
+class MyActivity extends Activity
 {
 	@BundleProperty
 	String myString
