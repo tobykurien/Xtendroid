@@ -15,9 +15,8 @@ Documentation
   - [Base Adapter](#base-adapter)
 - Passing data around
   - [JSON handling](#json-handling)
-  - [Enum types](#enums-types)
   - [Parcelables](#parcelables)
-  - [Intents and Bundles](#intent-and-bundles)
+  - [Intents and Bundles](#intents-and-bundles)
 - [Custom Views and ViewGroups](#custom-views-and-viewgroups)
 - [Utilities](#utilities)
 
@@ -117,7 +116,7 @@ new BgTask<String>.runInBg([|
 )
 ```
 
-Since Honeycomb, Android has defaulted to using a single thread for all AsyncTasks, because too many developers were writing non-thread-safe code. BgTask changes that, so that multiple AsyncTasks will run simultaneously using the THREAD_POOL_EXECUTOR, so be careful to write thread-safe code.
+>Note: Since Honeycomb, Android has defaulted to using a single thread for all AsyncTasks, because too many developers were writing non-thread-safe code. BgTask changes that, so that multiple AsyncTasks will run simultaneously using the THREAD_POOL_EXECUTOR, so be careful to write thread-safe code.
 
 AsyncTaskLoaders and LoaderCallbacks
 ------------------------------------
@@ -149,13 +148,14 @@ You're free to implement as many Loaders as you require. You may use your own Lo
 
 ```xtend
 @AndroidLoader
-class MyActivity extends Activity implements LoaderManager.LoaderCallbacks {
+class MyActivity extends Activity
+   implements LoaderManager.LoaderCallbacks<MyBean> {
 
 	var loader = new MyLoader<MyBean>(this)
 	var MyBean bean = null
 
-	override onLoadFinished(Loader loader, Object data) {
-		bean = data as MyBean
+	override onLoadFinished(Loader<MyBean> loader, MyBean data) {
+		bean = data
 	}
 
 	override onLoaderReset(Loader loader) {
@@ -256,7 +256,7 @@ The list will now display the data. If you need to add some presentation logic, 
 Database
 --------
 
-Database handling is made much easier thanks to the aBatis project - a fork of this project is included in Xtendroid with some syntactic sugar provided by the BaseDbService class for Xtend. Let's look at typical usage:
+Database handling is made much easier thanks to the aBatis project - a fork of this project is included in Xtendroid with some syntactic sugar provided by the `BaseDbService` class for Xtend. Let's look at typical usage:
 
 Create a bean for some data you want to store:
 ```xtend
@@ -290,9 +290,10 @@ Create some SQL strings in res/values folder, e.g. in sqlmaps.xml:
     </string>
 </resources>
 ```
-Note that the column names in the database are exactly the same as the field names in the bean. The special string name "dbInitialize" is used the first time the db is created, thereafter onUpgrade() is called on the DbService class for newer versions. If you need to migrate between database versions, just implement onUpgrade().
 
-Create a DbService class you will use to interact with the database:
+Note that the column names in the database are exactly the same as the field names in the bean. The special string name `dbInitialize` is used the first time the db is created.
+
+Create a `DbService` class you will use to interact with the database:
 ```xtend
 @AndroidDatabase class DbService {
 
@@ -306,7 +307,7 @@ Create a DbService class you will use to interact with the database:
 }
 ```
 
-The `@AndroidDatabase` annotation will automatically extend the `BaseDbService` class, make the constructor protected, and add two `getDb()` convenience methods for you for use in activities and fragments. Note that `BaseDbService` ultimately extends `android.database.sqlite.SQLiteOpenHelper`, so you can use your normal Android database code too.
+The `@AndroidDatabase` annotation will automatically extend the `BaseDbService` class, make the constructor protected, and add two `getDb()` convenience methods for you for use in activities and fragments. Note that `BaseDbService` ultimately extends `android.database.sqlite.SQLiteOpenHelper`, so you can use your normal Android database code too. To handle database migrations, you can override the `onUpgrade()` method.
 
 Now you are ready to play! Here are some examples:
 ```xtend
@@ -363,11 +364,11 @@ JSON handling
 -------------
 
 You can easily create a bean to hold and parse JSON data. This bean will simply
-store the JSONObject passed into the constructor without parsing the data into fields.
+store the `JSONObject` passed into the constructor without parsing the data into fields.
 The data is then parsed on-demand and cached, which makes it more efficient for use in
-```Adapter``` classes (quick load time, minimal garbage collection, parse on-demand).
+`Adapter` classes (quick load time, minimal garbage collection, parse on-demand).
 
-This can become memory-inefficient if you only need a small amount of data from the JSON response
+>Note: This can become memory-inefficient if you only need a small amount of data from the JSON response
 (and you discard the rest), but in that case, you are wasting the user's bandwidth and
 should seek to improve the JSON API call.
 
@@ -407,40 +408,8 @@ In addition to using it at the class-level, you can also use it at the field-lev
 }
 ```
 
-Note: The ```@JsonProperty``` annotation has been deprecated in favour of ```@AndroidJson```.
+>Note: The ```@JsonProperty``` annotation has been deprecated in favour of ```@AndroidJson```.
 
-Enum types
-----------
-
-The `@EnumProperty` annotation allows you to generate enum types or reuse pre-defined enum types, and generates the convenience methods to convert Strings to enum types.
-
-Like this:
-
-```xtend
-enum ABCEnum {
-	a,b,c
-}
-
-class MyBean {
-	@EnumProperty(enumType=ABCEnum) // pre-defined
-	var String alpha
-
-	@EnumProperty(name="DEFEnum", values=#["d","e","f"])
-	var String delta
-}
-```
-
-Now you can use the generated methods as extension methods:
-
-```xtend
-alpha = ABCEnum.a.toString
-delta = DEFEnum.d.toString
-
-assertEquals(alpha, DEFEnum.a)
-assertEquals(DEFEnum.toDEFEnumValue(delta), DEFEnum.d)
-```
-
-This is especially handy when you're converting string to enums, e.g. from a JSON object.
 
 Custom Views and ViewGroups
 ---------------------------
@@ -563,5 +532,15 @@ var Date tomorrow = 24.hours.fromNow
 var Date futureDate = now + 48.days + 20.hours + 2.seconds
 if (futureDate - now < 24.hours) {
     // we are in the future!
+}
+```
+
+The `@AddLogTag` annotation generates a `TAG` member for use in logging, which will contain the class name, or the specified value:
+
+```xtend
+@AddLogTag("optional") class MyActivity {
+   def someMethod() {
+      Log.d(TAG, "Some debug log message")
+   }
 }
 ```

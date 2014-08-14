@@ -18,5 +18,6 @@ class EnumPropertyTest extends AndroidTestCase {
 		group = GroupEnum.Baby.toString
 		assertEquals(group, "Baby")
 		assertEquals(GroupEnum.Baby, GroupEnum.toGroupEnumValue(group))
+		assertNull(GroupEnum.toGroupEnumValue("Juvenile"))
 	}
 }
