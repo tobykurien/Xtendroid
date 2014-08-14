@@ -24,7 +24,8 @@
         <activity android:name="org.xtendroid.xtendroidtest.activities.DbTestActivity" />
         <activity android:name="org.xtendroid.xtendroidtest.activities.SettingsActivity" />
         <activity android:name="org.xtendroid.xtendroidtest.activities.FragmentActivity" />
-        <activity android:name="org.xtendroid.xtendroidtest.activities.AndroidAdapterActivity"/>
+        <activity android:name="org.xtendroid.xtendroidtest.activities.AndroidAdapterActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"/>
     </application>
 
 </manifest>

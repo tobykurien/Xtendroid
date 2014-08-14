@@ -1,6 +1,5 @@
 package org.xtendroid.xtendroidtest.activities
 
-import android.app.Activity
 import java.util.ArrayList
 import org.xtendroid.app.AndroidActivity
 import org.xtendroid.app.OnCreate
@@ -11,7 +10,7 @@ import org.xtendroid.xtendroidtest.models.User
 /**
  * Test usage of @AndroidAdapter annotation
  */
-@AndroidActivity(R.layout.activity_main) class AndroidAdapterActivity extends Activity {
+@AndroidActivity(R.layout.activity_main) class AndroidAdapterActivity {
 	
 	@OnCreate def init() {		
 		val users = new ArrayList<User>;
