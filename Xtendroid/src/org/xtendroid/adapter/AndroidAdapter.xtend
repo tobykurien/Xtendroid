@@ -1,4 +1,4 @@
-package org.xtendroid.annotations
+package org.xtendroid.adapter
 
 import android.content.Context
 import android.util.AttributeSet
