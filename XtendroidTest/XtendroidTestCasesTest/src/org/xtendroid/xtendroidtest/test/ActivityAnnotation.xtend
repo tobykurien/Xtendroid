@@ -14,7 +14,7 @@ class ActivityAnnotation extends ActivityInstrumentationTestCase2<MainActivity> 
 	def void testAnnotation() {
 		val annotationTv = (activity as MainActivity).mainHello
 		val tv = activity.findViewById(R.id.main_hello) as TextView
-		assertEquals(activity.getString(R.string.hello_world), tv.text)
+		assertEquals(activity.getString(R.string.welcome), tv.text)
 		
 		activity.runOnUiThread [|
 			annotationTv.text = "Testing"
