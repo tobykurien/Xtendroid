@@ -15,17 +15,26 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name="org.xtendroid.xtendroidtest.activities.MainActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="org.xtendroid.xtendroidtest.activities.DbTestActivity" />
-        <activity android:name="org.xtendroid.xtendroidtest.activities.SettingsActivity" />
-        <activity android:name="org.xtendroid.xtendroidtest.activities.FragmentActivity" />
-        <activity android:name="org.xtendroid.xtendroidtest.activities.AndroidAdapterActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"/>
+        <activity
+            android:name="org.xtendroid.xtendroidtest.activities.DbTestActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name="org.xtendroid.xtendroidtest.activities.SettingsActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name="org.xtendroid.xtendroidtest.activities.FragmentActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name="org.xtendroid.xtendroidtest.activities.AndroidAdapterActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
     </application>
 
 </manifest>

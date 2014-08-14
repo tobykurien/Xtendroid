@@ -19,12 +19,10 @@ import static extension org.xtendroid.xtendroidtest.db.DbService.*
 	
 	@OnCreate
 	def init() {
+		db.delete("manyitems")
 		manyItems = db.lazyFindAll("manyitems", "id", ManyItem)
 		mainList.adapter = new BeanAdapter(this, R.layout.main_list_row, manyItems)
-	}
-	
-	override onStart() {
-		super.onStart()
+
 		
 		if (manyItems.size == 0) {
 			// let's make many items
@@ -43,7 +41,7 @@ import static extension org.xtendroid.xtendroidtest.db.DbService.*
 						'itemName' -> "Item " + i,
 						'itemOrder' -> i
 					})
-					
+
 					runOnUiThread [| pd.progress = i ]
 				]
 				"done"
