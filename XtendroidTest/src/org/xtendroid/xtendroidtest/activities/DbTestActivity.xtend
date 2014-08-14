@@ -19,10 +19,8 @@ import static extension org.xtendroid.xtendroidtest.db.DbService.*
 	
 	@OnCreate
 	def init() {
-		db.delete("manyitems")
 		manyItems = db.lazyFindAll("manyitems", "id", ManyItem)
 		mainList.adapter = new BeanAdapter(this, R.layout.main_list_row, manyItems)
-
 		
 		if (manyItems.size == 0) {
 			// let's make many items
@@ -42,10 +40,12 @@ import static extension org.xtendroid.xtendroidtest.db.DbService.*
 						'itemOrder' -> i
 					})
 
+					// TODO - stop this process if pd is cancelled
 					runOnUiThread [| pd.progress = i ]
 				]
 				"done"
 			], [r|
+				manyItems = db.lazyFindAll("manyitems", "id", ManyItem)
 				(mainList.adapter as BaseAdapter).notifyDataSetChanged
 			], [e|
 				toast("ERROR: " + e.message)
