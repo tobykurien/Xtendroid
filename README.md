@@ -5,7 +5,7 @@ Xtendroid is an Android library that combines the power of [Xtend][] (think: Cof
 
 Xtend code looks like Ruby or Groovy code, but is fully statically-typed and compiles to readable Java code. Most Java code is valid Xtend code too, making the learning curve very easy for Java developers. You can debug the original Xtend code or the generated Java code. The runtime library is very thin and includes [Google Guava][]. Xtend's *extension methods* and *active annotations* gives it meta-programming capabilities that are perfectly suited for Android development, and this is what Xtendroid takes advantage of. Xtend also provides lambdas and other functional programming constructs, string templating, type inference, [and more][xtend-doc]. You could say that Xtend is [Swift][] for Android.
 
-Note that Xtend and Xtendroid are currently only supported in Eclipse (Xtend is an Eclipse project), although projects using them can be compiled with Maven or Gradle.
+Note that Xtend and Xtendroid are currently only supported in Eclipse (Xtend is an Eclipse project), although projects using them can be compiled with Maven or Gradle. IntelliJ support for Xtend is being worked on.
 
 How it works
 ------------
@@ -76,7 +76,7 @@ Here's an example of an app that fetches a quote from the internet and displays 
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity" 
+    tools:context=".MainActivity"
     android:orientation="vertical">
 
     <TextView
@@ -85,14 +85,14 @@ Here's an example of an app that fetches a quote from the internet and displays 
         android:layout_height="0dp"
         android:layout_weight="1"
         android:gravity="center"
-        android:text="Click below to load a quote..."/>    
+        android:text="Click below to load a quote..."/>
 
     <Button
         android:id="@+id/main_load_quote"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="Load Quote"/>
-    
+
 </LinearLayout>
 
 ```
@@ -110,11 +110,11 @@ Now the activity class to fetch the quote from the internet (in a background thr
          // show progress
          val pd = new ProgressDialog(this)
          pd.message = "Loading quote..."
-         
+
          // load quote in the background
          new BgTask<String>.runInBgWithProgress(pd,[|
             // get the data in the background
-            getData('http://www.iheartquotes.com/api/v1/random')               
+            getData('http://www.iheartquotes.com/api/v1/random')
          ],[result|
             // update the UI with new data
             mainQuote.text = Html.fromHtml(result)
@@ -126,18 +126,18 @@ Now the activity class to fetch the quote from the internet (in a background thr
    }
 
    /**
-    * Utility function to get data from the internet. In production code, 
+    * Utility function to get data from the internet. In production code,
     * you should rather use something like the Volley library.
     */
    def static String getData(String url) {
       // connect to the URL
       var c = new URL(url).openConnection as HttpURLConnection
       c.connect
-      
+
       if (c.responseCode == HttpURLConnection.HTTP_OK) {
          // read data into a buffer
          var os = new ByteArrayOutputStream
-         ByteStreams.copy(c.inputStream, os) // Guava utility            
+         ByteStreams.copy(c.inputStream, os) // Guava utility
          return os.toString
       }
 
@@ -146,7 +146,7 @@ Now the activity class to fetch the quote from the internet (in a background thr
 }
 ```
 
-Declare the activity in your ```AndroidManifest.xml``` file, add the internet permission, and that's it! Note the lack of boilerplate code and Java verbosity in things like exception handling and implementing anonymous inner classes for handlers. 
+Declare the activity in your ```AndroidManifest.xml``` file, add the internet permission, and that's it! Note the lack of boilerplate code and Java verbosity in things like exception handling and implementing anonymous inner classes for handlers.
 
 This and other examples are in the [examples folder][examples].
 
