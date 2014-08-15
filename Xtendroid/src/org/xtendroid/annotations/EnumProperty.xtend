@@ -18,7 +18,7 @@ import org.eclipse.xtend.lib.macro.declaration.Visibility
 annotation EnumProperty {
 	String name = ""// enum type to generate
 	String[] values = #[] // enum type values to generate
-	Class enumType = typeof(Object) // pre-defined
+	Class<?> enumType = typeof(Object) // pre-defined
 }
 
 class EnumPropertyProcessor extends AbstractFieldProcessor {

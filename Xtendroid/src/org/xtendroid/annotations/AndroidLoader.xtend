@@ -3,6 +3,8 @@ package org.xtendroid.annotations
 import android.app.Activity
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentActivity
+import android.support.v4.app.LoaderManager
 import android.support.v4.content.Loader
 import android.view.View
 import java.lang.annotation.ElementType
@@ -11,11 +13,9 @@ import org.eclipse.xtend.lib.macro.AbstractClassProcessor
 import org.eclipse.xtend.lib.macro.Active
 import org.eclipse.xtend.lib.macro.TransformationContext
 import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
-import org.eclipse.xtend.lib.macro.declaration.MutableFieldDeclaration
 import org.eclipse.xtend.lib.macro.declaration.Visibility
 
 import static extension org.xtendroid.utils.NamingUtils.*
-import android.support.v4.app.FragmentActivity
 
 /**
  * 
@@ -56,7 +56,7 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 		val loaderFields = clazz.declaredFields.filter[f|
 			!f.type.inferred && f.initializer != null && (
 			android.content.Loader.newTypeReference.isAssignableFrom(f.type) ||
-				android.support.v4.content.Loader.newTypeReference.isAssignableFrom(f.type)
+				Loader.newTypeReference.isAssignableFrom(f.type)
 		)]
 
 		if (loaderFields.size == 0) {
@@ -74,15 +74,15 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 		// check if you are using the correct types
 		// TODO rethink this check, if the user wants to shoot herself in the foot..., BgLoader is done with support
 		val usingSupportCallbacks = clazz.implementedInterfaces.exists[i|
-			android.support.v4.app.LoaderManager$LoaderCallbacks.newTypeReference.isAssignableFrom(i)]
+			LoaderManager.LoaderCallbacks.newTypeReference.isAssignableFrom(i)]
 		val usingSupportLoaders = loaderFields.exists[f|
-			android.support.v4.content.Loader.newTypeReference.isAssignableFrom(f.type)]
+			Loader.newTypeReference.isAssignableFrom(f.type)]
 		if (!usingSupportCallbacks && usingSupportLoaders || usingSupportCallbacks && !usingSupportLoaders) {
 			val warning = String.format(
 				"Don't mix support version and the standard version of Loaders (support:%s) and LoaderCallbacks (support:%s)",
 				Boolean.valueOf(usingSupportLoaders), Boolean.valueOf(usingSupportCallbacks))
 			loaderFields.filter[f|
-				usingSupportCallbacks && android.support.v4.content.Loader.newTypeReference.isAssignableFrom(f.type)].
+				usingSupportCallbacks && Loader.newTypeReference.isAssignableFrom(f.type)].
 				forEach[f|f.addError(warning)]
 		}
 
@@ -246,7 +246,7 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 		clazz.declaredFields.filter[f|
 			!f.type.inferred && f.initializer == null && (
 				android.content.Loader.newTypeReference.isAssignableFrom(f.type) ||
-				android.support.v4.content.Loader.newTypeReference.isAssignableFrom(f.type)
+				Loader.newTypeReference.isAssignableFrom(f.type)
 			)].forEach[remove]
 	}
 }
