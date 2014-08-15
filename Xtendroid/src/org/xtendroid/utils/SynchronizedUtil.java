@@ -15,6 +15,10 @@ import org.eclipse.xtext.xbase.lib.Procedures;
  * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=418753
  */
 public class SynchronizedUtil {
+   /**
+    * @deprecated synchronized expression is supported natively since Xtend 2.6 
+    */
+   @Deprecated
    @Inline(value = "synchronized($1) { $2.apply($1);}", statementExpression = true)
    public static <T> void sync(T obj, Procedures.Procedure1<? super T> proc) {
       synchronized (obj) {
