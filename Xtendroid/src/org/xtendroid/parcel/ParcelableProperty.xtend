@@ -1,18 +1,21 @@
 package org.xtendroid.parcel
 
 import android.os.Parcel
+import android.os.Parcelable
 import android.os.Parcelable.Creator
+import java.lang.annotation.ElementType
+import java.lang.annotation.Target
+import java.util.List
 import org.eclipse.xtend.lib.macro.AbstractClassProcessor
 import org.eclipse.xtend.lib.macro.Active
 import org.eclipse.xtend.lib.macro.TransformationContext
 import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
 import org.eclipse.xtend.lib.macro.declaration.MutableFieldDeclaration
+import org.eclipse.xtend.lib.macro.declaration.TypeReference
 import org.eclipse.xtend.lib.macro.declaration.Visibility
 import org.json.JSONException
-import org.xtendroid.json.JsonPropertyProcessor
-import java.lang.annotation.Target
-import java.lang.annotation.ElementType
 import org.json.JSONObject
+import org.xtendroid.json.JsonPropertyProcessor
 
 @Active(ParcelableProcessor)
 @Target(ElementType.TYPE)
@@ -189,8 +192,11 @@ class ParcelableProcessor extends AbstractClassProcessor
 	override doTransform(MutableClassDeclaration clazz, extension TransformationContext context) {
 		if (!clazz.implementedInterfaces.exists[i | "android.os.Parcelable".endsWith(i.name) ])
 		{
-			val interfaces = clazz.implementedInterfaces.join(', ')
-			clazz.addError (String.format("To use @AndroidParcelable, %s must implement android.os.Parcelable, currently it implements: %s.", clazz.simpleName, if (interfaces.empty) 'nothing.' else interfaces))
+		   var List<TypeReference> implemented = clazz.implementedInterfaces.toList as List<TypeReference>
+		   implemented.add(Parcelable.newTypeReference)
+		   clazz.setImplementedInterfaces(implemented)
+//			val interfaces = clazz.implementedInterfaces.join(', ')
+//			clazz.addError (String.format("To use @AndroidParcelable, %s must implement android.os.Parcelable, currently it implements: %s.", clazz.simpleName, if (interfaces.empty) 'nothing.' else interfaces))
 		}
 		
 		val fields = clazz.declaredFields

@@ -37,7 +37,7 @@ import static extension org.xtendroid.utils.AlertUtils.*
 }
 
 @AndroidParcelable
-class ParcelableData implements Parcelable {
+class ParcelableData {
 	public int age
 	public long createdAt
 	public float likeAButterfly
