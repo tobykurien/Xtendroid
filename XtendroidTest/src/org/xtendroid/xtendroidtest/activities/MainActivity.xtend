@@ -23,10 +23,11 @@ import org.xtendroid.adapter.BeanAdapter
 	// Xtendroid API demos
 	var demos = #[
 		new Demo('@AndroidFragment', FragmentActivity),
-		new Demo('@AndroidDatabase', DbTestActivity),
+		new Demo('@AndroidDatabase, BgTask', DbTestActivity),
 		new Demo('@AndroidAdapter', AndroidAdapterActivity),
 		new Demo('@AndroidPreference', SettingsActivity),
-		new Demo('@AndroidLoader', LoaderActivity)
+		new Demo('@AndroidLoader', LoaderActivity),
+		new Demo('@AndroidParcelable', ParcelableActivity)
 	]
 	
 	@OnCreate
