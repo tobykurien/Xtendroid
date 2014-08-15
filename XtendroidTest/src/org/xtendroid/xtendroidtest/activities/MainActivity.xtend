@@ -25,7 +25,8 @@ import org.xtendroid.adapter.BeanAdapter
 		new Demo('@AndroidFragment', FragmentActivity),
 		new Demo('@AndroidDatabase', DbTestActivity),
 		new Demo('@AndroidAdapter', AndroidAdapterActivity),
-		new Demo('@AndroidPreference', SettingsActivity)
+		new Demo('@AndroidPreference', SettingsActivity),
+		new Demo('@AndroidLoader', LoaderActivity)
 	]
 	
 	@OnCreate

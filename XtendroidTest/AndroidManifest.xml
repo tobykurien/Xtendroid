@@ -35,6 +35,9 @@
         <activity
             android:name="org.xtendroid.xtendroidtest.activities.AndroidAdapterActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name="org.xtendroid.xtendroidtest.activities.LoaderActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
     </application>
 
 </manifest>
