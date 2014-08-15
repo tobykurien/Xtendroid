@@ -192,7 +192,7 @@ class ParcelableProcessor extends AbstractClassProcessor
 	override doTransform(MutableClassDeclaration clazz, extension TransformationContext context) {
 		if (!clazz.implementedInterfaces.exists[i | "android.os.Parcelable".endsWith(i.name) ])
 		{
-		   var List<TypeReference> implemented = clazz.implementedInterfaces.toList as List<TypeReference>
+		   var List<TypeReference> implemented = clazz.declaredInterfaces.toList as List<TypeReference>
 		   implemented.add(Parcelable.newTypeReference)
 		   clazz.setImplementedInterfaces(implemented)
 //			val interfaces = clazz.implementedInterfaces.join(', ')
