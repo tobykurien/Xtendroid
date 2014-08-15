@@ -47,7 +47,6 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
 		, 'Serializable' -> 'Serializable' 
 		, 'short' -> 'Short'
 		, 'short[]' -> 'ShortArray'
-		, 'short' -> 'Short'
 		, 'SparseArray<? extends Parcelable>' -> 'SparseParcelableArray'
 		, 'SparseArray<Parcelable>' -> 'SparseParcelableArray'
 		, 'String' -> 'String'
@@ -82,7 +81,6 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
 		, 'Serializable' -> 'null' 
 		, 'short' -> '0'
 		, 'short[]' -> 'null'
-		, 'short' -> '0'
 		, 'SparseArray<? extends Parcelable>' -> 'null'
 		, 'SparseArray<Parcelable>' -> 'null'
 		, 'String' -> 'null'
@@ -105,17 +103,15 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
 //		val bundleField = clazz.declaredFields.findFirst[f|f.type.equals(Bundle.newTypeReference)
 //			&& (f.annotations.findFirst[a|a.equals(BundleProperty.newAnnotationReference)] == null)
 //		]
-		val intentField = clazz.declaredFields.findFirst[f|f.type.equals(Intent.newTypeReference)]
+		val intentField = clazz.declaredFields.findFirst[type == Intent.newTypeReference]
 		
-		var _prefix = context.determinePrefix(field, isDataSourceActivity, isDataSourceFragment, intentField)
-		
-		val prefix = _prefix
+		val prefix = context.determinePrefix(field, isDataSourceActivity, isDataSourceFragment, intentField)
 		
 		val alias = field.findAnnotation(BundleProperty.findTypeGlobally)?.getStringValue('value')
 
 		val fieldName = field.simpleName.santizedName
     	
-    	if (!clazz.declaredFields.exists[f| f.simpleName.equalsIgnoreCase('_bundleHolder') && f.type.equals(Bundle.newTypeReference)])
+    	if (!clazz.declaredFields.exists[f| f.simpleName.equalsIgnoreCase('_bundleHolder') && f.type == Bundle.newTypeReference])
     	{
     		clazz.addField('_bundleHolder') [
 	    		visibility = Visibility.PRIVATE
@@ -123,7 +119,7 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
     		]
     	}
 
-    	if (intentField == null && !isDataSourceFragment && !clazz.declaredFields.exists[f| f.simpleName.equalsIgnoreCase('_intentHolder') && f.type.equals(Intent.newTypeReference)])
+    	if (intentField == null && !isDataSourceFragment && !clazz.declaredFields.exists[f| f.simpleName.equalsIgnoreCase('_intentHolder') && f.type == Intent.newTypeReference])
     	{
     		clazz.addField('_intentHolder') [
 	    		visibility = Visibility.PRIVATE
@@ -139,10 +135,11 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
     	val keyValue = if (alias.nullOrEmpty) fieldName else alias
     	if (!clazz.declaredMethods.exists[m|m.simpleName.equalsIgnoreCase(getterMethodName)])
     	{
+    	   field.markAsRead
 	    	clazz.addMethod(getterMethodName) [
 	    		visibility = Visibility.PUBLIC
 	    		returnType = field.type
-				body =['''
+				body = '''
 					«IF isDataSourceFragment»
 						«IF field.type.primitive || fieldInitializer != null»
 							«field.simpleName» = «prefix».get«mapTypeToMethodName.get(field.type.simpleName)»("«keyValue»");
@@ -160,18 +157,19 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
 							return «prefix».get«mapTypeToMethodName.get(field.type.simpleName)»Extra("«keyValue»");
 						«ENDIF»
 					«ENDIF»
-				''']    		
+				'''    		
 	    	]
     	}
     	
 		if (!clazz.declaredMethods.exists[m|m.simpleName.equalsIgnoreCase(getterMethodDefaultName)] && fieldInitializer != null)
     	{
+    	   field.markAsRead
     		clazz.addMethod(getterMethodDefaultName) [
 	    		visibility = Visibility.PUBLIC
 	    		returnType = field.type
     			body = fieldInitializer
     		]
-    	}else if (field.type.primitive && isDataSourceActivity)
+    	} else if (field.type.primitive && isDataSourceActivity)
     	{
     		field.addError('You must provide a default value for this primitive type. Or declare a function that provides this default value.')
     	}
@@ -181,14 +179,14 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
     		visibility = Visibility.PUBLIC
     		returnType = clazz.newTypeReference
     		addParameter("value", field.type)
-			body =['''
+			body = '''
 				«IF isDataSourceFragment»
 					«prefix».put«mapTypeToMethodName.get(field.type.simpleName)»("«keyValue»", value);
 				«ELSE»
 					«prefix».putExtra("«keyValue»", value);
 				«ENDIF»
 				return this;
-			''']    		
+			'''    		
     	]
     }
 				
