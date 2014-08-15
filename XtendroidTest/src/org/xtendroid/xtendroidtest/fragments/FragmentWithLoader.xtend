@@ -12,14 +12,16 @@ import org.xtendroid.xtendroidtest.R
 //@AndroidLoader
 @AndroidFragment(R.layout.fragment_test) 
 class FragmentWithLoader implements LoaderCallbacks<String> {
-	var BgLoader<String> loader = new BgLoader<String>(activity, [|
+	var BgLoader<String> loader
+
+	@OnCreate
+	def init() {
+		loader = new BgLoader<String>(activity, [|
 				Thread.sleep(5000)
 				"Return value from loader"
 			], [
 			])	
-
-	@OnCreate
-	def init() {
+			
 		fragText.text = "Fragment loading value..."
 	}
 	
