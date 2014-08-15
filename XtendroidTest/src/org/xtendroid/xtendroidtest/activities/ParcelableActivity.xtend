@@ -30,7 +30,7 @@ import static extension org.xtendroid.utils.AlertUtils.*
 			startActivity(intent2)
 			finish
 		} else {
-			// pass the parcel to the fragment as argument
+			// display de-serialized data
 			parcelText.text = "Got parcel: " + parcel.toString
 		}
 	}

@@ -38,8 +38,8 @@
         <activity
             android:name="org.xtendroid.xtendroidtest.activities.LoaderActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
-            android:name="org.xtendroid.xtendroidtest.activities.ParcelableActivity"/>
+        <activity android:name="org.xtendroid.xtendroidtest.activities.ParcelableActivity" />
+        <activity android:name="org.xtendroid.xtendroidtest.activities.BundleActivity" />
     </application>
 
 </manifest>

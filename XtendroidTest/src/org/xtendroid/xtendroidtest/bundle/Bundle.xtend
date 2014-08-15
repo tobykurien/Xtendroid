@@ -317,8 +317,8 @@ class BundleFragment1 extends Fragment {
 	@BundleProperty
 	short s = 0 as short
 	
-	@BundleProperty
-	SparseArray<? extends Parcelable> sparpa
+//	@BundleProperty
+//	SparseArray<? extends Parcelable> sparpa
 	
 	@BundleProperty
 	String str
@@ -418,8 +418,8 @@ class BundleFragment2 extends android.support.v4.app.Fragment {
 	@BundleProperty
 	short s = 0 as short
 	
-	@BundleProperty
-	SparseArray<? extends Parcelable> sparpa
+//	@BundleProperty
+//	SparseArray<? extends Parcelable> sparpa
 	
 	@BundleProperty
 	String str

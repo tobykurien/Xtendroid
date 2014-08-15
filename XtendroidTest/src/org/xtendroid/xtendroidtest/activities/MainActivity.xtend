@@ -9,14 +9,6 @@ import org.xtendroid.xtendroidtest.R
 import org.xtendroid.adapter.BeanAdapter
 
 /**
- * Data bean to store each demo activity
- */
-@Data class Demo {
-	String title
-	Class<?> activity
-}
-
-/**
  * Main activity simply lists the demos and allows user to launch them
  */
 @AndroidActivity(R.layout.activity_main) class MainActivity {
@@ -27,7 +19,8 @@ import org.xtendroid.adapter.BeanAdapter
 		new Demo('@AndroidAdapter', AndroidAdapterActivity),
 		new Demo('@AndroidPreference', SettingsActivity),
 		new Demo('@AndroidLoader', LoaderActivity),
-		new Demo('@AndroidParcelable', ParcelableActivity)
+		new Demo('@AndroidParcelable', ParcelableActivity),
+      new Demo('@BundleProperty', BundleActivity)
 	]
 	
 	@OnCreate
@@ -57,4 +50,12 @@ import org.xtendroid.adapter.BeanAdapter
 		super.onOptionsItemSelected(item)
 	}
 	
+}
+
+/**
+ * Data bean to store each demo activity
+ */
+@Data class Demo {
+   String title
+   Class<?> activity
 }

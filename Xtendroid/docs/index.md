@@ -367,23 +367,40 @@ Intents and Bundles
 
 The member-level `@BundleProperty` annotation, will create a convenience methods for extracting a value from a Bundle or Intent.
 
-If a `@BundleProperty` is applied to a member of an Activity then the generated convenience method will be applied to the intent of the Activity.
+If a `@BundleProperty` is applied to a member of an Activity then the generated convenience method will be applied to the intent of the Activity. If applied to a Fragment, then it will be applied to the Bundle (through the `getArguments()` method). If applied to a bean or a Service or any other type other than an Activity or Fragment, then the annotation will attempt to find an Intent among the members and do the same.
 
-If applied to a Fragment, then it will be applied to the Bundle (through the `getArguments` method).
-
-If applied to a bean or a Service or any other type other than an Activity or Fragment, then the annotation will attempt to find an Intent among the members and do the same.
+Suppose an Activity is expecting a "country" bundle extra, but will default to "South Africa" if not found:
 
 ```xtend
 class MyActivity extends Activity {
-	@BundleProperty String myString
-}
+	@BundleProperty String country = "South Africa"
+   @BundleProperty String category
 
-class MyFragment extends Fragment {
-	@BundleProperty int myInt // the member name is the name of the key in the Bundle
+   override onStart() {
+      super.onStart()
+      toast("Using country " + country + ", category " + category)
+   }
 }
 ```
 
-It's important to define the type of the member, so the correct methods will be invoked to fetch the value contained within the Bundle.
+Now you can call the activity and send the data in an Intent:
+
+```xtend
+var intent = new Intent(this, MyActivity)
+MyActivity.putCountry(intent, "Finland")
+MyActivity.putCategory(intent, "Sports")
+startActivity(intent)
+```
+
+The above also works for using an arguments Bundle for Fragments too.
+
+```xtend
+var bundle = new Bundle
+MyActivity.putCountry(bundle, "Finland")
+MyActivity.putCategory(bundle, "Sports")
+
+// set bundle as arguments, etc.
+```
 
 Parcelables
 -----------
@@ -406,7 +423,7 @@ class ParcelableData {
 }
 ```
 
-Now this Parcelable can be added to an Intent (and retrieved at the receiving Fragment or Activity using `Intent.getParcelableExtra("parcel")`):
+Now this Parcelable can be added to an Intent:
 
 ```xtend
 var p = new ParcelableData
@@ -419,6 +436,8 @@ var intent2 = new Intent(this, AnotherActivity)
 intent2.putExtra("parcel", p)
 startActivity(intent2)
 ```
+
+The receiving Fragment or Activity can retrieve the data using `Intent.getParcelableExtra("parcel")`.
 
 Utilities
 ---------
