@@ -11,6 +11,9 @@ import org.eclipse.xtend.lib.macro.Active
 import org.eclipse.xtend.lib.macro.TransformationContext
 import org.eclipse.xtend.lib.macro.declaration.MutableFieldDeclaration
 import org.eclipse.xtend.lib.macro.declaration.Visibility
+import android.os.Parcelable
+import org.eclipse.xtend.lib.macro.declaration.TypeReference
+import java.util.ArrayList
 
 @Active(BundlePropertyProcessor)
 @Target(ElementType.FIELD)
@@ -19,10 +22,15 @@ annotation BundleProperty {
 }
 
 class BundlePropertyProcessor extends AbstractFieldProcessor {
+	
+	val mapTypeToIntentPutInFix = #{
+   		'ArrayList<String>' -> 'StringArrayList',
+   		'ArrayList<Integer>' -> 'IntegerArrayList',
+   		'ArrayList<CharSequence>' -> 'CharSequenceArrayList'
+	}
 
    val mapTypeToMethodName = #{
-      'Bundle' -> 'Bundle' // 'All'-> 'Bundle, the difference, is that 'All' does not require a key.
-      ,
+      'Bundle' -> 'Bundle', // 'All'-> 'Bundle, the difference, is that 'All' does not require a key.
       'IBinder' -> 'Binder',
       'boolean' -> 'Boolean',
       'boolean[]' -> 'BooleanArray',
@@ -56,8 +64,7 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
    }
 
    val mapTypeToNilValue = #{
-      'Bundle' -> 'null' // 'All'-> 'Bundle, the difference, is that 'All' does not require a key.
-      ,
+      'Bundle' -> 'null', // 'All'-> 'Bundle, the difference, is that 'All' does not require a key.
       'IBinder' -> 'null',
       'boolean' -> 'false',
       'boolean[]' -> 'null',
@@ -147,11 +154,15 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
                   «IF field.type.primitive || fieldInitializer != null»
                      «field.type.name» «field.simpleName» = «prefix».get«mapTypeToMethodName.get(field.type.simpleName)»("«keyValue»");
                      return «field.simpleName» == «mapTypeToNilValue.get(field.type.simpleName)» ? «field.simpleName» : «getterMethodDefaultName»();
+                  «ELSEIF field.isParcelable(context)»
+                  	 return «prefix».get«field.parcelableSuffix»("«keyValue»"); 
                   «ELSE»
                      return «prefix».get«mapTypeToMethodName.get(field.type.simpleName)»("«keyValue»");
                   «ENDIF»
                «ELSE»
-                  «IF field.type.primitive»
+				  «IF field.isParcelable(context)»
+				     return «prefix».get«field.parcelableSuffix»Extra("«keyValue»"); 
+                  «ELSEIF field.type.primitive»
                      return «prefix».get«mapTypeToMethodName.get(field.type.simpleName)»Extra("«keyValue»", «getterMethodDefaultName»());
                   «ELSEIF fieldInitializer != null»
                      «field.type.name» «fieldName» = «prefix».get«mapTypeToMethodName.get(field.type.simpleName)»Extra("«keyValue»");
@@ -181,14 +192,22 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
       clazz.addMethod("put" + field.simpleName.toFirstUpper) [
          visibility = Visibility.PUBLIC
          returnType = clazz.newTypeReference
-         addParameter("value", field.type)
+         addParameter("value", if (field.isParcelable(context)) field.getParcelableType(context) else field.type)
          body = '''
-            «IF isDataSourceFragment»
-               «prefix».put«mapTypeToMethodName.get(field.type.simpleName)»("«keyValue»", value);
-            «ELSE»
-               «prefix».putExtra("«keyValue»", value);
-            «ENDIF»
-            return this;
+			«IF field.isParcelable(context)»
+				«IF isDataSourceFragment»
+					«prefix».put«field.parcelableSuffix»("«keyValue»", value);
+				«ELSE»
+					«prefix».put«IF field.type.simpleName.contains("ArrayList")»ParcelableArrayList«ENDIF»Extra("«keyValue»", value);
+				«ENDIF»
+            «ELSEIF mapTypeToIntentPutInFix.containsKey(field.type.simpleName) && !isDataSourceFragment»
+				«prefix».put«mapTypeToIntentPutInFix.get(field.type.simpleName)»Extra("«keyValue»", value);
+			«ELSEIF isDataSourceFragment»
+           		«prefix».put«mapTypeToMethodName.get(field.type.simpleName)»("«keyValue»", value);
+           	«ELSE»
+           		«prefix».putExtra("«keyValue»", value);
+           	«ENDIF»
+			return this;
          '''
       ]
 
@@ -197,10 +216,16 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
          visibility = Visibility.PUBLIC
          static = true
          addParameter("intent", Intent.newTypeReference())
-         addParameter("value", field.type)
+         addParameter("value", if (field.isParcelable(context)) field.getParcelableType(context) else field.type)
          body = [
             '''
-               intent.putExtra("«keyValue»", value);
+				«IF field.isParcelable(context)»
+					intent.put«IF field.type.simpleName.contains("ArrayList")»ParcelableArrayList«ENDIF»Extra("«keyValue»", value);
+            	«ELSEIF mapTypeToIntentPutInFix.containsKey(field.type.simpleName)»
+            		intent.put«mapTypeToIntentPutInFix.get(field.type.simpleName)»Extra("«keyValue»", value);
+				«ELSE»
+               		intent.putExtra("«keyValue»", value);
+               «ENDIF»
             ''']
       ]
 
@@ -209,10 +234,14 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
          visibility = Visibility.PUBLIC
          static = true
          addParameter("bundle", Bundle.newTypeReference())
-         addParameter("value", field.type)
+         addParameter("value", if (field.isParcelable(context)) field.getParcelableType(context) else field.type)
          body = [
             '''
-               bundle.put«mapTypeToMethodName.get(field.type.simpleName)»("«keyValue»", value);
+«««				«IF field.isParcelable(context)»
+«««					bundle.put«field.parcelableSuffix»("«keyValue»", value);
+«««				«ELSE»             	
+					bundle.put«mapTypeToMethodName.get(field.type.simpleName)»("«keyValue»", value);
+«««				«ENDIF»
             ''']
       ]
 
@@ -221,7 +250,7 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
    }
 
    def determinePrefix(extension TransformationContext context, MutableFieldDeclaration field,
-      boolean isDataSourceActivity, boolean isDataSourceFragment, MutableFieldDeclaration intentField/*, MutableFieldDeclaration bundleField*/) {
+      boolean isDataSourceActivity, boolean isDataSourceFragment, MutableFieldDeclaration intentField) {
       var _prefix = ''
       if (isDataSourceActivity) {
          return 'getIntent()'
@@ -238,5 +267,31 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
 
    def santizedName(String name) {
       return name.replaceFirst("^_+", '')
+   }
+   
+   def boolean isParcelable(MutableFieldDeclaration field, extension TransformationContext context)
+   {
+   	    // it could be a ArrayList<? extends Parcelable> // TODO test
+   		val fieldType = if (field.type.simpleName.contains("ArrayList") && !field.type.actualTypeArguments.empty) field.type.actualTypeArguments.head else field.type  
+   		var type = if (fieldType.array) fieldType.arrayComponentType else fieldType
+		return Parcelable.newTypeReference.isAssignableFrom(type) &&
+			// a bundle is a sub type of Parcelable
+			!Bundle.newTypeReference.isAssignableFrom(type)
+   }
+   
+   def CharSequence getParcelableSuffix(MutableFieldDeclaration field)
+   {
+      if (field.type.simpleName.contains("ArrayList")) return "ParcelableArrayList"
+      if (field.type.array) return "ParcelableArray"
+      return "Parcelable"
+   }
+   
+   def TypeReference getParcelableType(MutableFieldDeclaration field, extension TransformationContext context) {
+		val parcelableTypeRef = Parcelable.newTypeReference
+      if (field.type.simpleName.contains("ArrayList")) return field.type
+      if (field.type.array) {
+      	return parcelableTypeRef.newArrayTypeReference
+      }
+      return parcelableTypeRef
    }
 }
