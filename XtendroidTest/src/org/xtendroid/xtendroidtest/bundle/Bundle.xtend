@@ -1,17 +1,17 @@
 package org.xtendroid.xtendroidtest.bundle
 
 import android.app.Activity
-import org.xtendroid.app.AndroidActivity
-import org.xtendroid.annotations.BundleProperty
-import org.xtendroid.annotations.AndroidFragment
-import android.os.Bundle
-import android.os.IBinder
-import java.util.ArrayList
-import android.os.Parcelable
-import java.io.Serializable
-import android.util.SparseArray
-import android.content.Intent
+import android.app.Fragment
 import android.app.IntentService
+import android.content.Intent
+import android.os.Bundle
+import android.os.Parcelable
+import android.util.SparseArray
+import java.io.Serializable
+import java.util.ArrayList
+import org.xtendroid.annotations.AndroidFragment
+import org.xtendroid.annotations.BundleProperty
+import org.xtendroid.app.AndroidActivity
 import org.xtendroid.xtendroidtest.R
 
 class BundleService extends IntentService
@@ -231,7 +231,7 @@ class BundleActivity extends Activity {
 }
 
 @AndroidFragment(layout=R.layout.activity_bundle)
-class BundleFragment1 extends android.app.Fragment {
+class BundleFragment1 extends Fragment {
 	
 	@BundleProperty
 	var Bundle bundle

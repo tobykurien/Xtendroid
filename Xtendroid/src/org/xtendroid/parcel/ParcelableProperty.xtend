@@ -200,7 +200,6 @@ class ParcelableProcessor extends AbstractClassProcessor
 		}
 		
 		val fields = clazz.declaredFields
-		val jsonPropertyFieldDeclared = fields.exists[f | f.simpleName.equalsIgnoreCase(JsonPropertyProcessor.jsonObjectFieldName) && f.type.name.equalsIgnoreCase('org.json.JSONObject')]
 		for (f : fields)
 		{
 			if (unsupportedAbstractTypesAndSuggestedTypes.keySet.contains(f.type.name))

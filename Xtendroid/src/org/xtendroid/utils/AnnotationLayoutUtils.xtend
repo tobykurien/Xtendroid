@@ -1,15 +1,15 @@
 package org.xtendroid.utils
 
-import org.w3c.dom.Element
 import android.view.View
+import org.eclipse.xtend.lib.macro.TransformationContext
+import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
+import org.eclipse.xtend.lib.macro.declaration.MutableInterfaceDeclaration
+import org.eclipse.xtend.lib.macro.declaration.TypeReference
+import org.eclipse.xtend.lib.macro.file.Path
+import org.w3c.dom.Element
+
 import static extension org.xtendroid.utils.NamingUtils.*
 import static extension org.xtendroid.utils.XmlUtils.*
-import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
-import org.eclipse.xtend.lib.macro.TransformationContext
-import org.eclipse.xtend.lib.macro.file.Path
-import org.eclipse.xtend.lib.macro.declaration.MutableInterfaceDeclaration
-import org.xtendroid.app.AndroidActivity
-import org.eclipse.xtend.lib.macro.declaration.TypeReference
 
 class AnnotationLayoutUtils {
 	def static getFieldType(Element e) {
@@ -83,7 +83,7 @@ class AnnotationLayoutUtils {
 		}
 	}
 
-	def static createViewGettersWithCallBack(extension TransformationContext context, Path xmlFilePath,
+	def static void createViewGettersWithCallBack(extension TransformationContext context, Path xmlFilePath,
 		MutableClassDeclaration clazz, MutableInterfaceDeclaration callbacksType) {
 
 		val viewType = View.newTypeReference
@@ -118,7 +118,7 @@ class AnnotationLayoutUtils {
 
 	}
 
-	def static createViewGetters(
+	def static void createViewGetters(
 		extension TransformationContext context,
 		Path xmlFilePath,
 		MutableClassDeclaration clazz

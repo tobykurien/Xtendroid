@@ -13,7 +13,7 @@ import org.xtendroid.adapter.BeanAdapter
  */
 @Data class Demo {
 	String title
-	Class activity
+	Class<?> activity
 }
 
 /**

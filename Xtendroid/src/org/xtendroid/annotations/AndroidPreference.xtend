@@ -14,7 +14,7 @@ import org.xtendroid.utils.NamingUtils
 import android.content.Context
 import android.app.Fragment
 
-@Active(typeof(AndroidPreferenceProcessor))
+@Active(AndroidPreferenceProcessor)
 annotation AndroidPreference {
 }
 
@@ -36,9 +36,9 @@ class AndroidPreferenceProcessor implements TransformationParticipant<MutableMem
          addParameter("context", Context.newTypeReference)
          setReturnType(clazz.newTypeReference())
          setStatic(true)
-         body = ['''
+         body = '''
             return BasePreferences.getPreferences(context, «clazz.simpleName».class);
-         ''']
+         '''
       ]
 		
 		// add a getter for fragments too
@@ -46,9 +46,9 @@ class AndroidPreferenceProcessor implements TransformationParticipant<MutableMem
          addParameter("fragment", Fragment.newTypeReference)
          setReturnType(clazz.newTypeReference())
          setStatic(true)
-         body = ['''
+         body = '''
             return BasePreferences.getPreferences(fragment.getActivity(), «clazz.simpleName».class);
-         ''']
+         '''
       ]
  
  		clazz.declaredFields.forEach[f| 
@@ -66,6 +66,11 @@ class AndroidPreferenceProcessor implements TransformationParticipant<MutableMem
       {
          field.addError("A Preference field must have an initializer.")      	
       }
+      if (field.type.isInferred)
+      {
+         field.addError("A Preference field must have an explicit type.")
+         return;      	
+      }
       
       val clazz = field.declaringType     
       val isTypeOfBasePreferences = BasePreferences.newTypeReference.isAssignableFrom(clazz.newTypeReference)
@@ -74,32 +79,30 @@ class AndroidPreferenceProcessor implements TransformationParticipant<MutableMem
 			clazz.addError('This class must extend org.xtendroid.utils.BasePreferences')
 		}
 
+      field.markAsRead
       // add synthetic init-method
-      var getter = if(field.type.simpleName.equalsIgnoreCase("Boolean")) "is" else "get"
+      var getter = if (field.type.simpleName.equalsIgnoreCase("Boolean")) "is" else "get"
       field.declaringType.addMethod(getter + field.simpleName.toFirstUpper) [
-         visibility = Visibility::PUBLIC
+         visibility = Visibility.PUBLIC
          returnType = field.type
          val methodName = "get" + returnType.prefMethodName
          // reassign the initializer expression to be the init method’s body
          // this automatically removes the expression as the field’s initializer
-         body = [
-            '''
-               return pref.«methodName»("«NamingUtils.toResourceName(field.simpleName)»", «field.simpleName»);
-            '''
-         ]
+         body = '''
+            return pref.«methodName»("«NamingUtils.toResourceName(field.simpleName)»", «field.simpleName»);
+         '''
       ]
 
       // add a getter method which lazily initializes the field
       field.declaringType.addMethod("set" + field.simpleName.toFirstUpper) [
-         visibility = Visibility::PUBLIC
+         visibility = Visibility.PUBLIC
          returnType = context.primitiveBoolean
          addParameter("value", field.type)
          val methodName = "put" + field.type.prefMethodName
-         body = [
-            '''
-               pref.edit().«methodName»("«NamingUtils.toResourceName(field.simpleName)»", value).commit();
-               return true;
-            ''']
+         body = '''
+            pref.edit().«methodName»("«NamingUtils.toResourceName(field.simpleName)»", value).commit();
+            return true;
+         '''
       ]
    }
 
