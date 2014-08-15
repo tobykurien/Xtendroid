@@ -15,7 +15,7 @@ import org.eclipse.xtend.lib.macro.declaration.TypeReference
 import org.eclipse.xtend.lib.macro.declaration.Visibility
 import org.json.JSONException
 import org.json.JSONObject
-import org.xtendroid.json.JsonPropertyProcessor
+import org.xtendroid.json.AndroidJsonProcessor
 
 @Active(ParcelableProcessor)
 @Target(ElementType.TYPE)
@@ -151,7 +151,7 @@ class ParcelableProcessor extends AbstractClassProcessor
 			this.«f.simpleName» = new Date(in.readLong());
 		«ELSEIF "org.json.JSONObject".equals(f.type.name)»
 			this.«f.simpleName» = new JSONObject(in.readString());
-		«ELSEIF "org.json.JSONArray".equals(f.type.name)»
+		«ELSEIF "org.json.JSONArray" == f.type.name»
 			this.«f.simpleName» = new JSONArray(in.readString());
 		«ELSEIF f.type.name.endsWith('[]')»
 			«IF f.type.name.startsWith("java.util.Date")»
@@ -251,7 +251,7 @@ class ParcelableProcessor extends AbstractClassProcessor
 			''']
 		]
 
-		val exceptionsTypeRef = if (fields.exists[f|f.type.name.startsWith("org.json.JSONObject")])  #[ JSONException.newTypeReference() ] else #[]
+		val exceptionsTypeRef = if (fields.exists[type.name.startsWith("org.json.JSON")])  #[ JSONException.newTypeReference() ] else #[]
 		clazz.addConstructor[
 			addParameter('in', Parcel.newTypeReference)
 			body = ['''
@@ -277,20 +277,21 @@ class ParcelableProcessor extends AbstractClassProcessor
 		
 		// if the raw JSON container is explicitly declared
 		// it needs to be declared in this @AndroidParcelable context or expect data loss during (de)marshalling
-		if (clazz.declaredFields.exists[f|f.simpleName.equals(JsonPropertyProcessor.jsonObjectFieldName)])
+		if (clazz.declaredFields.exists[f|f.simpleName.equals(AndroidJsonProcessor.jsonObjectFieldName)])
 		{
 			clazz.addConstructor[
 				addParameter('jsonObj', JSONObject.newTypeReference)
 				body = ['''
-					this.«JsonPropertyProcessor.jsonObjectFieldName» = jsonObj;
+					this.«AndroidJsonProcessor.jsonObjectFieldName» = jsonObj;
 				''']
 			]
 		}
 		
 		clazz.addMethod('readFromParcel') [
+		   fields.forEach[markAsRead]
 			addParameter('in', Parcel.newTypeReference)
 			body = ['''
-				«fields.filter[f|!f.static].map[f | f.mapTypeToReadMethodBody ].join()»
+				«fields.filter[!static].map[f | f.mapTypeToReadMethodBody ].join()»
 			''']
 			exceptions = exceptionsTypeRef
 			returnType = void.newTypeReference				
