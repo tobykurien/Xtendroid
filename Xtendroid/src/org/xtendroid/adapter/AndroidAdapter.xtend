@@ -29,7 +29,7 @@ import org.eclipse.xtend.lib.macro.declaration.Visibility
  * My aim is to pave the way from @JsonProperty and @AndroidParcelable to @AndroidAdapter, @CustomViewGroup, @CustomView, or native android view widgets.
  * 
  */
-@Active(typeof(AdapterizeProcessor))
+@Active(AdapterizeProcessor)
 @Target(ElementType.TYPE)
 annotation AndroidAdapter {
 }
@@ -61,9 +61,12 @@ class AdapterizeProcessor extends AbstractClassProcessor {
 		]
 
 		val dataContainerField = dataContainerFields.head
+		dataContainerField.markAsRead
 		val dataContainerFieldTypeConst = dataContainerField.type
 		clazz.addConstructor [
 			visibility = Visibility::PUBLIC
+//			TODO active when 2.7 is used
+//			dataContainerField.markAsInitializedBy(it)
 			body = [
 				'''
 					this.mContext = context;
@@ -103,6 +106,7 @@ class AdapterizeProcessor extends AbstractClassProcessor {
 			androidViewGroupType.isAssignableFrom(f.type) || androidViewType.isAssignableFrom(f.type)]
 		if (!dummyViews.nullOrEmpty) {
 			dummyViews.forEach [ dummyView |
+			   dummyView.markAsRead
 				val dummyType = dummyView.type
 				clazz.addMethod("getView") [
 					visibility = Visibility::PUBLIC

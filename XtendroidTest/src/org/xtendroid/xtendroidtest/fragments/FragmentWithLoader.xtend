@@ -4,7 +4,6 @@ import android.app.LoaderManager.LoaderCallbacks
 import android.content.Loader
 import android.os.Bundle
 import org.xtendroid.annotations.AndroidFragment
-import org.xtendroid.annotations.AndroidLoader
 import org.xtendroid.app.OnCreate
 import org.xtendroid.utils.BgLoader
 import org.xtendroid.xtendroidtest.R
@@ -34,5 +33,5 @@ class FragmentWithLoader implements LoaderCallbacks<String> {
 	override onLoadFinished(Loader<String> arg0, String result) {
 		fragText.text = result
 	}
-	
+		
 }

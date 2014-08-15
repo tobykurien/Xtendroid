@@ -20,8 +20,6 @@ import org.eclipse.xtend.lib.macro.TransformationParticipant
 import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
 
 @Active(AndroidJsonProcessor)
-//@Target(ElementType.FIELD)
-//@Target(ElementType.TYPE)
 @Target(value=#[ElementType.FIELD, ElementType.TYPE])
 annotation AndroidJson {
 	// Use this to explicitly state the key value (String) of the JSON Object
@@ -88,7 +86,7 @@ class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDec
 			field.declaringType.addField(jsonObjectFieldName) [
 				type = JSONObject.newTypeReference
 				final = false
-				visibility = Visibility::PROTECTED
+				visibility = Visibility.PROTECTED
 				initializer = '''null'''
 			]
 
@@ -122,8 +120,8 @@ class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDec
 		// so that we can cache the result of parsing
 		field.declaringType.addField(field.simpleName + "Loaded") [
 			type = boolean.newTypeReference
-			initializer = ["false"]
-			visibility = Visibility::PROTECTED
+			initializer = '''false'''
+			visibility = Visibility.PROTECTED
 		]
 
 		// for Date (e.g. List<Date>, Date[], Date) members
@@ -131,50 +129,46 @@ class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDec
 
 		// create a getter method for the property
 		var getter = if(field.type.simpleName.equalsIgnoreCase("Boolean")) "is" else "get"
+		field.markAsRead
 		field.declaringType.addMethod(getter + field.simpleName.replaceAll('_', '').toFirstUpper) [
-			visibility = Visibility::PUBLIC
+			visibility = Visibility.PUBLIC
 			returnType = field.type
 			exceptions = #[JSONException.newTypeReference]
 			if (supportedTypes.containsKey(field.type.name)) {
 
 				// parse the value if it hasn't already been, then return the stored result
-				body = [
-					'''
-						if (!«field.simpleName»Loaded) {
-						   «field.simpleName» = «jsonObjectFieldName».get«supportedTypes.get(field.type.name)»("«jsonKey»");
-						   «field.simpleName»Loaded = true;
-						}
-						return «field.simpleName»;
-					''']
+				body = '''
+					if (!«field.simpleName»Loaded) {
+					   «field.simpleName» = «jsonObjectFieldName».get«supportedTypes.get(field.type.name)»("«jsonKey»");
+					   «field.simpleName»Loaded = true;
+					}
+					return «field.simpleName»;
+				'''
 			} else if (field.type.name.startsWith('java.util.Date')) {
 				exceptions = #[ParseException.newTypeReference, JSONException.newTypeReference]
 				if (field.type.array) {
-					body = [
-						'''
-							if (!«field.simpleName»Loaded) {
-								final «toJavaCode(JSONArray.newTypeReference)» «field.simpleName»JsonArray = «jsonObjectFieldName».getJSONArray("«jsonKey»");
-								this.«field.simpleName» = new «toJavaCode(Date.newTypeReference)»[«field.simpleName»JsonArray.length()];
-								for (int i=0; i<«field.simpleName»JsonArray.length(); i++)
-								{
-									this.«field.simpleName»[i] = «ConcurrentDateFormatHashMap.newTypeReference.name».convertStringToDate("«dateFormat»", «field.
-								simpleName»JsonArray.getString(i));
-								}
-								«field.simpleName»Loaded = true;
+					body = '''
+						if (!«field.simpleName»Loaded) {
+							final «JSONArray.newTypeReference» «field.simpleName»JsonArray = «jsonObjectFieldName».getJSONArray("«jsonKey»");
+							this.«field.simpleName» = new «Date.newTypeReference»[«field.simpleName»JsonArray.length()];
+							for (int i=0; i<«field.simpleName»JsonArray.length(); i++)
+							{
+								this.«field.simpleName»[i] = «ConcurrentDateFormatHashMap.newTypeReference.name».convertStringToDate("«dateFormat»", «field.
+							simpleName»JsonArray.getString(i));
 							}
-							return «field.simpleName»;
-							'''
-					]
-
+							«field.simpleName»Loaded = true;
+						}
+						return «field.simpleName»;
+					'''
 				} else // single object
 				{
-					body = [
-						'''
-							if (!«field.simpleName»Loaded) {
-							   «field.simpleName» = «ConcurrentDateFormatHashMap.newTypeReference.name».convertStringToDate("«dateFormat»", «jsonObjectFieldName».getString("«jsonKey»"));
-							   «field.simpleName»Loaded = true;
-							}
-							return «field.simpleName»;
-						''']
+					body = '''
+						if (!«field.simpleName»Loaded) {
+						   «field.simpleName» = «ConcurrentDateFormatHashMap.newTypeReference.name».convertStringToDate("«dateFormat»", «jsonObjectFieldName».getString("«jsonKey»"));
+						   «field.simpleName»Loaded = true;
+						}
+						return «field.simpleName»;
+					'''
 				}
 			} else if (field.type.array) {
 				val baseType = field.type.arrayComponentType
