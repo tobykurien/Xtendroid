@@ -21,13 +21,8 @@ import static extension org.xtendroid.utils.NamingUtils.*
  * 
  * TODO
  * 
- * + auto-generate Loader IDs and put them in the Activity/Fragment
- * + check if implements support LoaderCallbacks or just plain LoaderCallback in case of multiple Loader pattern
- * - add convenience functions to start, restart, stop, convenience method calls to the (support) LoaderManager
- * - add callbacks to Activity client (make it so that the Activity client, can implement multiple AsyncTaskLoaders if need be)
  * - Research: hook on to ApplicationContext instead of the activity context, or rehook the same Loader instance to the Activity context, onConfigurationChanged or onCreate even.
  */
-//	val Class value = typeof(Object)
 @Active(AndroidLoaderProcessor)
 @Target(ElementType.TYPE)
 annotation AndroidLoader {
@@ -58,7 +53,7 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 			android.content.Loader.newTypeReference.isAssignableFrom(f.type) ||
 				Loader.newTypeReference.isAssignableFrom(f.type)
 		)]
-
+		
 		if (loaderFields.size == 0) {
 			clazz.declaredFields.filter[f|f.type.inferred].forEach[f|
 				f.addWarning(
@@ -113,7 +108,7 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 		// and try to call initLoaders, where they should be called.
 		var isTypeActivity = false;
 		var isTypeFragment = false;
-		val fragmentWarning = "The initLoaders method must be invoked from the onViewCreated method.\n" +
+		val fragmentWarning = "The initLoaders method must be invoked from the onViewCreated or the onActivityCreated method.\n" +
 			"The initLoaders method must be invoked after the views are inflated, or expect crashes when the LoaderCallback attempts to access views."
 		if (Activity.newTypeReference.isAssignableFrom(clazz.extendedClass)) {
 			val onCreateMethod = clazz.declaredMethods.findFirst[m|m.simpleName.equals('onCreate')]
@@ -122,8 +117,6 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 					"The initLoaders method must be invoked here.\n" +
 						"After the setContentView method is called, or expect crashes when the LoaderCallback attempts to access views.\n" +
 						"Pro tip: use the @OnCreate annotation, to call initLoaders method.")
-			} else {
-				//				val test = onCreateMethod.getBody() + ['''something '''] // this doesn't work
 			}
 
 			// TODO figure out a way to use @AndroidActivity's onCreate injection mechanism
@@ -133,6 +126,9 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 		} else if (Fragment.newTypeReference.isAssignableFrom(clazz.extendedClass) ||
 			android.app.Fragment.newTypeReference.isAssignableFrom(clazz.extendedClass)) {
 			val onViewCreatedMethod = clazz.declaredMethods.findFirst[m|m.simpleName.equals('onViewCreated')]
+			val onActivityCreatedMethod = clazz.declaredMethods.findFirst[m|m.simpleName.equals('onActivityCreated')]
+			
+			// try this one first
 			if (onViewCreatedMethod == null) {
 				clazz.addMethod('onViewCreated') [
 					addAnnotation(Override.newAnnotationReference)
@@ -144,8 +140,22 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 							initLoaders();
 						''']
 				]
-			} else {
-				clazz.addWarning(fragmentWarning)
+			// try the next best
+			}else if (onActivityCreatedMethod == null)
+			{
+				clazz.addMethod('onActivityCreated') [
+					addAnnotation(Override.newAnnotationReference)
+					addParameter("savedInstanceState", Bundle.newTypeReference)
+					returnType = void.newTypeReference
+					body = [
+						'''
+							initLoaders();
+						''']
+				]
+			}else
+			{
+				onViewCreatedMethod.addWarning(fragmentWarning)
+				onActivityCreatedMethod.addWarning(fragmentWarning)
 			}
 			isTypeFragment = true
 		}
@@ -233,7 +243,6 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 		}
 
 		// add getters for Loaders (NOTE: workaround/hack, because I don't know how to evaluate initializer exprs)
-		// TODO determine how to evaluate exprs like body (method) and initializer (field), like a pro
 		loaderFields.forEach [ f |
 			clazz.addMethod("get" + f.simpleName.toJavaIdentifier.toFirstUpper + "Loader") [
 				visibility = Visibility.PUBLIC
