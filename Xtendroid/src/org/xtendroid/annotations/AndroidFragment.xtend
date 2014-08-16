@@ -108,18 +108,21 @@ class FragmentProcessor extends AbstractClassProcessor {
          ]
       }
          
-		clazz.addMethod("onCreateView") [
-			addAnnotation(Override.newAnnotationReference)
-			returnType = View.newTypeReference
-			addParameter("inflater", LayoutInflater.newTypeReference)
-			addParameter("container", ViewGroup.newTypeReference)
-			addParameter("savedInstanceState", Bundle.newTypeReference)
-			body = [
-				'''
-					View view = inflater.inflate(«layoutResId», container, false);
-					return view;
-				''']
-      ]
+      // create onCreateView method to load the layout, if method is not defined
+      if (clazz.findDeclaredMethod("onCreateView") == null) {
+   		clazz.addMethod("onCreateView") [
+   			addAnnotation(Override.newAnnotationReference)
+   			returnType = View.newTypeReference
+   			addParameter("inflater", LayoutInflater.newTypeReference)
+   			addParameter("container", ViewGroup.newTypeReference)
+   			addParameter("savedInstanceState", Bundle.newTypeReference)
+   			body = [
+   				'''
+   					View view = inflater.inflate(«layoutResId», container, false);
+   					return view;
+   				''']
+         ]
+      }
 
 		context.createViewGetters(xmlFile, clazz)
 	}
