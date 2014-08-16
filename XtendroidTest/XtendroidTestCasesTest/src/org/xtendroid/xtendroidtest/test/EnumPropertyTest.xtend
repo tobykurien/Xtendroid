@@ -3,13 +3,14 @@ package org.xtendroid.xtendroidtest.test
 import android.test.AndroidTestCase
 import org.xtendroid.annotations.EnumProperty
 
+enum AbcEnum {
+	a, b, c
+}
+
 class EnumPropertyTest extends AndroidTestCase {
-	enum AbcEnum {
-		a, b, c
-	}
 	
-//	@EnumProperty(enumType=AbcEnum)
-//	String alpha
+	@EnumProperty(enumType=AbcEnum)
+	String alpha
 	
 	@EnumProperty(name="GroupEnum", values=#["Baby", "Toddler", "Child", "Adult", "Senior"]) 
 	String group
@@ -18,6 +19,6 @@ class EnumPropertyTest extends AndroidTestCase {
 		group = GroupEnum.Baby.toString
 		assertEquals(group, "Baby")
 		assertEquals(GroupEnum.Baby, GroupEnum.toGroupEnumValue(group))
-		//assertNull(GroupEnum.toGroupEnumValue("Juvenile"))
+		assertNotNull(GroupEnum.toGroupEnumValue("Juvenile"))
 	}
 }
