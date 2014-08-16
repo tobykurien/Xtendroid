@@ -112,6 +112,7 @@ The `@EnumProperty` annotation allows you to generate enum types or reuse pre-de
 Like this:
 
 ```xtend
+// The enum must be declared outside the class
 enum ABCEnum {
    a,b,c
 }
