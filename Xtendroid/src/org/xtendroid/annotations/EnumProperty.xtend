@@ -136,8 +136,13 @@ class EnumPropertyProcessor extends AbstractFieldProcessor {
 				static = true
 				returnType = enumType.newTypeReference
 				body = ['''
-					«enumType.newTypeReference» e = «toJavaCode(enumType.newTypeReference)».valueOf(s);
-					return e != null ? e : PREVENT_NPE;
+					try
+					{
+						return «toJavaCode(enumType.newTypeReference)».valueOf(s);
+					}catch (IllegalArgumentException e)
+					{
+						return PREVENT_NPE;
+					}
 				''']
 			]
 		}
