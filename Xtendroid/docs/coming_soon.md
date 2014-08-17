@@ -21,9 +21,20 @@ new BgLoader<String>(context, [|
 ])
 ```
 
+There is another flavour of `BgLoader`, namely the `BgSupportLoader`, in case you want to support older androids.
+
+When a loader object is used together with `@AndroidLoader`,
+the loader must be initialized in the Activity's or Fragment`s field.
+
+This might seem weird because there is no guarantee that Fragment/Activity will be ready
+to access the context object during initialization.
+
+What actually happens is that the initializer in the Loader fields will be placed inside a method, that is invoked
+later on the lifecycle when all the views are inflated and the context object are completely ready.
+
 The result can be fetched by extending your Activity or Fragment with a LoaderCallback. Setting up the callback and the loader requires plenty of boilerplate code.
 
-It requires the following actions:
+Usually setting up a loader requires the following actions:
 
 * Create an integer ID for the LoaderManager to identify a Loader with
 * Write code to initialize a loader
@@ -60,8 +71,28 @@ Implementing a custom adapter that extends `BaseAdapter` with custom views has n
 
 ```xtend
 @AndroidAdapter class MyAdapter {
-   var List<Payload> data         // first list used as adapter data
-   var MyViewGroup showWithData   // "showWithData" viewgroup will display data
+    var List<Payload> data         // first list used as adapter data
+    var MyViewGroup   irrelevant   // How you label the MyViewGroup object is irrelevant, it has no side-effects.
+
+    def void showWithData(MyViewGroup view, Payload payload)
+    {
+        view.show(payload)
+    }
+}
+
+@CustomViewGroup(layout=R.layout.shipments_item_layout)
+abstract class MyViewGroup extends RelativeLayout
+{
+    /**
+     *
+     * This abstract method above will automagically
+     * try to match Payload's field names with `@+id/...` names.
+     *
+     * In the actual MyViewGroup (java) type, show will not be abstract.
+     *
+     */
+    def abstract void show(Payload input)
+
 }
 ```
 
