@@ -52,7 +52,7 @@ class FragmentProcessor extends AbstractClassProcessor {
 
 		// See if a layout is defined, then create accessors for them, if they actually exist
 		val String layoutResId = AnnotationLayoutUtils.getLayoutValue(clazz, context, AndroidFragment.newTypeReference)
-		if (layoutResId == null || "0".equals(layoutResId) || !layoutResId.contains('R.layout')) {
+		if (layoutResId == null || "-1".equals(layoutResId) || !layoutResId.contains('R.layout')) {
 			clazz.addWarning('You may add a layout resource id to the annotation, like this: @AndroidFragment(layout=R.layout...).')
 			return;
 		}
@@ -77,35 +77,65 @@ class FragmentProcessor extends AbstractClassProcessor {
 			return;
 		}
 
-      // create onViewCreated if not present
-      if (clazz.findDeclaredMethod("onViewCreated", Bundle.newTypeReference()) == null) {
          // prepare @OnCreate methods
          val onCreateAnnotation = OnCreate.newTypeReference.type
          val onCreateMethods = clazz.declaredMethods.filter[annotations.exists[annotationTypeDeclaration==onCreateAnnotation]]
          for (m : onCreateMethods) {
             if (m.parameters.empty) {
-               m.addParameter("savedInstanceState", Bundle.newTypeReference)
-            } else {
-               if (m.parameters.size > 1) {
-                  m.parameters.get(1).addError("Methods annotated with @OnCreate might only have zero or one parameter.")
-               } else {
-                  if (m.parameters.head.type != Bundle.newTypeReference) {
-                     m.parameters.head.addError("The single parameter type must be of type Bundle.")
-                  }
-               }
-            }
+				m.addParameter("savedInstanceState", Bundle.newTypeReference)
+            } else if (m.parameters.size > 1) {
+				m.parameters.get(1).addError("Methods annotated with @OnCreate might only have zero or one parameter.")
+			} else if (m.parameters.head.type != Bundle.newTypeReference) {
+				m.parameters.head.addError("The single parameter type must be of type Bundle.")
+			}
          }
          
-         clazz.addMethod("onViewCreated") [
-            addParameter("view", View.newTypeReference)
-            addParameter("savedInstanceState", Bundle.newTypeReference)
-            body = ['''
-               super.onViewCreated(view, savedInstanceState);
-               «FOR method : onCreateMethods»
-                  «method.simpleName»(savedInstanceState);
-               «ENDFOR»
-            ''']
-         ]
+      if (!onCreateMethods.nullOrEmpty)
+      {
+	      // create onViewCreated if not present
+	      if (clazz.findDeclaredMethod("onViewCreated") == null) {
+			
+			clazz.addMethod("onViewCreated") [
+	         	addAnnotation(Override.newAnnotationReference)
+	            addParameter("view", View.newTypeReference)
+	            addParameter("savedInstanceState", Bundle.newTypeReference)
+	            body = ['''
+	               super.onViewCreated(view, savedInstanceState);
+	               «FOR method : onCreateMethods»
+	                  «method.simpleName»(savedInstanceState);
+	               «ENDFOR»
+	            ''']
+	         ]
+
+			// use the next best thing	         
+	      }else if (clazz.findDeclaredMethod("onActivityCreated") == null)
+	      {
+	         clazz.addMethod("onActivityCreated") [
+	         	addAnnotation(Override.newAnnotationReference)
+	            addParameter("savedInstanceState", Bundle.newTypeReference)
+	            body = ['''
+	               super.onActivityCreated(savedInstanceState);
+	               «FOR method : onCreateMethods»
+	                  «method.simpleName»(savedInstanceState);
+	               «ENDFOR»
+	            ''']
+	         ]
+	      // last chance
+	      }else if (clazz.findDeclaredMethod("onStart") == null)
+	      {
+	         clazz.addMethod("onStart") [
+	         	addAnnotation(Override.newAnnotationReference)
+	            body = ['''
+	               super.onStart();
+	               «FOR method : onCreateMethods»
+	                  «method.simpleName»(savedInstanceState);
+	               «ENDFOR»
+	            ''']
+	         ]	      	
+	      }else
+	      {
+	      	clazz.addWarning('The @AndroidFragment annotation failed to process the @OnCreate annotation')
+	      }
       }
          
 		clazz.addMethod("onCreateView") [
