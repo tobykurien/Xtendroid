@@ -125,14 +125,11 @@ class AdapterizeProcessor extends AbstractClassProcessor {
 							}
 							«IF dataContainerField.type.array»
 								«dataContainerField.type.arrayComponentType» item = getItem(position);
+«««							// There is a strong bias for List type containers
 							«ELSEIF !dataContainerField.type.actualTypeArguments.empty»
 								«dataContainerField.type.actualTypeArguments.head.name» item = getItem(position);
 							«ENDIF»
-							«IF dummyType.name.startsWith("android")»
-								«dummyView.simpleName»(view, item);
-							«ELSE»
-								view.«dummyView.simpleName»(item);
-							«ENDIF»
+							«dummyView.simpleName»(view, item);
 							return view;
 						''']
 				]
