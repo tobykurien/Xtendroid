@@ -4,5 +4,6 @@
     <string name="app_name">XtendroidTest</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello, Xtendroid</string>
-
+    <string name="welcome">Xtendroid API demos and tests</string>
+    
 </resources>

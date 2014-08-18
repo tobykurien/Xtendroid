@@ -12,6 +12,7 @@ import org.eclipse.xtend.lib.macro.declaration.ClassDeclaration
 import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
 
 import static extension org.xtendroid.utils.AnnotationLayoutUtils.*
+import org.xtendroid.utils.AnnotationLayoutUtils
 
 /**
  * An active annotation for Android activities.
@@ -40,7 +41,7 @@ class AndroidActivityProcessor extends AbstractClassProcessor {
    
    override doTransform(MutableClassDeclaration annotatedClass, extension TransformationContext context) {
       val callBacksType = findInterface(annotatedClass.qualifiedName+"_CallBacks")
-      val layoutResourceID = getValue(annotatedClass, context)
+      val layoutResourceID = AnnotationLayoutUtils.getLayoutValue(annotatedClass, context, AndroidActivity.newTypeReference)
        
       val viewFileName = layoutResourceID?.substring(layoutResourceID.lastIndexOf('.') + 1)
       if (viewFileName == null) {
@@ -101,23 +102,5 @@ class AndroidActivityProcessor extends AbstractClassProcessor {
       }
       
       context.createViewGettersWithCallBack(xmlFile, annotatedClass, callBacksType)
-   }
-   
-   // TODO unify and refactor out with @CustomViewGroup, @AndroidFragment 
-   def String getValue(MutableClassDeclaration annotatedClass, extension TransformationContext context) {
-      var value = annotatedClass.annotations.findFirst[
-         annotationTypeDeclaration==AndroidActivity.newTypeReference.type
-      ].getExpression("layout")
-      
-      if (value == null || value.toString.trim == "-1") {
-      	value = annotatedClass.annotations.findFirst[
-            annotationTypeDeclaration==AndroidActivity.newTypeReference.type
-         ].getExpression("value")
-         
-         if (value == null) {
-            return null
-         }
-      }
-      return value.toString
    }
 }

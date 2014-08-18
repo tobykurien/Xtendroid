@@ -1,10 +1,10 @@
 package org.xtendroid.xtendroidtest.models
 
-import org.xtendroid.json.JsonProperty
+import org.xtendroid.json.AndroidJson
 
-class NewsItem {
-	@JsonProperty String url
-	@JsonProperty String title
-	@JsonProperty long id
-	@JsonProperty boolean published
+@AndroidJson class NewsItem {
+	String url
+	String title
+	long id
+	boolean published
 }

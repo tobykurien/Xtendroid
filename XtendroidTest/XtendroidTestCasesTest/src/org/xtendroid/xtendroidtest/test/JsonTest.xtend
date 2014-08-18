@@ -1,11 +1,14 @@
 package org.xtendroid.xtendroidtest.test
 
 import android.test.AndroidTestCase
-import android.test.suitebuilder.annotation.SmallTest
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.List
 import org.json.JSONObject
-import org.xtendroid.json.JsonProperty
-import java.util.Date
+import org.xtendroid.json.AndroidJson
+import org.xtendroid.annotations.BundleProperty
+import java.lang.annotation.Documented
+import android.annotation.SuppressLint
 
 /**
  * 
@@ -17,193 +20,126 @@ import java.util.Date
  * 5) The java.util.List version of the aforementioned
  * 
  */
- 
-class Result
-{
-	@JsonProperty
+@AndroidJson class Result {
 	var String url = null
-
-	@JsonProperty
 	var String title = null
-
-	@JsonProperty
 	var int id = 0
-
-	@JsonProperty
 	var boolean published = false
 }
 
-class ResultHolder
-{
-	@JsonProperty
+@AndroidJson class ResultHolder {
 	var List<Result> results
-	
-	@JsonProperty
 	var ArraysOfPrimitives[] arraysOfPrimitives
-
-	@JsonProperty
 	var List<ListsOfPrimitives> listsOfPrimitives
-	
-	@JsonProperty
 	var DateTypes dateTypes;
-
-	@JsonProperty
 	var ZuluFormat zuluFormat;
 }
 
-class DateTypes
-{
-	@JsonProperty("yyyy-MM-dd")
+class DateTypes {
+	@AndroidJson("yyyy-MM-dd")
 	var Date scalar
-	
-	@JsonProperty("yyyy-MM-dd")
+
+	@AndroidJson("yyyy-MM-dd")
 	var Date[] array
-	
-	@JsonProperty("yyyy-MM-dd")
+
+	@AndroidJson("yyyy-MM-dd")
 	var List<Date> list
 }
 
-class ZuluFormat
-{
-	@JsonProperty
+@AndroidJson class ZuluFormat {
 	var Date scalar
-	
-	@JsonProperty
 	var Date[] array
-	
-	@JsonProperty
 	var List<Date> list
 }
 
-class ArraysOfPrimitives
-{
-	@JsonProperty
+@AndroidJson class ArraysOfPrimitives {
 	var Double[] ddta
-
-	@JsonProperty
 	var double[] dta
-
-	@JsonProperty
 	var int[] ita
-
-	@JsonProperty
 	var Integer[] iita
-	
-	@JsonProperty
 	var long[] lta
-
-	@JsonProperty
 	var Long[] llta
-
-	@JsonProperty
 	var boolean[] bta
-
-	@JsonProperty
 	var Boolean[] bbta
 }
 
-
-class ListsOfPrimitives
-{
-	@JsonProperty
+@AndroidJson class ListsOfPrimitives {
 	var List<Double> ddtl
-
-	@JsonProperty
 	var List<Integer> iitl
-	
-	@JsonProperty
 	var List<Long> lltl
-
-	@JsonProperty
 	var List<Boolean> bbtl
 }
 
-class Response
-{
-	@JsonProperty
+@AndroidJson class Response {
 	ResultHolder responseData = null
-	
-	@JsonProperty
-	var Double ddt
-
-	@JsonProperty
-	var double dt
-
-	@JsonProperty("it")
+	@AndroidJson("it")
 	var int it_is_a_reserved_keyword = 0
 
-	@JsonProperty
-	var Integer iit = 0
+	var protected Double ddt // this gets left alone
+	var package double dt // this gets left alone
+	var public Integer iit = 0 // this gets left alone
 	
-	@JsonProperty
 	var long lt = 0
-
-	@JsonProperty
 	var Long llt = null
-
-	@JsonProperty
 	var boolean bt = false
-
-	@JsonProperty
 	var Boolean bbt = false
 }
 
-@SmallTest
 class JsonTest extends AndroidTestCase {
 	def testJson() {
 		var jsonRaw = '''
-		{
-			"responseData": 
-		   	{
-		   		"results":[
-					  {"url":"http://one.com", "title": "One", "id": 1, "published": true}
-					, {"url":"http://two.com", "title": "Two", "id": 2, "published": true}
-					, {"url":"http://three.com", "title": "Three", "id": 3, "published": true}
-					, {"url":"http://four.com", "title": "Four", "id": 4, "published": false}
-		   		]
-		   		, "arraysOfPrimitives" : [{
-				   	  "ddta" : [ 0.01 ]
-				   	, "dta"  : [ 0.01 ]
-				   	, "ita"  : [ 1234 ]
-				   	, "iita" : [ 1234 ]
-				   	, "lta"  : [ 1234 ]
-				   	, "llta" : [ 1234 ]
-				   	, "bta"  : [ true ]
-				   	, "bbta" : [ true ]
-		   		}]
-		   		, "listsOfPrimitives" : [{
-				   	  "ddtl" : [ 0.01 ]
-				   	, "iitl" : [ 1234 ]
-				   	, "lltl" : [ 1234 ]
-				   	, "bbtl" : [ true ]
-		   		}]
-		   		, "dateTypes" : {
-		   			  "scalar" : "1981-07-07"
-		   			, "array"  : [ "1981-07-07" ]
-		   			, "list"   : [ "1981-07-07" ]
-		   		}
-		   		, "zuluFormat" :
-		   		{
-		   			  "scalar" : "2011-11-11T12:34:56.789Z"
-		   			, "array" : [ "2011-11-11T12:34:56.789Z" ]
-		   			, "list" : [ "2011-11-11T12:34:56.789Z" ]
-		   		}
-		   	}
-		   	
-		   	, "ddt" : 0.01
-		   	, "dt"  : 0.01
-		   	, "it"  : 1234
-		   	, "iit" : 1234
-		   	, "lt"  : 1234
-		   	, "llt" : 1234
-		   	, "bt"  : true
-		   	, "bbt" : true
-		}
+			{
+				"responseData": 
+				  	{
+				  		"results":[
+							  		{"url":"http://one.com", "title": "One", "id": 1, "published": true}
+									, {"url":"http://two.com", "title": "Two", "id": 2, "published": true}
+									, {"url":"http://three.com", "title": "Three", "id": 3, "published": true}
+									, {"url":"http://four.com", "title": "Four", "id": 4, "published": false}
+						]
+						, "arraysOfPrimitives" : [{
+							  "ddta" : [ 0.01, 0.02 ]
+							, "dta"  : [ 0.01 ]
+							, "ita"  : [ 1234 ]
+							, "iita" : [ 1234 ]
+							, "lta"  : [ 2345 ]
+							, "llta" : [ 1234 ]
+							, "bta"  : [ true ]
+							, "bbta" : [ true ]
+						}]
+						, "listsOfPrimitives" : [{
+							  "ddtl" : [ 0.01, 0.02 ]
+							, "iitl" : [ 1234 ]
+							, "lltl" : [ 2345 ]
+							, "bbtl" : [ true ]
+						}]
+						, "dateTypes" : {
+							  "scalar" : "1981-07-07"
+							, "array"  : [ "1981-07-07" ]
+							, "list"   : [ "1981-07-07" ]
+						}
+						, "zuluFormat" :
+						{
+							  "scalar" : "2011-11-11T12:34:56.789Z"
+							, "array" : [ "2011-11-11T12:34:56.789Z" ]
+							, "list" : [ "2011-11-11T12:34:56.789Z" ]
+						}
+					}
+					
+					, "ddt" : 0.01
+					, "dt"  : 0.01
+					, "it"  : 1234
+					, "iit" : 1234
+					, "lt"  : 2345
+					, "llt" : 2345
+					, "bt"  : true
+					, "bbt" : true
+			}
 		'''
 
 		val response = new Response(new JSONObject(jsonRaw))
 		val ret = response.responseData.results
-		
+
 		assertNotNull(ret)
 		assertTrue(ret.length == 4)
 		assertEquals(ret.get(0).url, "http://one.com")
@@ -211,33 +147,40 @@ class JsonTest extends AndroidTestCase {
 		assertEquals(ret.get(0).id, 1)
 		assertEquals(ret.get(0).published, true)
 		assertEquals(ret.get(3).published, false)
+
+		// these fields should have been left alone
+		assertNull(response.ddt) //assertEquals(response.ddt, 0.01)
+		assertEquals(0.0, response.dt) //assertEquals(response.dt, 0.01)
+		assertEquals(0, response.iit)
 		
-		assertEquals(response.ddt, response.dt)
-		assertEquals(response.itisareservedkeyword, response.iit)
-		assertEquals(response.lt, response.llt)
-		assertEquals(response.bt, response.bbt)
-		
+		assertEquals(response.itisareservedkeyword, 1234)
+		assertEquals(response.lt, 2345)
+		assertTrue(response.bt)
+
 		val arraysOfPrimitives = response.responseData.arraysOfPrimitives.get(0)
-		assertEquals(arraysOfPrimitives.ddta.get(0), arraysOfPrimitives.dta.get(0))
-		assertEquals(arraysOfPrimitives.lta.get(0), arraysOfPrimitives.llta.get(0))
-		assertEquals(arraysOfPrimitives.ita.get(0), arraysOfPrimitives.iita.get(0))
-		assertEquals(arraysOfPrimitives.bbta.get(0), arraysOfPrimitives.bta.get(0))
-		
+		assertEquals(arraysOfPrimitives.ddta.get(0), 0.01)
+		assertEquals(arraysOfPrimitives.ddta.get(1), 0.02)
+		assertEquals(arraysOfPrimitives.lta.get(0), 2345)
+		assertEquals(arraysOfPrimitives.ita.get(0), 1234)
+		assertEquals(arraysOfPrimitives.bbta.get(0), true)
+
 		val listsOfPrimitives = response.responseData.listsOfPrimitives.get(0)
 		assertEquals(listsOfPrimitives.ddtl.head, 0.01)
+		assertEquals(listsOfPrimitives.ddtl.drop(1).head, 0.02)
 		assertEquals(listsOfPrimitives.iitl.head, 1234)
-		assertEquals(listsOfPrimitives.lltl.head, 1234)
+		assertEquals(listsOfPrimitives.lltl.head, 2345)
 		assertEquals(listsOfPrimitives.bbtl.head, true)
 
 		val dateTypes = response.responseData.dateTypes
-		assertEquals(dateTypes.scalar, dateTypes.array.get(0))
-		assertEquals(dateTypes.array.get(0), dateTypes.list.head)
+		val format1 = new SimpleDateFormat("yyyy-MM-dd")
+		assertEquals(dateTypes.scalar.time, format1.parse("1981-07-07").time)
+		assertEquals(dateTypes.array.get(0).time, format1.parse("1981-07-07").time)
 
 		val zuluFormat = response.responseData.zuluFormat
-		assertEquals(zuluFormat.scalar, zuluFormat.array.get(0))
-		assertEquals(zuluFormat.array.get(0), zuluFormat.list.head)
-		
+		val format2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+		assertEquals(zuluFormat.scalar.time, format2.parse("2011-11-11T12:34:56.789Z").time)
+		assertEquals(zuluFormat.array.get(0).time, format2.parse("2011-11-11T12:34:56.789Z").time)
+
 	}
-	
-		
+
 }

@@ -9,6 +9,7 @@ import org.json.JSONArray
 import java.util.List
 import android.util.SparseBooleanArray
 import org.xtendroid.annotations.EnumProperty
+import org.xtendroid.json.AndroidJson
 
 /**
 forbidden non-primitive types:
@@ -36,10 +37,8 @@ class SubModel implements Parcelable
 @AndroidParcelable
 class ModelRoot implements Parcelable
 {
-	@Property
-	JSONObject jsonObj
 	
-	@JsonProperty
+	@AndroidJson
 	String a_str
 	
 	@Property

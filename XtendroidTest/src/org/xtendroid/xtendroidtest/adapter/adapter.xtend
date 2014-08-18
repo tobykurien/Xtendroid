@@ -8,10 +8,10 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import java.util.List
-import org.xtendroid.annotations.AndroidAdapter
+import org.xtendroid.adapter.AndroidAdapter
 import org.xtendroid.annotations.CustomView
 import org.xtendroid.annotations.CustomViewGroup
-import org.xtendroid.json.JsonProperty
+import org.xtendroid.json.AndroidJson
 import org.xtendroid.parcel.AndroidParcelable
 import org.xtendroid.xtendroidtest.R
 
@@ -29,16 +29,16 @@ class Payload implements Parcelable
 	@Property
 	var int    c
 	
-	@JsonProperty
+	@AndroidJson
 	var String d 
 	
-	@JsonProperty
+	@AndroidJson
 	var String ppp
-	@JsonProperty
+	@AndroidJson
 	var String qqq
-	@JsonProperty
+	@AndroidJson
 	var int rrr
-	@JsonProperty
+	@AndroidJson
 	var String sss
 }
 
@@ -49,7 +49,12 @@ class Payload implements Parcelable
 class XtendAdapter0 extends BaseAdapter {
 	@Property
 	var List<Payload> data
-	var CustomAdapterView1 showWithJsonData
+	var CustomAdapterView1 it_doesnt_matter_how_you_call_this_thing
+	
+	def injectData(CustomAdapterView1 view, Payload data)
+	{
+		view.show(data)
+	}
 }
 
 /**
@@ -62,6 +67,12 @@ class XtendAdapter1 extends BaseAdapter {
 	@Property
 	var Payload[] data
 	var CustomAdapterView1 show
+	
+	def injectData(CustomAdapterView1 view, Payload data)
+	{
+		view.show(data)
+		view.a.text = "bla"
+	}
 }
 
 /**
@@ -139,7 +150,7 @@ class XtendAdapter6 extends BaseAdapter {
 	
 	def void meh2(CustomView1 meh, Payload something)
 	{
-		meh.text = something.a
+		meh.show80085(something)
 	}
 }
 

@@ -1,13 +1,15 @@
 package org.xtendroid.utils
 
-import org.w3c.dom.Element
 import android.view.View
+import org.eclipse.xtend.lib.macro.TransformationContext
+import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
+import org.eclipse.xtend.lib.macro.declaration.MutableInterfaceDeclaration
+import org.eclipse.xtend.lib.macro.declaration.TypeReference
+import org.eclipse.xtend.lib.macro.file.Path
+import org.w3c.dom.Element
+
 import static extension org.xtendroid.utils.NamingUtils.*
 import static extension org.xtendroid.utils.XmlUtils.*
-import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
-import org.eclipse.xtend.lib.macro.TransformationContext
-import org.eclipse.xtend.lib.macro.file.Path
-import org.eclipse.xtend.lib.macro.declaration.MutableInterfaceDeclaration
 
 class AnnotationLayoutUtils {
 	def static getFieldType(Element e) {
@@ -81,7 +83,7 @@ class AnnotationLayoutUtils {
 		}
 	}
 
-	def static createViewGettersWithCallBack(extension TransformationContext context, Path xmlFilePath,
+	def static void createViewGettersWithCallBack(extension TransformationContext context, Path xmlFilePath,
 		MutableClassDeclaration clazz, MutableInterfaceDeclaration callbacksType) {
 
 		val viewType = View.newTypeReference
@@ -116,7 +118,7 @@ class AnnotationLayoutUtils {
 
 	}
 
-	def static createViewGetters(
+	def static void createViewGetters(
 		extension TransformationContext context,
 		Path xmlFilePath,
 		MutableClassDeclaration clazz
@@ -145,4 +147,21 @@ class AnnotationLayoutUtils {
 		]
 	}
 
+   // TODO unify and refactor out with @CustomViewGroup, @AndroidFragment 
+   def public static String getLayoutValue(MutableClassDeclaration annotatedClass, extension TransformationContext context, TypeReference typeRef) {
+      var value = annotatedClass.annotations.findFirst[
+         annotationTypeDeclaration==typeRef.type
+      ].getExpression("layout")
+      
+      if (value == null || value.toString.trim == "-1") {
+      	value = annotatedClass.annotations.findFirst[
+            annotationTypeDeclaration==typeRef.type
+         ].getExpression("value")
+         
+         if (value == null) {
+            return null
+         }
+      }
+      return value.toString
+   }
 }

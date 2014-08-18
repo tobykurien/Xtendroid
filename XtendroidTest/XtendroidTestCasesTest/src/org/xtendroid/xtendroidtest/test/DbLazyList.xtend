@@ -13,7 +13,7 @@ class DbLazyList extends AndroidTestCase {
 	override void setUp() {
 		// check for data
 		var res = context.db.executeForMap("select count(*) as cnt from manyItems", null)
-		if (Integer.parseInt(res.get("cnt") as String) < 1000) {
+		if (Integer.parseInt(res.get("cnt") as String) != 1000) {
 			// delete current items
 			context.db.delete("manyItems")
 			// add 1000 items

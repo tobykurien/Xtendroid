@@ -21,6 +21,7 @@
         android:id="@+id/main_load_quote"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Load Quote"/>
+        android:text="Load Quote"
+        android:onClick="loadQuote"/>
     
 </LinearLayout>

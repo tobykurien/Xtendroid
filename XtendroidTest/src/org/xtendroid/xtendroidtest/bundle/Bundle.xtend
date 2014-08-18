@@ -1,17 +1,17 @@
 package org.xtendroid.xtendroidtest.bundle
 
 import android.app.Activity
-import org.xtendroid.app.AndroidActivity
-import org.xtendroid.annotations.BundleProperty
-import org.xtendroid.annotations.AndroidFragment
-import android.os.Bundle
-import android.os.IBinder
-import java.util.ArrayList
-import android.os.Parcelable
-import java.io.Serializable
-import android.util.SparseArray
-import android.content.Intent
+import android.app.Fragment
 import android.app.IntentService
+import android.content.Intent
+import android.os.Bundle
+import android.os.Parcelable
+import android.util.SparseArray
+import java.io.Serializable
+import java.util.ArrayList
+import org.xtendroid.annotations.AndroidFragment
+import org.xtendroid.annotations.BundleProperty
+import org.xtendroid.app.AndroidActivity
 import org.xtendroid.xtendroidtest.R
 
 class BundleService extends IntentService
@@ -130,7 +130,7 @@ class BundleBean
 	
 }
 
-@AndroidActivity(layout=R.layout.activity_main)
+@AndroidActivity(layout=R.layout.activity_bundle)
 class BundleActivity extends Activity {
 
 	@BundleProperty
@@ -230,8 +230,8 @@ class BundleActivity extends Activity {
 	ArrayList<String> mrstrs
 }
 
-@AndroidFragment(layout=R.layout.activity_main)
-class BundleFragment1 extends android.app.Fragment {
+@AndroidFragment(layout=R.layout.activity_bundle)
+class BundleFragment1 extends Fragment {
 	
 	@BundleProperty
 	var Bundle bundle
@@ -317,8 +317,8 @@ class BundleFragment1 extends android.app.Fragment {
 	@BundleProperty
 	short s = 0 as short
 	
-	@BundleProperty
-	SparseArray<? extends Parcelable> sparpa
+//	@BundleProperty
+//	SparseArray<? extends Parcelable> sparpa
 	
 	@BundleProperty
 	String str
@@ -331,7 +331,7 @@ class BundleFragment1 extends android.app.Fragment {
 	
 }
 
-@AndroidFragment(layout=R.layout.activity_main)
+@AndroidFragment(layout=R.layout.activity_bundle)
 class BundleFragment2 extends android.support.v4.app.Fragment {
 	
 	@BundleProperty
@@ -418,8 +418,8 @@ class BundleFragment2 extends android.support.v4.app.Fragment {
 	@BundleProperty
 	short s = 0 as short
 	
-	@BundleProperty
-	SparseArray<? extends Parcelable> sparpa
+//	@BundleProperty
+//	SparseArray<? extends Parcelable> sparpa
 	
 	@BundleProperty
 	String str

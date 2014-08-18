@@ -2,8 +2,8 @@ package org.xtendroid.xtendroidtest.test
 
 import android.test.ActivityInstrumentationTestCase2
 import android.widget.TextView
-import org.xtendroid.xtendroidtest.MainActivity
 import org.xtendroid.xtendroidtest.R
+import org.xtendroid.xtendroidtest.activities.MainActivity
 
 class ActivityAnnotation extends ActivityInstrumentationTestCase2<MainActivity> {
 	
@@ -14,7 +14,7 @@ class ActivityAnnotation extends ActivityInstrumentationTestCase2<MainActivity> 
 	def void testAnnotation() {
 		val annotationTv = (activity as MainActivity).mainHello
 		val tv = activity.findViewById(R.id.main_hello) as TextView
-		assertEquals(activity.getString(R.string.hello_world), tv.text)
+		assertEquals(activity.getString(R.string.welcome), tv.text)
 		
 		activity.runOnUiThread [|
 			annotationTv.text = "Testing"

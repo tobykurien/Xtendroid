@@ -1,12 +1,12 @@
 package org.xtendroid.xtendroidtest.test
 
-import android.test.ActivityInstrumentationTestCase2
-import android.test.suitebuilder.annotation.SmallTest
-import org.xtendroid.xtendroidtest.SettingsActivity
-
-import static extension org.xtendroid.xtendroidtest.Settings.*
 import android.preference.CheckBoxPreference
 import android.preference.EditTextPreference
+import android.test.ActivityInstrumentationTestCase2
+import android.test.suitebuilder.annotation.SmallTest
+import org.xtendroid.xtendroidtest.activities.SettingsActivity
+
+import static extension org.xtendroid.xtendroidtest.Settings.*
 
 @SmallTest
 class AndroidPreferenceAnnotation extends ActivityInstrumentationTestCase2<SettingsActivity> {

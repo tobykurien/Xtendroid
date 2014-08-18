@@ -18,7 +18,7 @@ import org.eclipse.xtend.lib.macro.declaration.Visibility
 annotation EnumProperty {
 	String name = ""// enum type to generate
 	String[] values = #[] // enum type values to generate
-	Class enumType = typeof(Object) // pre-defined
+	Class<?> enumType = typeof(Object) // pre-defined
 }
 
 class EnumPropertyProcessor extends AbstractFieldProcessor {
@@ -136,8 +136,13 @@ class EnumPropertyProcessor extends AbstractFieldProcessor {
 				static = true
 				returnType = enumType.newTypeReference
 				body = ['''
-					«enumType.newTypeReference» e = «toJavaCode(enumType.newTypeReference)».valueOf(s);
-					return e != null ? e : PREVENT_NPE;
+					try
+					{
+						return «toJavaCode(enumType.newTypeReference)».valueOf(s);
+					}catch (IllegalArgumentException e)
+					{
+						return PREVENT_NPE;
+					}
 				''']
 			]
 		}
