@@ -58,7 +58,7 @@ class ActivityParcelableAnnotationTest extends ActivityInstrumentationTestCase2<
 		activityIntent = newIntent
 	}
 	
-	def void dont_testAndroidParcelableAnnotation() {
+	def void testAndroidParcelableAnnotation() {
 		activity.runOnUiThread [|
 			assertTrue(activity.intent.extras.containsKey(label))
 			val model = activity.intent.extras.getParcelable(label) as ModelRoot
