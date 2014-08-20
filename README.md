@@ -155,25 +155,59 @@ For an example of a live project that uses this library, see the Webapps project
 Getting Started
 ===============
 
-Method 1:
----------
+Method 1: Copy JAR file in
+------------------------
 - Download the latest release from https://github.com/tobykurien/Xtendroid/tree/master/Xtendroid/release
 - Copy the JAR file into your Android project's `libs` folder
-- If you are using an existing or new Android project:
+- If your project isn't Xtend-enabled yet:
   - Right-click on your project -> Properties -> Java Build Path
   - Click Libraries -> Add library -> Xtend Library
 - Now you can use it as documented [here][doc].
 
 
-Method 2:
----------
+Method 2: Add as library project
+-----------------------------
 - Git clone this repository and import it using Eclipse.
 - Add it as a library project to your Android project:
   - Right-click your project -> Properties -> Android -> (Library) Add -> Xtendroid
-- If you are using an existing or new Android project:
+- If your project isn't Xtend-enabled yet:
   - Right-click on your project -> Properties -> Java Build Path
   - Click Libraries -> Add library -> Xtend Library
 - Now you can use it as documented [here][doc].
+
+Method 3: Gradle build config
+---------------------------
+- In your `build.gradle` file, add a compile dependency for 'com.github.tobykurien:xtendroid:0.10.+' and also add the [Xtend compiler](https://github.com/oehme/xtend-gradle-plugin)
+- A typical `build.gradle` file looks as follows:
+```groovy
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.11.+'
+        classpath 'org.xtend:xtend-gradle-plugin:0.1.+'
+    }
+}
+
+apply plugin: 'android'
+apply plugin: 'xtend-android'
+
+repositories {
+    mavenCentral()
+}
+
+android {
+	dependencies {
+		compile 'com.github.tobykurien:xtendroid:0.10.+'
+		compile 'org.eclipse.xtend:org.eclipse.xtend.lib:2.6.+'
+		// other dependencies here
+	}
+
+	// other build config stuff
+}
+```
 
 Xtend
 =====

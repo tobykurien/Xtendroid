@@ -3,7 +3,6 @@ apply plugin: 'xtend-android'
 
 dependencies {
   compile 'com.android.support:support-v4:20.0.0'
-  compile 'org.eclipse.xtext:org.eclipse.xtext.xbase.lib.slim:2.6+'
   xtendCompileOnly 'org.eclipse.xtend:org.eclipse.xtend.lib:2.6.+'
 }
 
