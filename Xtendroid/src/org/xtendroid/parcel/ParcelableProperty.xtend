@@ -5,12 +5,14 @@ import android.os.Parcelable
 import android.os.Parcelable.Creator
 import java.lang.annotation.ElementType
 import java.lang.annotation.Target
+import java.util.ArrayList
 import java.util.List
 import org.eclipse.xtend.lib.macro.AbstractClassProcessor
 import org.eclipse.xtend.lib.macro.Active
 import org.eclipse.xtend.lib.macro.TransformationContext
 import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
 import org.eclipse.xtend.lib.macro.declaration.MutableFieldDeclaration
+import org.eclipse.xtend.lib.macro.declaration.MutableInterfaceDeclaration
 import org.eclipse.xtend.lib.macro.declaration.TypeReference
 import org.eclipse.xtend.lib.macro.declaration.Visibility
 import org.json.JSONException
@@ -192,9 +194,11 @@ class ParcelableProcessor extends AbstractClassProcessor
 	override doTransform(MutableClassDeclaration clazz, extension TransformationContext context) {
 		if (!clazz.implementedInterfaces.exists[i | "android.os.Parcelable".endsWith(i.name) ])
 		{
-		   var List<TypeReference> implemented = clazz.declaredInterfaces.toList as List<TypeReference>
-		   implemented.add(Parcelable.newTypeReference)
-		   clazz.setImplementedInterfaces(implemented)
+		   var List<? extends MutableInterfaceDeclaration> implemented = clazz.declaredInterfaces.toList
+		   val implTypes = new ArrayList<TypeReference>
+		   implemented.forEach[t| implTypes.add(t as TypeReference) ]
+		   implTypes.add(Parcelable.newTypeReference)
+		   clazz.setImplementedInterfaces(implTypes)
 //			val interfaces = clazz.implementedInterfaces.join(', ')
 //			clazz.addError (String.format("To use @AndroidParcelable, %s must implement android.os.Parcelable, currently it implements: %s.", clazz.simpleName, if (interfaces.empty) 'nothing.' else interfaces))
 		}
