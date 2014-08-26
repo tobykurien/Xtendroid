@@ -182,7 +182,7 @@ class ParcelableProcessor extends AbstractClassProcessor
 					«f.simpleName» = java.util.Arrays.asList(«f.simpleName»DateArray);
 				}
 			«ELSEIF f.type.actualTypeArguments.head.name.equals('java.lang.String')»
-				in.readStringList(this.«f.simpleName»);
+				this.«f.simpleName» = in.createStringArrayList();
 			«ELSE»
 				in.readTypedList(this.«f.simpleName», «f.type.actualTypeArguments.head.name».CREATOR);
 			«ENDIF»
