@@ -15,9 +15,11 @@ import org.eclipse.xtend.lib.macro.declaration.MutableFieldDeclaration
 import org.eclipse.xtend.lib.macro.declaration.MutableInterfaceDeclaration
 import org.eclipse.xtend.lib.macro.declaration.TypeReference
 import org.eclipse.xtend.lib.macro.declaration.Visibility
+import org.eclipse.xtend.lib.macro.declaration.CompilationStrategy.CompilationContext
 import org.json.JSONException
 import org.json.JSONObject
 import org.xtendroid.json.AndroidJsonProcessor
+import android.text.TextUtils
 
 @Active(ParcelableProcessor)
 @Target(ElementType.TYPE)
@@ -142,7 +144,7 @@ class ParcelableProcessor extends AbstractClassProcessor
 	 * Demarshalling code for common types
 	 * 
 	 */
-	def mapTypeToReadMethodBody(MutableFieldDeclaration f) '''
+	def mapTypeToReadMethodBody(extension CompilationContext compContext, extension TransformationContext context, MutableFieldDeclaration f) '''
 		«IF supportedPrimitiveScalarType.containsKey(f.type.name)»
 			this.«f.simpleName» = in.read«supportedPrimitiveScalarType.get(f.type.name)»();
 		«ELSEIF supportedPrimitiveArrayType.containsKey(f.type.name)»
@@ -152,9 +154,17 @@ class ParcelableProcessor extends AbstractClassProcessor
 		«ELSEIF "java.util.Date".equals(f.type.name)»
 			this.«f.simpleName» = new Date(in.readLong());
 		«ELSEIF "org.json.JSONObject".equals(f.type.name)»
-			this.«f.simpleName» = new JSONObject(in.readString());
+			String jsonObjectString = in.readString();
+			if (!«toJavaCode(TextUtils.newTypeReference)».isEmpty(jsonObjectString))
+			{
+				this.«f.simpleName» = new JSONObject(jsonObjectString);
+			}
 		«ELSEIF "org.json.JSONArray" == f.type.name»
-			this.«f.simpleName» = new JSONArray(in.readString());
+			String jsonArrayString = in.readString();
+			if (!«toJavaCode(TextUtils.newTypeReference)».isEmpty(jsonArrayString))
+			{		
+				this.«f.simpleName» = new JSONArray(jsonArrayString);
+			}
 		«ELSEIF f.type.name.endsWith('[]')»
 			«IF f.type.name.startsWith("java.util.Date")»
 				long[] «f.simpleName»LongArray = in.createLongArray();
@@ -184,7 +194,7 @@ class ParcelableProcessor extends AbstractClassProcessor
 			«ELSEIF f.type.actualTypeArguments.head.name.equals('java.lang.String')»
 				this.«f.simpleName» = in.createStringArrayList();
 			«ELSE»
-				in.readTypedList(this.«f.simpleName», «f.type.actualTypeArguments.head.name».CREATOR);
+				this.«f.simpleName» = in.createTypedArrayList(«f.type.actualTypeArguments.head.name».CREATOR);
 			«ENDIF»
 		«ELSE»
 			this.«f.simpleName» = («f.type.name») «f.type.name».CREATOR.createFromParcel(in);
@@ -295,7 +305,7 @@ class ParcelableProcessor extends AbstractClassProcessor
 		   fields.forEach[markAsRead]
 			addParameter('in', Parcel.newTypeReference)
 			body = ['''
-				«fields.filter[!static].map[f | f.mapTypeToReadMethodBody ].join()»
+				«fields.filter[!static].map[f | mapTypeToReadMethodBody(context, f) ].join()»
 			''']
 			exceptions = exceptionsTypeRef
 			returnType = void.newTypeReference				
