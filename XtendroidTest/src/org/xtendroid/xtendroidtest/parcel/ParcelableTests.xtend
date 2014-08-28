@@ -37,6 +37,9 @@ class SubModel implements Parcelable
 @AndroidParcelable
 class ModelRoot implements Parcelable
 {
+	// This is required to persist the JSON objects via Intents
+	JSONObject _jsonObj
+	
 	@AndroidJson
 	String a_str
 	

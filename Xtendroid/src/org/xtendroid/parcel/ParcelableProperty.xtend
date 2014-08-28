@@ -21,6 +21,7 @@ import org.json.JSONException
 import org.json.JSONObject
 import org.xtendroid.json.AndroidJsonProcessor
 import org.xtendroid.json.AndroidJson
+import org.xtendroid.json.JsonProperty
 
 @Active(ParcelableProcessor)
 @Target(ElementType.TYPE)
@@ -88,8 +89,6 @@ class ParcelableProcessor extends AbstractClassProcessor
 	/**
 	 * 
 	 * Marshalling code generator for common types
-	 * 
-	 * TODO static fields should be exempt from Parcelization
 	 * 
 	 */
 	def mapTypeToWriteMethodBody(MutableFieldDeclaration f) '''
@@ -232,6 +231,23 @@ class ParcelableProcessor extends AbstractClassProcessor
 		val hasJsonBeanDataField = fields.exists[f|f.simpleName.equals(AndroidJsonProcessor.jsonObjectFieldName)] ||
 			fields.exists[f|f.annotations.exists[AndroidJson.newAnnotationReference.equals]] ||
 			clazz.annotations.exists[AndroidJson.newAnnotationReference.equals]
+			
+		// TODO determine why the annotation scan isn't working
+		// so I don't need to manually add the `JSONObject _jsonObj` field.
+//		clazz.addWarning(String.format("%b;%b;%b|||%b;%b;%b|||%b|||%b;%b;%b||%s",
+//			fields.exists[simpleName.equals(AndroidJsonProcessor.jsonObjectFieldName)],
+//			fields.exists[annotations.exists[AndroidJson.newAnnotationReference.equals]],
+//			clazz.annotations.exists[AndroidJson.newAnnotationReference.equals],
+//			fields.exists[f|f.simpleName.equals(AndroidJsonProcessor.jsonObjectFieldName)],
+//			fields.exists[f|f.annotations.exists[a|AndroidJson.newAnnotationReference.equals(a)]],
+//			clazz.annotations.exists[a | AndroidJson.newAnnotationReference.equals(a)],
+//			clazz.annotations.exists[a | JsonProperty.newAnnotationReference.equals(a)],
+//			clazz.annotations.exists[a | JsonProperty.newAnnotationReference == a],
+//			clazz.annotations.exists[a | AndroidJson.newAnnotationReference == a],
+//			fields.exists[f|f.annotations.exists[a|AndroidJson.newAnnotationReference == a]],
+//			fields.map[annotations.map[a|a.annotationTypeDeclaration.simpleName].join('')].join('')
+//		))
+		
 		clazz.addMethod("writeToParcel")  [
 			returnType = void.newTypeReference
 			addParameter('out', Parcel.newTypeReference)
@@ -312,9 +328,9 @@ class ParcelableProcessor extends AbstractClassProcessor
 			body = ['''
 				«fields.filter[!static].map[f | mapTypeToReadMethodBody(context, f) ].join()»
 				«IF hasJsonBeanDataField»
-				final String jsonHolder = in.readString();
-				if («toJavaCode(TextUtils.newTypeReference)».isEmpty(jsonHolder))
-					this.«AndroidJsonProcessor.jsonObjectFieldName» = new JSONObject(jsonHolder);
+				final String jsonStringHolder = in.readString();
+				if (!«toJavaCode(TextUtils.newTypeReference)».isEmpty(jsonStringHolder))
+					this.«AndroidJsonProcessor.jsonObjectFieldName» = new JSONObject(jsonStringHolder);
 				«ENDIF»
 			''']
 			exceptions = exceptionsTypeRef
