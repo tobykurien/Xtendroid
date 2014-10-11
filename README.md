@@ -3,9 +3,11 @@ Xtendroid
 
 Xtendroid is an Android library that combines the power of [Xtend][] (think: CoffeeScript for Java) with some utility classes and annotations for productive Android development. With Xtendroid, you can spend a lot less time writing boilerplate code and benefit from the tooling support provided by the Xtend framework and Eclipse IDE.
 
-Xtend code looks like Ruby or Groovy code, but is fully statically-typed and compiles to readable Java code. Most Java code is valid Xtend code too, making the learning curve very easy for Java developers. You can debug the original Xtend code or the generated Java code. The runtime library is very thin and includes [Google Guava][]. Xtend's *extension methods* and *active annotations* gives it meta-programming capabilities that are perfectly suited for Android development, and this is what Xtendroid takes advantage of. Xtend also provides lambdas and other functional programming constructs, string templating, type inference, [and more][xtend-doc]. You could say that Xtend is [Swift][] for Android.
+Xtend code looks like Ruby or Groovy code, but is fully statically-typed and compiles to readable Java code. Most Java code is valid Xtend code too, making the learning curve very easy for Java developers. You can debug the original Xtend code or the generated Java code. The runtime library is very thin and includes [Google Guava][]. Xtend's *extension methods* and *active annotations* gives it meta-programming capabilities that are perfectly suited for Android development, and this is what Xtendroid takes advantage of. Xtendroid replaces most of the coding 3rd party libraries you would normally use, such as Android Annotations, RoboGuice or Dagger, RetroLambda, RxJava (functional reactive programming), etc. The features provided by those libraries are already part of the Xtend language or provided by Xtendroid.
 
-Note that Xtend and Xtendroid are currently only supported in Eclipse (Xtend is an Eclipse project), although projects using them can be compiled with Maven or Gradle. IntelliJ support for Xtend is being worked on.
+The Xtend language also provides lambdas and other functional programming constructs, string templating, type inference, [and more][xtend-doc]. You could say that Xtend is [Swift][] for Android.
+
+Note that Xtend and Xtendroid are currently only supported in Eclipse (Xtend is an Eclipse project), although projects using them can be compiled with Maven or Gradle. IntelliJ support for Xtend is [being worked on][xtend_intellij].
 
 How it works
 ------------
@@ -112,7 +114,7 @@ Now the activity class to fetch the quote from the internet (in a background thr
          pd.message = "Loading quote..."
 
          // load quote in the background
-         new BgTask<String>.runInBgWithProgress(pd,[|
+         new BgTask().runInBgWithProgress(pd,[
             // get the data in the background
             getData('http://www.iheartquotes.com/api/v1/random')
          ],[result|
@@ -233,3 +235,4 @@ If in doubt, clean the project, and re-open the editor.
 [Swift]: https://developer.apple.com/swift/
 [doc]: /Xtendroid/docs/index.md
 [examples]: /examples
+[xtend_intellij]: http://blog.efftinge.de/2014/10/eclipse-xtext-goes-intellij-idea.html
