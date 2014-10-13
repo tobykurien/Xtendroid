@@ -70,7 +70,7 @@ Background tasks using AsyncTask
 A class called ```BgTask``` is provided, that extends the standard ```AsyncTask``` and works in much the same way, but provides lambda parameters for the background task and the UI task, thus reducing boilerplate:
 
 ```xtend
-new BgTask<String>.runInBg([|
+new BgTask().runInBg([
    // this bit runs in a background thread
    return getSomeString()
 ],[result|
@@ -84,7 +84,7 @@ ProgressDialog is also handled automatically when using this syntax:
 ```xtend
 val progressBar = new ProgressDialog(...)
 
-new BgTask<String>.runInBgWithProgress(progressBar, [|
+new BgTask().runInBgWithProgress(progressBar, [
    // this bit runs in a background thread, progressDialog automatically displayed
    var retVal = fetchStringFromSomewhere()
 
@@ -101,7 +101,7 @@ new BgTask<String>.runInBgWithProgress(progressBar, [|
 No ```onProgressUpdate``` method is needed, since it is trivial to use the ```runOnUiThread``` method instead, as shown above.  Handling errors in a background task is made easy: you can simply pass a third lambda function that will be executed (in the UI thread) if an error occurs during the background task:
 
 ```xtend
-new BgTask<String>.runInBg([|
+new BgTask().runInBg([
    // this runs in the background thread
    fetchStringFromSomewhere()
 ],[result|
