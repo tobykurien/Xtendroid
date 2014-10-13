@@ -2,18 +2,14 @@ apply plugin: 'android-library'
 apply plugin: 'xtend-android'
 
 dependencies {
-  compile 'org.eclipse.xtext:org.eclipse.xtext.xbase.lib.slim:2.6+'
+  compile 'com.android.support:support-v4:20.0.0'
   xtendCompileOnly 'org.eclipse.xtend:org.eclipse.xtend.lib:2.6.+'
 }
 
 android {
    compileSdkVersion 19
-   buildToolsVersion "19.1.0"
+   buildToolsVersion "20"
    
-   dependencies {
-      compile fileTree(dir: 'libs', includes: ['*.jar'])
-   }
-
    sourceSets {
       main {
          manifest {
@@ -37,3 +33,5 @@ android {
       }
    }
 }
+
+apply from: 'maven-push.gradle'

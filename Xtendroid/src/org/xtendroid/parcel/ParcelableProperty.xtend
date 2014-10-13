@@ -3,19 +3,25 @@ package org.xtendroid.parcel
 import android.os.Parcel
 import android.os.Parcelable
 import android.os.Parcelable.Creator
+import android.text.TextUtils
 import java.lang.annotation.ElementType
 import java.lang.annotation.Target
+import java.util.ArrayList
 import java.util.List
 import org.eclipse.xtend.lib.macro.AbstractClassProcessor
 import org.eclipse.xtend.lib.macro.Active
 import org.eclipse.xtend.lib.macro.TransformationContext
+import org.eclipse.xtend.lib.macro.declaration.CompilationStrategy.CompilationContext
 import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
 import org.eclipse.xtend.lib.macro.declaration.MutableFieldDeclaration
+import org.eclipse.xtend.lib.macro.declaration.MutableInterfaceDeclaration
 import org.eclipse.xtend.lib.macro.declaration.TypeReference
 import org.eclipse.xtend.lib.macro.declaration.Visibility
 import org.json.JSONException
 import org.json.JSONObject
 import org.xtendroid.json.AndroidJsonProcessor
+import org.xtendroid.json.AndroidJson
+import org.xtendroid.json.JsonProperty
 
 @Active(ParcelableProcessor)
 @Target(ElementType.TYPE)
@@ -84,22 +90,20 @@ class ParcelableProcessor extends AbstractClassProcessor
 	 * 
 	 * Marshalling code generator for common types
 	 * 
-	 * TODO static fields should be exempt from Parcelization
-	 * 
 	 */
 	def mapTypeToWriteMethodBody(MutableFieldDeclaration f) '''
 		«IF supportedPrimitiveScalarType.containsKey(f.type.name)»
-			in.write«supportedPrimitiveScalarType.get(f.type.name)»(this.«f.simpleName»);
+			out.write«supportedPrimitiveScalarType.get(f.type.name)»(this.«f.simpleName»);
 		«ELSEIF supportedPrimitiveArrayType.keySet.exists[ k | k.endsWith(f.type.name)]»
-			in.write«supportedPrimitiveArrayType.get(f.type.name)»(this.«f.simpleName»);
+			out.write«supportedPrimitiveArrayType.get(f.type.name)»(this.«f.simpleName»);
 		«ELSEIF "boolean".equals(f.type.name)»
-			in.writeInt(this.«f.simpleName» ? 1 : 0);
+			out.writeInt(this.«f.simpleName» ? 1 : 0);
 		«ELSEIF "java.util.Date".equals(f.type.name)»
 			if (this.«f.simpleName» != null)
-				in.writeLong(this.«f.simpleName».getTime());
+				out.writeLong(this.«f.simpleName».getTime());
 		«ELSEIF f.type.name.startsWith("org.json.JSON")»
 			if (this.«f.simpleName» != null)
-				in.writeString(this.«f.simpleName».toString());
+				out.writeString(this.«f.simpleName».toString());
 		«ELSEIF f.type.name.startsWith('java.util.List')»
 			«IF f.type.actualTypeArguments.head.name.equals('java.util.Date')»
 				if («f.simpleName» != null)
@@ -109,12 +113,12 @@ class ParcelableProcessor extends AbstractClassProcessor
 					{
 						«f.simpleName»LongArray[i] = ((java.util.Date) «f.simpleName».toArray()[i]).getTime();
 					}
-					in.writeLongArray(«f.simpleName»LongArray);
+					out.writeLongArray(«f.simpleName»LongArray);
 				}
 			«ELSEIF f.type.actualTypeArguments.head.name.equals('java.lang.String')»
-				in.writeStringList(this.«f.simpleName»);
+				out.writeStringList(this.«f.simpleName»);
 			«ELSE»
-				in.writeTypedList(this.«f.simpleName»);
+				out.writeTypedList(this.«f.simpleName»);
 			«ENDIF»
 		«ELSEIF f.type.name.endsWith('[]')»
 			«IF f.type.name.startsWith("java.util.Date")»
@@ -125,13 +129,13 @@ class ParcelableProcessor extends AbstractClassProcessor
 					{
 						«f.simpleName»LongArray[i] = this.«f.simpleName»[i].getTime();
 					}
-					in.writeLongArray(«f.simpleName»LongArray);
+					out.writeLongArray(«f.simpleName»LongArray);
 				}
 			«ELSE»
-				in.writeParcelableArray(this.«f.simpleName», flags);
+				out.writeParcelableArray(this.«f.simpleName», flags);
 			«ENDIF»
 		«ELSE»
-			in.writeParcelable(this.«f.simpleName», flags);
+			out.writeParcelable(this.«f.simpleName», flags);
 		«ENDIF»
 	'''
 	
@@ -140,7 +144,7 @@ class ParcelableProcessor extends AbstractClassProcessor
 	 * Demarshalling code for common types
 	 * 
 	 */
-	def mapTypeToReadMethodBody(MutableFieldDeclaration f) '''
+	def mapTypeToReadMethodBody(extension CompilationContext compContext, extension TransformationContext context, MutableFieldDeclaration f) '''
 		«IF supportedPrimitiveScalarType.containsKey(f.type.name)»
 			this.«f.simpleName» = in.read«supportedPrimitiveScalarType.get(f.type.name)»();
 		«ELSEIF supportedPrimitiveArrayType.containsKey(f.type.name)»
@@ -150,9 +154,17 @@ class ParcelableProcessor extends AbstractClassProcessor
 		«ELSEIF "java.util.Date".equals(f.type.name)»
 			this.«f.simpleName» = new Date(in.readLong());
 		«ELSEIF "org.json.JSONObject".equals(f.type.name)»
-			this.«f.simpleName» = new JSONObject(in.readString());
+			final String jsonObject«f.simpleName»String = in.readString();
+			if (!«toJavaCode(TextUtils.newTypeReference)».isEmpty(jsonObject«f.simpleName»String))
+			{
+				this.«f.simpleName» = new JSONObject(jsonObject«f.simpleName»String);
+			}
 		«ELSEIF "org.json.JSONArray" == f.type.name»
-			this.«f.simpleName» = new JSONArray(in.readString());
+			final String jsonArray«f.simpleName»String = in.readString();
+			if (!«toJavaCode(TextUtils.newTypeReference)».isEmpty(jsonArray«f.simpleName»String))
+			{		
+				this.«f.simpleName» = new JSONArray(jsonArray«f.simpleName»String);
+			}
 		«ELSEIF f.type.name.endsWith('[]')»
 			«IF f.type.name.startsWith("java.util.Date")»
 				long[] «f.simpleName»LongArray = in.createLongArray();
@@ -180,9 +192,9 @@ class ParcelableProcessor extends AbstractClassProcessor
 					«f.simpleName» = java.util.Arrays.asList(«f.simpleName»DateArray);
 				}
 			«ELSEIF f.type.actualTypeArguments.head.name.equals('java.lang.String')»
-				in.readStringList(this.«f.simpleName»);
+				this.«f.simpleName» = in.createStringArrayList();
 			«ELSE»
-				in.readTypedList(this.«f.simpleName», «f.type.actualTypeArguments.head.name».CREATOR);
+				this.«f.simpleName» = in.createTypedArrayList(«f.type.actualTypeArguments.head.name».CREATOR);
 			«ENDIF»
 		«ELSE»
 			this.«f.simpleName» = («f.type.name») «f.type.name».CREATOR.createFromParcel(in);
@@ -192,11 +204,11 @@ class ParcelableProcessor extends AbstractClassProcessor
 	override doTransform(MutableClassDeclaration clazz, extension TransformationContext context) {
 		if (!clazz.implementedInterfaces.exists[i | "android.os.Parcelable".endsWith(i.name) ])
 		{
-		   var List<TypeReference> implemented = clazz.declaredInterfaces.toList as List<TypeReference>
-		   implemented.add(Parcelable.newTypeReference)
-		   clazz.setImplementedInterfaces(implemented)
-//			val interfaces = clazz.implementedInterfaces.join(', ')
-//			clazz.addError (String.format("To use @AndroidParcelable, %s must implement android.os.Parcelable, currently it implements: %s.", clazz.simpleName, if (interfaces.empty) 'nothing.' else interfaces))
+		   var List<? extends MutableInterfaceDeclaration> implemented = clazz.declaredInterfaces.toList
+		   val implTypes = new ArrayList<TypeReference>
+		   implemented.forEach[t| implTypes.add(t as TypeReference) ]
+		   implTypes.add(Parcelable.newTypeReference)
+		   clazz.setImplementedInterfaces(implTypes)
 		}
 		
 		val fields = clazz.declaredFields
@@ -208,7 +220,6 @@ class ParcelableProcessor extends AbstractClassProcessor
 			}
 		}
 		
-		// @Override public int describeContents() { return 0; }
 		clazz.addMethod("describeContents")  [
 			returnType = int.newTypeReference
 			addAnnotation(Override.newAnnotationReference)
@@ -217,13 +228,37 @@ class ParcelableProcessor extends AbstractClassProcessor
 			'''
 		]
 
+		val hasJsonBeanDataField = fields.exists[f|f.simpleName.equals(AndroidJsonProcessor.jsonObjectFieldName)] ||
+			fields.exists[f|f.annotations.exists[AndroidJson.newAnnotationReference.equals]] ||
+			clazz.annotations.exists[AndroidJson.newAnnotationReference.equals]
+			
+		// TODO determine why the annotation scan isn't working
+		// so I don't need to manually add the `JSONObject _jsonObj` field.
+//		clazz.addWarning(String.format("%b;%b;%b|||%b;%b;%b|||%b|||%b;%b;%b||%s",
+//			fields.exists[simpleName.equals(AndroidJsonProcessor.jsonObjectFieldName)],
+//			fields.exists[annotations.exists[AndroidJson.newAnnotationReference.equals]],
+//			clazz.annotations.exists[AndroidJson.newAnnotationReference.equals],
+//			fields.exists[f|f.simpleName.equals(AndroidJsonProcessor.jsonObjectFieldName)],
+//			fields.exists[f|f.annotations.exists[a|AndroidJson.newAnnotationReference.equals(a)]],
+//			clazz.annotations.exists[a | AndroidJson.newAnnotationReference.equals(a)],
+//			clazz.annotations.exists[a | JsonProperty.newAnnotationReference.equals(a)],
+//			clazz.annotations.exists[a | JsonProperty.newAnnotationReference == a],
+//			clazz.annotations.exists[a | AndroidJson.newAnnotationReference == a],
+//			fields.exists[f|f.annotations.exists[a|AndroidJson.newAnnotationReference == a]],
+//			fields.map[annotations.map[a|a.annotationTypeDeclaration.simpleName].join('')].join('')
+//		))
+		
 		clazz.addMethod("writeToParcel")  [
 			returnType = void.newTypeReference
-			addParameter('in', Parcel.newTypeReference)
+			addParameter('out', Parcel.newTypeReference)
 			addParameter('flags', int.newTypeReference)
 			addAnnotation(Override.newAnnotationReference)
 			body = [ '''
 				«fields.filter[f|!f.static].map[f | f.mapTypeToWriteMethodBody ].join()»
+				«IF hasJsonBeanDataField»
+				if («AndroidJsonProcessor.jsonObjectFieldName» != null)
+					out.writeString(«AndroidJsonProcessor.jsonObjectFieldName».toString());
+				«ENDIF»
 			''']
 		]
 		
@@ -277,7 +312,7 @@ class ParcelableProcessor extends AbstractClassProcessor
 		
 		// if the raw JSON container is explicitly declared
 		// it needs to be declared in this @AndroidParcelable context or expect data loss during (de)marshalling
-		if (clazz.declaredFields.exists[f|f.simpleName.equals(AndroidJsonProcessor.jsonObjectFieldName)])
+		if (hasJsonBeanDataField)
 		{
 			clazz.addConstructor[
 				addParameter('jsonObj', JSONObject.newTypeReference)
@@ -291,7 +326,12 @@ class ParcelableProcessor extends AbstractClassProcessor
 		   fields.forEach[markAsRead]
 			addParameter('in', Parcel.newTypeReference)
 			body = ['''
-				«fields.filter[!static].map[f | f.mapTypeToReadMethodBody ].join()»
+				«fields.filter[!static].map[f | mapTypeToReadMethodBody(context, f) ].join()»
+				«IF hasJsonBeanDataField»
+				final String jsonStringHolder = in.readString();
+				if (!«toJavaCode(TextUtils.newTypeReference)».isEmpty(jsonStringHolder))
+					this.«AndroidJsonProcessor.jsonObjectFieldName» = new JSONObject(jsonStringHolder);
+				«ENDIF»
 			''']
 			exceptions = exceptionsTypeRef
 			returnType = void.newTypeReference				

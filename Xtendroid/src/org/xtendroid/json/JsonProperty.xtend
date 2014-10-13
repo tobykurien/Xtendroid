@@ -10,7 +10,6 @@ import org.eclipse.xtend.lib.macro.Active
  * 
  * @deprecated Use @AndroidJson instead, does the same thing, and more
  */
-@Deprecated
 @Active(AndroidJsonProcessor)
 @Target(ElementType.FIELD)
 annotation JsonProperty {
