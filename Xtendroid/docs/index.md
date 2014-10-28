@@ -209,7 +209,7 @@ The list will now display the data. If you need to add some presentation logic, 
 View Holder
 ------------
 
-You can now easily implement the (view holder pattern)[viewholder] by using the ```@AndroidViewHolder``` 
+You can now easily implement the [view holder pattern][viewholder] by using the ```@AndroidViewHolder``` 
 annotation to create the view holder class. This class will automatically load all the widgets inside 
 the specified layout and create lazy getters/setters for them. It also provides the convenient ```getOrCreate()``` 
 method to inflate and manage your recycled view. 
