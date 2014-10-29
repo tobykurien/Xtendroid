@@ -103,7 +103,7 @@ class AndroidViewHolderProcessor extends AbstractClassProcessor {
                '''
                   View cv = convertView;
                   if (convertView == null) {
-                     cv = android.view.LayoutInflater.from(context).inflate(R.layout.list_row_user, parent, false);
+                     cv = android.view.LayoutInflater.from(context).inflate(«layoutResId», parent, false);
                      cv.setTag(new ViewHolder(cv));
                   }
                   
