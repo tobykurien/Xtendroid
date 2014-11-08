@@ -21,11 +21,11 @@ class BgTask<R> extends AsyncTask<Void, Void, R> {
    var Exception exception
 
    def runInBgWithProgress(ProgressDialog pdialog, ()=>R bg) {
-      runInBg(bg, null, null)
+      runInBgWithProgress(pdialog, bg, null)
    }
 
    def runInBgWithProgress(ProgressDialog pdialog, ()=>R bg, (R)=>void ui) {
-      runInBg(bg, ui, null)
+      runInBgWithProgress(pdialog, bg, ui, null)
    }
 
    def runInBgWithProgress(ProgressDialog pdialog, ()=>R bg, (R)=>void ui, (Exception)=>void error) {
