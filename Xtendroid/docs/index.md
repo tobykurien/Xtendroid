@@ -90,7 +90,7 @@ new BgTask().runInBgWithProgress(progressBar, [
    var retVal = fetchStringFromSomewhere()
 
    // update progress UI from background thread
-   runOnUiThread[| progressBar.progress = 10 ]
+   runOnUiThread [ progressBar.progress = 10 ]
 
    return retVal // return keyword is optional
 ],[result|
@@ -190,10 +190,10 @@ Layout for each row - row_user.xml:
 
 Java bean containing the data (fields map by name to the layout above):
 ```xtend
-class User {
-  @Property String firstName
-  @Property String lastName
-  @Property Bitmap avatar
+@Accessors class User {
+  String firstName
+  String lastName
+  Bitmap avatar
 }
 ```
 
@@ -245,14 +245,10 @@ Database handling is made much easier thanks to the aBatis project - a fork of t
 
 Create a bean for some data you want to store:
 ```xtend
-class User {
-  @Property String firstName
-  @Property String lastName
-  @Property int age
-
-  override toString() {
-      firstName + " " + lastName
-  }
+@Accessors class User {
+  String firstName
+  String lastName
+  int age
 }
 ```
 
