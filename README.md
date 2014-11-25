@@ -7,8 +7,6 @@ Xtend code looks like Ruby or Groovy code, but is fully statically-typed and com
 
 The Xtend language also provides lambdas and other functional programming constructs, string templating, type inference, [and more][xtend-doc]. You could say that Xtend is [Swift][] for Android.
 
-Note that Xtend and Xtendroid are currently only supported in Eclipse (Xtend is an Eclipse project), although projects using them can be compiled with Maven or Gradle. IntelliJ support for Xtend is [being worked on][xtend_intellij].
-
 How it works
 ------------
 
@@ -218,6 +216,8 @@ For more about the Xtend language, see http://xtend-lang.org
 
 Gotchas
 =======
+
+Note that Xtend and Xtendroid are currently only supported in Eclipse (Xtend is an Eclipse project), although projects using them can be compiled with Maven or Gradle. IntelliJ support for Xtend is [being worked on][xtend_intellij].
 
 There are currently some bugs with the Xtend editor that can lead to unexpected behaviour (e.g. compile errors).
 Here are the current bugs you should know about:

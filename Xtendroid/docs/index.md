@@ -478,7 +478,7 @@ import static extension org.xtendroid.utils.AlertUtils.*
 toast("Upload started!")
 toastLong("No internet connection")
 
-confirm("Are you sure you want to exit?") [|
+confirm("Are you sure you want to exit?") [
     finish
 ]
 ```
