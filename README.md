@@ -237,6 +237,7 @@ Method 3: Gradle build config
 ```groovy
 buildscript {
     repositories {
+        jcenter()
         mavenCentral()
     }
 
