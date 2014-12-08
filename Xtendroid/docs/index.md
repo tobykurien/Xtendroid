@@ -283,8 +283,6 @@ Create a `DbService` class you will use to interact with the database:
    }
 
    // override onUpgrade() to manage database migrations
-
-   // add DAO methods here, e.g. findUsers(), saveUser(), etc.
 }
 ```
 
