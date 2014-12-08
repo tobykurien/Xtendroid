@@ -151,7 +151,7 @@ Now the activity class to fetch the quote from the internet (in a background thr
 
 Declare the activity in your ```AndroidManifest.xml``` file, add the internet permission, and that's it! Note the lack of boilerplate code and Java verbosity in things like exception handling and implementing anonymous inner classes for handlers.
 
-This and other examples are in the [examples folder][examples].
+This and other examples are in the [examples folder][examples]. The [Xtendroid Test app][] is like Android's APIDemos app, and showcases the various features of Xtendroid.
 
 For an example of a live project that uses this library, see the Webapps project: https://github.com/tobykurien/webapps
 
@@ -287,4 +287,5 @@ If in doubt, clean the project, and re-open the editor.
 [Active Annotations]: http://www.eclipse.org/xtend/documentation.html#activeAnnotation
 [doc]: /Xtendroid/docs/index.md
 [examples]: /examples
+[Xtendroid Test app]: /XtendroidTest
 [xtend_intellij]: http://blog.efftinge.de/2014/10/eclipse-xtext-goes-intellij-idea.html
