@@ -241,13 +241,13 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.11.+'
-        classpath 'org.xtend:xtend-gradle-plugin:0.1.+'
+        classpath 'com.android.tools.build:gradle:1.0.+'
+        classpath 'org.xtend:xtend-android-gradle-plugin:0.3.+'
     }
 }
 
 apply plugin: 'android'
-apply plugin: 'xtend-android'
+apply plugin: 'org.xtend.xtend-android'
 
 repositories {
     mavenCentral()
@@ -255,8 +255,8 @@ repositories {
 
 android {
 	dependencies {
-		compile 'com.github.tobykurien:xtendroid:0.10.+'
-		compile 'org.eclipse.xtend:org.eclipse.xtend.lib:2.6.+'
+		compile 'com.github.tobykurien:xtendroid:0.11.+'
+		compile 'org.eclipse.xtend:org.eclipse.xtend.lib:2.7.+'
 		// other dependencies here
 	}
 

@@ -301,6 +301,7 @@ users.forEach [user|
 // get all users older than 18 (uses SQL defined above)
 var adults = db.executeForBeanList(R.string.dbGetOlderThan,
    #{ 'age' -> 18 }, User)
+   
 adults.forEach [adult|
    Log.d("db", "Got user: " + adult)
 ]

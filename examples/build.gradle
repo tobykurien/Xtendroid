@@ -1,15 +1,15 @@
 subprojects {
   apply plugin: 'android'
-  apply plugin: 'xtend-android'
+  apply plugin: 'org.xtend.xtend-android'
 
   dependencies {
     compile project(':Xtendroid')
-    xtendCompileOnly 'org.eclipse.xtend:org.eclipse.xtend.lib:2.6.+'
+    xtendCompileOnly 'org.eclipse.xtend:org.eclipse.xtend.lib:2.7.+'
   }
 
   android {
      compileSdkVersion 19
-     buildToolsVersion "20"
+     buildToolsVersion "21.1.1"
 
      sourceSets {
         main {
