@@ -1,14 +1,15 @@
 apply plugin: 'android-library'
-apply plugin: 'xtend-android'
+apply plugin: "org.xtend.xtend-android"
 
 dependencies {
   compile 'com.android.support:support-v4:20.0.0'
-  xtendCompileOnly 'org.eclipse.xtend:org.eclipse.xtend.lib:2.6.+'
+  compile 'org.eclipse.xtend:org.eclipse.xtend.lib:2.7.+'
+  xtendCompileOnly 'com.github.oehme.xtend:xtend-contrib:0.4.+'
 }
 
 android {
    compileSdkVersion 19
-   buildToolsVersion "20"
+   buildToolsVersion "21.1.1"
    
    sourceSets {
       main {

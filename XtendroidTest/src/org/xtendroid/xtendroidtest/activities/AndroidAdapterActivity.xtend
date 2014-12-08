@@ -4,7 +4,7 @@ import java.util.ArrayList
 import org.xtendroid.app.AndroidActivity
 import org.xtendroid.app.OnCreate
 import org.xtendroid.xtendroidtest.R
-import org.xtendroid.xtendroidtest.adapter.TestAdapter
+import org.xtendroid.xtendroidtest.adapter.AdapterWithViewHolder
 import org.xtendroid.xtendroidtest.models.User
 
 /**
@@ -22,7 +22,7 @@ import org.xtendroid.xtendroidtest.models.User
 			users.add(u)
 		]
 		
-		mainList.adapter = new TestAdapter(this, users)		
+		mainList.adapter = new AdapterWithViewHolder(this, users)		
 	}
 	
 }

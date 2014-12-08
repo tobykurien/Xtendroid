@@ -1,4 +1,4 @@
-<fragment xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/fragment"
     android:name="org.xtendroid.xtendroidtest.fragments.FragmentWithLoader"
     android:layout_width="match_parent"

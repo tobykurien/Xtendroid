@@ -212,6 +212,15 @@ class AdapterizeProcessor extends AbstractClassProcessor {
 			visibility = Visibility.PUBLIC
 		]
 
+      clazz.addMethod("getContext") [
+         body = [
+            '''
+               return mContext;
+            ''']
+         returnType = Context.newTypeReference
+         visibility = Visibility.PUBLIC
+      ]
+      
 	/*
 		clazz.addMethod("hasStableIds") [
 			addAnnotation(Override.newAnnotationReference)

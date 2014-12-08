@@ -11,6 +11,7 @@ Documentation
   - [Database](#database)
 - Adapters
   - [Bean Adapter](#bean-adapter)
+  - [View Holder](#view-holder)
 - Passing data around
   - [JSON handling](#json-handling)
   - [Intents and Bundles](#intents-and-bundles)
@@ -89,7 +90,7 @@ new BgTask().runInBgWithProgress(progressBar, [
    var retVal = fetchStringFromSomewhere()
 
    // update progress UI from background thread
-   runOnUiThread[| progressBar.progress = 10 ]
+   runOnUiThread [ progressBar.progress = 10 ]
 
    return retVal // return keyword is optional
 ],[result|
@@ -189,10 +190,10 @@ Layout for each row - row_user.xml:
 
 Java bean containing the data (fields map by name to the layout above):
 ```xtend
-class User {
-  @Property String firstName
-  @Property String lastName
-  @Property Bitmap avatar
+@Accessors class User {
+  String firstName
+  String lastName
+  Bitmap avatar
 }
 ```
 
@@ -205,6 +206,38 @@ userList.adapter = adapter // assuming the ListView is R.id.user_list
 
 The list will now display the data. If you need to add some presentation logic, for example to display a formatted date, simply add a method to the bean (or a presenter sub-class) to do it (e.g. ```def getFormattedDate() {...}``` and then display it in the list by naming your view appropriately, e.g. ```<TextView android:id="@+id/formatted_date" .../>```
 
+View Holder
+------------
+
+You can now easily implement the [view holder pattern][viewholder] by using the ```@AndroidViewHolder``` 
+annotation to create the view holder class. This class will automatically load all the widgets inside 
+the specified layout and create lazy getters/setters for them. It also provides the convenient ```getOrCreate()``` 
+method to inflate and manage your recycled view. 
+
+```xtend
+// Create an Adapter for a list of users
+@AndroidAdapter class UsersAdapter {
+   List<User> users // @AndroidAdapter uses this to generate adapter code 
+   
+   // Define our view holder and it's layout
+   @AndroidViewHolder(R.layout.list_row_user) static class ViewHolder {
+   }
+      
+   override getView(int position, View convertView, ViewGroup parent) {
+      // get a view holder for current row
+      var vh = ViewHolder.getOrCreate(context, convertView, parent)
+
+      // Load the user details into the widgets in the view holder      
+      var user = getItem(position)
+      vh.userName.text = user.firstName + " " + user.lastName
+      vh.userAge.text = String.valueOf(user.age)
+      
+      // return the view for the row
+      vh.getView()     
+   }
+}
+```
+
 Database
 --------
 
@@ -212,14 +245,10 @@ Database handling is made much easier thanks to the aBatis project - a fork of t
 
 Create a bean for some data you want to store:
 ```xtend
-class User {
-  @Property String firstName
-  @Property String lastName
-  @Property int age
-
-  override toString() {
-      firstName + " " + lastName
-  }
+@Accessors class User {
+  String firstName
+  String lastName
+  int age
 }
 ```
 
@@ -254,8 +283,6 @@ Create a `DbService` class you will use to interact with the database:
    }
 
    // override onUpgrade() to manage database migrations
-
-   // add DAO methods here, e.g. findUsers(), saveUser(), etc.
 }
 ```
 
@@ -274,6 +301,7 @@ users.forEach [user|
 // get all users older than 18 (uses SQL defined above)
 var adults = db.executeForBeanList(R.string.dbGetOlderThan,
    #{ 'age' -> 18 }, User)
+   
 adults.forEach [adult|
    Log.d("db", "Got user: " + adult)
 ]
@@ -449,7 +477,7 @@ import static extension org.xtendroid.utils.AlertUtils.*
 toast("Upload started!")
 toastLong("No internet connection")
 
-confirm("Are you sure you want to exit?") [|
+confirm("Are you sure you want to exit?") [
     finish
 ]
 ```
@@ -483,3 +511,5 @@ The `@AddLogTag` annotation generates a `TAG` member for use in logging, which w
    }
 }
 ```
+
+  [viewholder]: https://developer.android.com/training/improving-layouts/smooth-scrolling.html#ViewHolder
