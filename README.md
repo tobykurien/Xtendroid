@@ -151,7 +151,7 @@ Now the activity class to fetch the quote from the internet (in a background thr
 
 Declare the activity in your ```AndroidManifest.xml``` file, add the internet permission, and that's it! Note the lack of boilerplate code and Java verbosity in things like exception handling and implementing anonymous inner classes for handlers.
 
-This and other examples are in the [examples folder][examples]. The [Xtendroid Test app][] is like Android's APIDemos app, and showcases the various features of Xtendroid.
+This and other examples are in the [examples folder][examples]. The [Xtendroid Test app][] is like Android's API Demos app, and showcases the various features of Xtendroid.
 
 For an example of a live project that uses this library, see the Webapps project: https://github.com/tobykurien/webapps
 
@@ -231,7 +231,7 @@ Method 2: Add as library project
 
 Method 3: Gradle build config
 ---------------------------
-- In your `build.gradle` file, add a compile dependency for 'com.github.tobykurien:xtendroid:0.10.+' and also add the [Xtend compiler](https://github.com/oehme/xtend-gradle-plugin)
+- In your `build.gradle` file, add a compile dependency for 'com.github.tobykurien:xtendroid:0.11.+' and also add the [Xtend compiler](https://github.com/oehme/xtend-gradle-plugin)
 - A typical `build.gradle` file looks as follows:
 
 ```groovy
