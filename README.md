@@ -1,74 +1,77 @@
 Xtendroid
 =========
 
-Xtendroid is an Android library that combines the power of [Xtend][] (think: CoffeeScript for Java) with some utility classes and annotations for productive Android development. With Xtendroid, you can spend a lot less time writing boilerplate code and benefit from the tooling support provided by the Xtend framework and Eclipse IDE.
+Xtendroid is an Android library that combines the power of [Xtend][] with some utility classes and annotations for productive Android development. Xtendroid helps to reduce/eliminate boilerplate code that Android is known for, while providing full IDE support. This is achieved by using Xtend's [extension methods][xtend-doc] and [active annotations][] (edit-time code generators), which expand out to Java code during editing/compilation.
 
-Xtend code looks like Ruby or Groovy code, but is fully statically-typed and compiles to readable Java code. Most Java code is valid Xtend code too, making the learning curve very easy for Java developers. You can debug the original Xtend code or the generated Java code. The runtime library is very thin and includes [Google Guava][]. Xtend's *extension methods* and *active annotations* gives it meta-programming capabilities that are perfectly suited for Android development, and this is what Xtendroid takes advantage of. Xtendroid replaces most of the coding 3rd party libraries you would normally use, such as Android Annotations, RoboGuice or Dagger, RetroLambda, RxJava (functional reactive programming), etc. The features provided by those libraries are already part of the Xtend language or provided by Xtendroid.
+Xtendroid can replace dependency injection frameworks like RoboGuice, Dagger, and Android Annotations, with lazy-loading getters that are automatically generated for widgets in your layouts. With Xtend's lambda support and functional-style programming constructs, it also reduces the need for libraries like RetroLambda and RxJava.
 
-The Xtend language also provides lambdas and other functional programming constructs, string templating, type inference, [and more][xtend-doc]. You could say that Xtend is [Swift][] for Android.
+**Anonymous inner classes**
 
-How it works
-------------
+Android code:
+```java
+// get button widget, set onclick handler to toast a message
+Button myButton = (Button) findViewById(R.id.my_button);
 
-If you display toasts often, you know that typing out ```Toast.makeText(msg, Toast.LENGTH_SHORT).show();``` is a pain, and it's not easy to add it to a base class, since Activities (and Fragments) may extend multiple base classes (like ListActivity, FragmentActivity, etc.). Here's the easy way using Xtendroid:
-
+myButton.setOnClickListener(new View.OnClickListener() {
+   public void onClick(View v) {
+      Toast.makeText(this, "Hello, world!", Toast.LENGTH_LONG).show();
+   }
+});
+```
+Xtendroid Code:
 ```xtend
-import static extension org.xtendroid.utils.AlertUtils.*  // mix-in our alert utils
-
-// elsewhere
-toast("My short message")
-toastLong("This message displays for longer")
+// myButton references pre-generated getMyButton() lazy-getter
+myButton.onClickListener = [
+   toast("Hello, world!")
+]
 ```
 
-Where is the reference to the ```Context``` object? It is implicit, thanks to Xtend:
+**Redundant Type Information**
 
-```xtend
-// this:
-AlertUtils.toast(context, "My message")
+Android code:
+```java
+// Store JSONObject results into an array of HashMaps
+ArrayList<HashMap<String,JSONObject>> results = new ArrayList<HashMap<String,JSONObject>>();
 
-// becomes this via the static import:
-toast(context, "My message")
+HashMap<String,JsonObject> result1 = new HashMap<String,JSONObject>();
+result1.put("query", new JSONObject());
 
-// which is equivalent to (extension method):
-context.toast("My message")
-
-// which, in an Activity is the same as:
-this.toast("My message")
-
-// But "this" is implicit, so we can shorten it to:
-toast("My message")
+results.put(result1);
 ```
 
-The above magic, as well as the mix-in style ability of the ```import static extension``` of Xtend, is used to great effect in Xtendroid.
-
-In addition, Xtendroid implements several [Active Annotations][] (think of them as code generators) which remove most of the boilerplate-code that's associated with Android development. Here is an example of one of the most powerful Xtendroid annotations, ```@AndroidActivity```, which automatically extends the ```Activity``` class, loads the layout into the activity, parses the specified layout file, and creates getters/setters for each of the views contained there-in, and checks for the existence of all ```onClick``` methods, at **edit-time**! You will immediately get code-completion and outline for your views! Any method annotated with ```@OnCreate``` is called at runtime once the views are ready, although as with everything in Xtendroid, you are free to implement the ```onCreate()``` method yourself.
-
+Xtendroid code:
 ```xtend
-@AndroidActivity(R.layout.my_activity) class MyActivity {
-
-	@OnCreate
-	def init(Bundle savedInstanceState) {
-		myTextView.text = "some text"
-	}
-
-}
+var results = #[
+    #{ "query" -> new JSONObject }
+]
 ```
 
-Note that the Active Annotations run at compile-time and simply generate the usual Java code for you, so there is no runtime performance impact. View this video of how this works and how well it integrates with the Eclipse IDE: http://vimeo.com/77024959
+**Lambdas and multi-threading**
 
-Xtendroid combines extension methods, active annotations, and convention-over-configuration to provide you with a highly productive environment for Android development, where you are still writing standard Android code, but without all that boilerplate.
+Blink a button 3 times (equivalent Java code is too verbose to include here):
+```xtend
+// Blink button 3 times
+new Thread [
+    for (i : 1..3) { // number ranges, nice!
+        runOnUiThread [ myButton.pressed = true ]
+        Thread.sleep(250) // look ma! no try/catch!
+        runOnUiThread [ myButton.pressed = false ]
+        Thread.sleep(250)
+    }
+].start
+```
 
 Documentation
 -------------
 
-Xtendroid has helpers for things like activities and fragments (as shown above), background processing, shared preferences, adapters, database handling, JSON handling, and more. Combining these, you get concise and expressive code.
+Xtendroid removes boilerplate code from things like activities and fragments, background processing, shared preferences, adapters (and ViewHolder pattern), database handling, JSON handling, Parcelables, Bundle arguments, and more. Combining these, you get concise and expressive code.
 
 View the full reference documentation for Xtendroid [here][doc].
 
-Samples
+Sample
 -------
 
-Here's an example of an app that fetches a quote from the internet and displays it. First, the activity layout:
+Here's an example of an app that fetches a quote from the internet and displays it. First, the standard Android activity layout:
 
 *res/layout/activity_main.xml*
 ```xml
@@ -97,13 +100,13 @@ Here's an example of an app that fetches a quote from the internet and displays 
 
 ```
 
-Now the activity class to fetch the quote from the internet (in a background thread), handle any errors, and display the result. Imports and package declaration omitted.
+Now the activity class to fetch the quote from the internet (in a background thread), handle any errors, and display the result. Only imports and package declaration have been omitted.
 
 *MainActivity.xtend*
 ```xtend
 @AndroidActivity(R.layout.activity_main) class MainActivity {
 
-   @OnCreate
+   @OnCreate   // Run this method when widgets are ready
    def init() {
       // set up the button to load quotes
       mainLoadQuote.onClickListener = [
@@ -152,6 +155,57 @@ This and other examples are in the [examples folder][examples].
 
 For an example of a live project that uses this library, see the Webapps project: https://github.com/tobykurien/webapps
 
+How it works
+------------
+
+If you display toasts often, you know that typing out ```Toast.makeText(msg, Toast.LENGTH_SHORT).show();``` is a pain, and it's not easy to add it to a base class, since Activities (and Fragments) may extend multiple base classes (like ListActivity, FragmentActivity, etc.). Here's the easy way using Xtendroid:
+
+```xtend
+import static extension org.xtendroid.utils.AlertUtils.*  // mix-in our alert utils
+
+// elsewhere
+toast("My short message")
+toastLong("This message displays for longer")
+```
+
+Where is the reference to the ```Context``` object? It is implicit, thanks to Xtend:
+
+```xtend
+// this:
+AlertUtils.toast(context, "My message")
+
+// becomes this via the static import:
+toast(context, "My message")
+
+// which is equivalent to (extension method):
+context.toast("My message")
+
+// which, in an Activity is the same as:
+this.toast("My message")
+
+// But "this" is implicit, so we can shorten it to:
+toast("My message")
+```
+
+The above magic, as well as the mix-in style ability of the ```import static extension``` of Xtend, is used to great effect in Xtendroid.
+
+In addition, Xtendroid implements several [Active Annotations][] which remove most of the boilerplate-code that's associated with Android development. Here is an example of one of the most powerful Xtendroid annotations, ```@AndroidActivity```:
+
+```xtend
+@AndroidActivity(R.layout.my_activity) class MyActivity {
+
+	@OnCreate
+	def init(Bundle savedInstanceState) {
+		myTextView.text = "some text"
+	}
+
+}
+```
+
+```@AndroidActivity``` automatically extends the ```Activity``` class, loads the layout into the activity, parses the specified layout file, and creates getters/setters for each of the views contained there-in, and checks for the existence of all ```onClick``` methods, at **edit-time**! You will immediately get code-completion and outline for your layout widgets! Any method annotated with ```@OnCreate``` is called at runtime once the views are ready, although as with everything in Xtendroid, you are free to implement the ```onCreate()``` method yourself.
+
+Note that the Active Annotations run at edit-time and simply generate the usual Java code for you, so there is no runtime performance impact. View this video of how this works and how well it integrates with the Eclipse IDE: http://vimeo.com/77024959
+
 Getting Started
 ===============
 
@@ -179,6 +233,7 @@ Method 3: Gradle build config
 ---------------------------
 - In your `build.gradle` file, add a compile dependency for 'com.github.tobykurien:xtendroid:0.10.+' and also add the [Xtend compiler](https://github.com/oehme/xtend-gradle-plugin)
 - A typical `build.gradle` file looks as follows:
+
 ```groovy
 buildscript {
     repositories {
@@ -217,22 +272,19 @@ For more about the Xtend language, see http://xtend-lang.org
 Gotchas
 =======
 
-Note that Xtend and Xtendroid are currently only supported in Eclipse (Xtend is an Eclipse project), although projects using them can be compiled with Maven or Gradle. IntelliJ support for Xtend is [being worked on][xtend_intellij].
+Note that Xtend and Xtendroid are currently only supported in Eclipse (Xtend is an Eclipse project), although projects using them can be compiled with Maven or Gradle. IntelliJ support for Xtend is [being worked on][xtend_intellij], so it will be usable in Android Studio soon.
 
-There are currently some bugs with the Xtend editor that can lead to unexpected behaviour (e.g. compile errors).
+There are currently some bugs with the Eclipse Xtend editor that can lead to unexpected behaviour (e.g. compile errors).
 Here are the current bugs you should know about:
 
 - [Android: Editor not refreshing R class](https://bugs.eclipse.org/bugs/show_bug.cgi?id=433358)
 - [Android: First-opened Xtend editor shows many errors and never clears those errors after build ](https://bugs.eclipse.org/bugs/show_bug.cgi?id=433589)
-- [Android: R$array does not allow dot notation, although R$string and others do](https://bugs.eclipse.org/bugs/show_bug.cgi?id=437660)
 
 If in doubt, clean the project, and re-open the editor.
 
 [Xtend]: http://xtend-lang.org
 [xtend-doc]: http://www.eclipse.org/xtend/documentation.html
-[Google Guava]: https://code.google.com/p/guava-libraries/
 [Active Annotations]: http://www.eclipse.org/xtend/documentation.html#activeAnnotation
-[Swift]: https://developer.apple.com/swift/
 [doc]: /Xtendroid/docs/index.md
 [examples]: /examples
 [xtend_intellij]: http://blog.efftinge.de/2014/10/eclipse-xtext-goes-intellij-idea.html
