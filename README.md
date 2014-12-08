@@ -256,7 +256,11 @@ repositories {
 android {
 	dependencies {
 		compile 'com.github.tobykurien:xtendroid:0.11.+'
-		compile 'org.eclipse.xtend:org.eclipse.xtend.lib:2.7.+'
+		
+		compile 'org.eclipse.xtext:org.eclipse.xtext.xbase.lib:2.7.+'
+		// Use this instead if you're not using Google Guava, for a slimmer runtime:
+		// compile 'org.eclipse.xtext:org.eclipse.xtext.xbase.lib.slim:2.7.+'
+
 		// other dependencies here
 	}
 
