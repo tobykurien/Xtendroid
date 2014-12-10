@@ -3,7 +3,7 @@ apply plugin: "org.xtend.xtend-android"
 
 dependencies {
   compile 'com.android.support:support-v4:20.0.0'
-  compile 'org.eclipse.xtend:org.eclipse.xtend.lib:2.7.+'
+  compile 'org.eclipse.xtend:org.eclipse.xtend.lib:2.7.3'
   xtendCompileOnly 'com.github.oehme.xtend:xtend-contrib:0.4.+'
 }
 
