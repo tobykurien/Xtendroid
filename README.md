@@ -3,7 +3,7 @@ Xtendroid
 
 Xtendroid is an Android library that combines the power of [Xtend][] with some utility classes and annotations for productive Android development. Xtendroid helps to reduce/eliminate boilerplate code that Android is known for, while providing full IDE support. This is achieved by using Xtend's [extension methods][xtend-doc] and [active annotations][] (edit-time code generators), which expand out to Java code during editing/compilation.
 
-Xtendroid can replace dependency injection frameworks like RoboGuice, Dagger, and Android Annotations, with lazy-loading getters that are automatically generated for widgets in your layouts. With Xtend's lambda support and functional-style programming constructs, it also reduces the need for libraries like RetroLambda and RxJava.
+Xtendroid can replace dependency injection frameworks like RoboGuice, Dagger, and Android Annotations, with lazy-loading getters that are [automatically generated][injection] for widgets in your layouts. With Xtend's lambda support and functional-style programming constructs, it reduces/eliminates the need for libraries like RetroLambda and RxJava. With it's [database support][database], Xtendroid also removes the need for ORM libraries.
 
 **Anonymous inner classes**
 
@@ -39,7 +39,7 @@ result1.put("query", new JSONObject());
 results.put(result1);
 ```
 
-Xtendroid code:
+Xtendroid (Xtend) code:
 ```xtend
 var results = #[
     #{ "query" -> new JSONObject }
@@ -50,15 +50,15 @@ var results = #[
 
 Blink a button 3 times (equivalent Java code is too verbose to include here):
 ```xtend
-// Blink button 3 times
-new Thread [
+// Blink button 3 times using AsyncTask
+new BgTask().runInBg [
     for (i : 1..3) { // number ranges, nice!
         runOnUiThread [ myButton.pressed = true ]
         Thread.sleep(250) // look ma! no try/catch!
         runOnUiThread [ myButton.pressed = false ]
         Thread.sleep(250)
     }
-].start
+]
 ```
 
 Documentation
@@ -291,6 +291,8 @@ If in doubt, clean the project, and re-open the editor.
 [xtend-doc]: http://www.eclipse.org/xtend/documentation.html
 [Active Annotations]: http://www.eclipse.org/xtend/documentation.html#activeAnnotation
 [doc]: /Xtendroid/docs/index.md
+[injection]: /Xtendroid/docs/index.md#activities-and-fragments
+[database]: /Xtendroid/docs/index.md#database
 [examples]: /examples
 [Xtendroid Test app]: /XtendroidTest
 [xtend_intellij]: http://blog.efftinge.de/2014/10/eclipse-xtext-goes-intellij-idea.html
