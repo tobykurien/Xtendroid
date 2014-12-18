@@ -83,31 +83,24 @@ class AnnotationLayoutUtils {
 		}
 	}
 
-	def static void createViewGettersWithCallBack(extension TransformationContext context, Path xmlFilePath,
-		MutableClassDeclaration clazz, MutableInterfaceDeclaration callbacksType) {
+	def static void createViewGettersWithCallBack(
+	   extension TransformationContext context,
+	   String layoutFilename, 
+		MutableClassDeclaration clazz, 
+		MutableInterfaceDeclaration callbacksType) {
 
 		val viewType = View.newTypeReference
-		xmlFilePath.contentsAsStream.getDocument.traverseAllNodes [
+      val xmlFile = AnnotationLayoutUtils.getLayoutPath(context, layoutFilename, clazz)
+      if (xmlFile == null) return;
+             
+		xmlFile.contentsAsStream.getDocument.traverseAllNodes [
 			// recursively read includes
 			if (it.nodeName.equals('include') && it.hasAttribute('layout')) {
-
 				//  <include layout="@layout/titlebar"/>
 				val layoutFileName = it.getAttribute('layout')?.substring(8)
-
-				val pathToCU = clazz.compilationUnit.filePath
-
-				// TODO support res/layout-{suffix} 
-				var xmlFile = pathToCU.projectFolder.append("res/layout/" + layoutFileName + ".xml")
-				// error handling, there is no file
-				if (!xmlFile.exists) {
-               xmlFile = pathToCU.append("../res/layout/" + layoutFileName + ".xml")
-					if (!xmlFile.exists) {
-					   clazz.annotations.head.addError("There is no file in '" + xmlFile + "'.")
-					   return;
-					}
-				}
-				context.createViewGettersWithCallBack(xmlFile, clazz, callbacksType)
+				context.createViewGettersWithCallBack(layoutFileName, clazz, callbacksType)
 			}
+			
 			context.addLazyGetter(it, clazz)
 			// check for strings
 			val onClick = getAttribute("android:onClick")
@@ -119,31 +112,45 @@ class AnnotationLayoutUtils {
 		]
 
 	}
+   
+   /**
+    * Work out the path to a specified layout. Must support Eclipse
+    * and Android Studio/gradle project structures.
+    */
+   def static getLayoutPath(
+      extension TransformationContext context, 
+      String layoutFilename, 
+      MutableClassDeclaration clazz) {
+      val pathToCU = clazz.compilationUnit.filePath
+      
+      // TODO support res/layout-{suffix} 
+      var Path xmlFile = pathToCU.projectFolder.append("res/layout/" + layoutFilename + ".xml")
+      if (!xmlFile.exists) {
+         // TODO remove hardcoded "src/main" path
+         xmlFile = pathToCU.projectFolder.append("src/main/res/layout/" + layoutFilename + ".xml")
+         if (!xmlFile.exists) {
+            clazz.annotations.head.addError("Unable to find layout '"+xmlFile+"'.")
+            return null;
+         }
+      }
+      
+      return xmlFile
+   }
 
 	def static void createViewGetters(
 		extension TransformationContext context,
-		Path xmlFilePath,
-		MutableClassDeclaration clazz
-	) {
-		xmlFilePath.contentsAsStream.getDocument.traverseAllNodes [
+		String layoutFilename,
+		MutableClassDeclaration clazz) {
+      val xmlFile = AnnotationLayoutUtils.getLayoutPath(context, layoutFilename, clazz)
+      if (xmlFile == null) return;
+
+		xmlFile.contentsAsStream.getDocument.traverseAllNodes [
 
 			// recursively read includes
 			if (it.nodeName.equals('include') && it.hasAttribute('layout')) {
-
 				//  <include layout="@layout/titlebar"/>
 				val layoutFileName = it.getAttribute('layout')?.substring(8)
-
-				val pathToCU = clazz.compilationUnit.filePath
-
-				// TODO support res/layout-{suffix} 
-				val xmlFile = pathToCU.projectFolder.append("res/layout/" + layoutFileName + ".xml")
-
-				// error handling, there is no file
-				if (!xmlFile.exists) {
-					clazz.annotations.head.addError("There is no file in '" + xmlFile + "'.")
-					return;
-				}
-				context.createViewGetters(xmlFile, clazz)
+				context.createViewGetters(layoutFileName, clazz)
 			}
 			context.addLazyGetter(it, clazz)
 		]

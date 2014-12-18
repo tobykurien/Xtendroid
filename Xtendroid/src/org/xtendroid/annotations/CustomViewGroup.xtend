@@ -90,11 +90,7 @@ class CustomViewGroupProcessor extends AbstractClassProcessor {
 		if (viewFileName == null) {
 			return;
 		}
-
-		val pathToCU = clazz.compilationUnit.filePath
-		val xmlFile = pathToCU.projectFolder.append("res/layout/" + viewFileName + ".xml")
-		
-		context.createViewGetters(xmlFile, clazz)
+		context.createViewGetters(viewFileName, clazz)
 
 		// determine there is at least one View type (e.g. ImageView or TextView) field that is contained within the custom layout
 		val androidViewFields = clazz.declaredFields.filter[f|View.newTypeReference.isAssignableFrom(f.type)]

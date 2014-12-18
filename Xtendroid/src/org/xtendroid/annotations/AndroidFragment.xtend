@@ -67,16 +67,6 @@ class FragmentProcessor extends AbstractClassProcessor {
 			return;
 		}
 
-		val pathToCU = clazz.compilationUnit.filePath
-		// TODO support res/layout-{suffix} 
-		val xmlFile = pathToCU.projectFolder.append("res/layout/" + layoutFileName + ".xml")
-
-		// error handling, there is no file
-		if (!xmlFile.exists) {
-			clazz.annotations.head.addError("There is no file in '" + xmlFile + "'.")
-			return;
-		}
-
          // prepare @OnCreate methods
          val onCreateAnnotation = OnCreate.newTypeReference.type
          val onCreateMethods = clazz.declaredMethods.filter[annotations.exists[annotationTypeDeclaration==onCreateAnnotation]]
@@ -154,6 +144,6 @@ class FragmentProcessor extends AbstractClassProcessor {
          ]
       }
 
-		context.createViewGetters(xmlFile, clazz)
+		context.createViewGetters(layoutFileName, clazz)
 	}
 }
