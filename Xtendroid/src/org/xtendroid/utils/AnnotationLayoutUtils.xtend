@@ -97,12 +97,14 @@ class AnnotationLayoutUtils {
 				val pathToCU = clazz.compilationUnit.filePath
 
 				// TODO support res/layout-{suffix} 
-				val xmlFile = pathToCU.projectFolder.append("res/layout/" + layoutFileName + ".xml")
-
+				var xmlFile = pathToCU.projectFolder.append("res/layout/" + layoutFileName + ".xml")
 				// error handling, there is no file
 				if (!xmlFile.exists) {
-					clazz.annotations.head.addError("There is no file in '" + xmlFile + "'.")
-					return;
+               xmlFile = pathToCU.append("../res/layout/" + layoutFileName + ".xml")
+					if (!xmlFile.exists) {
+					   clazz.annotations.head.addError("There is no file in '" + xmlFile + "'.")
+					   return;
+					}
 				}
 				context.createViewGettersWithCallBack(xmlFile, clazz, callbacksType)
 			}
