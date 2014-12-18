@@ -231,7 +231,7 @@ Method 2: Add as library project
 
 Method 3: Gradle build config
 ---------------------------
-- In your `build.gradle` file, add a compile dependency for 'com.github.tobykurien:xtendroid:0.11.+' and also add the [Xtend compiler](https://github.com/oehme/xtend-gradle-plugin)
+- In your `build.gradle` file, add a compile dependency for ```com.github.tobykurien:xtendroid:0.11.+``` and also add the [Xtend compiler](https://github.com/oehme/xtend-gradle-plugin)
 - A typical `build.gradle` file looks as follows:
 
 ```groovy
@@ -259,7 +259,8 @@ android {
 		compile 'com.github.tobykurien:xtendroid:0.11.+'
 		
 		compile 'org.eclipse.xtext:org.eclipse.xtext.xbase.lib:2.7.+'
-		// Use this instead if you're not using Google Guava, for a slimmer runtime:
+		// OR: if you're not using Google Guava, for a slimmer runtime:
+      // xtendCompileOnly 'org.eclipse.xtext:org.eclipse.xtext.xbase.lib:2.7.+'
 		// compile 'org.eclipse.xtext:org.eclipse.xtext.xbase.lib.slim:2.7.+'
 
 		// other dependencies here
