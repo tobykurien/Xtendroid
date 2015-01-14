@@ -20,7 +20,7 @@ class AnnotationLayoutUtils {
 				Class.forName("android.view." + e.nodeName)
 			} catch (ClassNotFoundException exception1) {
 				try {
-					Class.forName(e.nodeName)
+					Class.forName(e.nodeName, false, Class.classLoader)
 				} catch (ClassNotFoundException exception2) {
 					null
 				}
