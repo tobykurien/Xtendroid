@@ -19,11 +19,20 @@ class AnnotationLayoutUtils {
 			try {
 				Class.forName("android.view." + e.nodeName)
 			} catch (ClassNotFoundException exception1) {
-				try {
-					Class.forName(e.nodeName, false, Class.classLoader)
-				} catch (ClassNotFoundException exception2) {
-					null
-				}
+			   if (e.nodeName.equals("android.support.v7.widget.CardView")) {
+			      // CardView causes unique problems
+               try { 
+                  Class.forName(e.nodeName, false, Class.classLoader)
+               } catch (ClassNotFoundException exception3) {
+                  null
+               }
+			   } else {
+               try {
+                  Class.forName(e.nodeName)
+               } catch (ClassNotFoundException exception2) {
+                  null
+               }
+			   }
 			}
 		}
 
