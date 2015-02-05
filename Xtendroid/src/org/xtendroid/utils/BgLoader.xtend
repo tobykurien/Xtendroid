@@ -18,7 +18,7 @@ import android.content.Context
 class BgSupportLoader<R> extends AsyncTaskLoader<R> {
 	var ()=>R bgFunction
 	var (R)=>void disposeFunction
-	var R result
+	protected var R result
 
 	new(Context context) {
 		super(context)
@@ -108,7 +108,7 @@ class BgSupportLoader<R> extends AsyncTaskLoader<R> {
 class BgLoader<R> extends android.content.AsyncTaskLoader<R> {
 	var ()=>R bgFunction
 	var (R)=>void disposeFunction
-	var R result
+	protected var R result
 
 	new(Context context) {
 		super(context)
