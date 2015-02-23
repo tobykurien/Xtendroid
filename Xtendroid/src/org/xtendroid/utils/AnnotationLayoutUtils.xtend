@@ -13,31 +13,43 @@ import static extension org.xtendroid.utils.XmlUtils.*
 
 class AnnotationLayoutUtils {
 	def static getFieldType(Element e) {
+		
 		val clazz = try {
+			// 100% applicable
 			Class.forName("android.widget." + e.nodeName)
 		} catch (ClassNotFoundException exception) {
 			try {
+				// 100% applicable
 				Class.forName("android.view." + e.nodeName)
 			} catch (ClassNotFoundException exception1) {
-			   if (e.nodeName.equals("android.support.v7.widget.CardView")) {
-			      // CardView causes unique problems
-               try { 
-                  Class.forName(e.nodeName, false, Class.classLoader)
-               } catch (ClassNotFoundException exception3) {
-                  null
-               }
-			   } else {
                try {
+               	  // Custom type, anyone's guess, at least jvm/dalvik/ART confirms it exists
                   Class.forName(e.nodeName)
                } catch (ClassNotFoundException exception2) {
                   null
                }
-			   }
 			}
 		}
-
-		if (clazz != null && View.isAssignableFrom(clazz)) {
-			return clazz
+		 
+		if (clazz != null)
+		{
+			// if (android.support.v7.widget.CardView.isAssignableFrom(clazz)) { return null }
+			// TODO the previous statement is what we want actually, so any child type of CardView
+			// including the parent-type CardView can be filtered out,
+			// but this needs to be added as a gradle dependency.
+			if ("android.support.v7.widget.CardView".equals(e.nodeName))
+			{		
+				try {
+					Class.forName(e.nodeName, false, Class.classLoader)
+				}catch (ClassNotFoundException exception)
+				{
+					// get outta here, because it explodes, for some reason
+					return null
+				}
+			}else if (View.isAssignableFrom(clazz))
+			{
+				return clazz
+			}
 		}
 
 		return null
