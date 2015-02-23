@@ -27,6 +27,8 @@ class AnnotationLayoutUtils {
                   Class.forName(e.nodeName)
                } catch (ClassNotFoundException exception2) {
                   null
+               } catch (ExceptionInInitializerError exception3) {
+                  null
                }
 			}
 		}
