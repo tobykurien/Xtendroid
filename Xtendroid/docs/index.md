@@ -52,6 +52,39 @@ You can do something similar in a fragment using the ```@AndroidFragment``` anno
 
 ```
 
+Dialogs in Android have become quite painful, because you can either use ```AlertDialog.Builder```, or implement a ```DialogFragment``` with a custom view, where you have to provide the buttons and theme it yourself (which is difficult, since AppCompat doesn't help you with dialogs). To make this simpler, you can use the ```@AndroidDialogFragment``` annotation, which implements a default dialog box using ```AlertDialog.Builder```:
+
+```xtend
+@AndroidDialogFragment(R.layout.my_dialog_fragment) class MyDialogFragment {
+
+   // A default dialog is created for us with an "Ok" button
+   // We can optionally implement our own dialog quite simply as follows:
+   override onCreateDialog(Bundle instance) {
+      
+      // Instead of AlertDialog.Buider, we for example could use 
+      // MaterialDialog.Builder from https://github.com/afollestad/material-dialogs
+      var dlg = new AlertDialog.Builder(activity)
+         .setTitle("My dialog")
+         .setView(contentView)  // contentView is the view specified in the annotation
+         .setPositiveButton("Hello", [
+            toast("Well, hello to you too!")
+          ])
+         .create
+         
+      dlg.show() // show the dialog
+         
+      return dlg
+   }
+
+}
+
+```
+
+When using ```@AndroidDialogFrament```, note the following:
+
+- ```getView()``` will always return null, otherwise the AlertDialog does not display its title or buttons
+- ```getContentView()``` will return the view inside the dialog
+
 The ```@AndroidView``` annotation is a simple way to access your views inside an activity or fragment, without using the above class-level annotations, e.g.
 
 ```xtend
