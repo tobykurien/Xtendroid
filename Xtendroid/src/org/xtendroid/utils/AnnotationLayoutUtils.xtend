@@ -185,7 +185,7 @@ class AnnotationLayoutUtils {
          annotationTypeDeclaration==typeRef.type
       ].getExpression("layout")
       
-      if (value == null || value.toString.trim == "-1") {
+      if (value == null || try {value.toString.trim == "-1"} catch (NullPointerException e) { true }) {
       	value = annotatedClass.annotations.findFirst[
             annotationTypeDeclaration==typeRef.type
          ].getExpression("value")
