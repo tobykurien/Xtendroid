@@ -231,7 +231,7 @@ Method 2: Add as library project
 
 Method 3: Gradle build config
 ---------------------------
-- In your `build.gradle` file, add a compile dependency for ```com.github.tobykurien:xtendroid:0.11.+``` and also add the [Xtend compiler](https://github.com/oehme/xtend-gradle-plugin)
+- In your `build.gradle` file, add a compile dependency for ```com.github.tobykurien:xtendroid:0.12.0``` and also add the [Xtend compiler](https://github.com/oehme/xtend-gradle-plugin)
 - A typical `build.gradle` file looks as follows:
 
 ```groovy
@@ -242,8 +242,8 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.0.+'
-        classpath 'org.xtend:xtend-android-gradle-plugin:0.3.+'
+        classpath 'com.android.tools.build:gradle:1.1.0'
+        classpath 'org.xtend:xtend-android-gradle-plugin:0.4.5'
     }
 }
 
@@ -256,12 +256,9 @@ repositories {
 
 android {
 	dependencies {
-		compile 'com.github.tobykurien:xtendroid:0.11.+'
+		compile 'com.github.tobykurien:xtendroid:0.12.0'
 		
-		compile 'org.eclipse.xtext:org.eclipse.xtext.xbase.lib:2.7.+'
-		// OR: if you're not using Google Guava, for a slimmer runtime:
-      // xtendCompileOnly 'org.eclipse.xtext:org.eclipse.xtext.xbase.lib:2.7.+'
-		// compile 'org.eclipse.xtext:org.eclipse.xtext.xbase.lib.slim:2.7.+'
+		compile 'org.eclipse.xtext:org.eclipse.xtext.xbase.lib:2.8.1'
 
 		// other dependencies here
 	}
@@ -273,7 +270,7 @@ android {
 Xtend
 =====
 
-For more about the Xtend language, see http://xtend-lang.org
+The latest version of Xtendroid is built with Xtend v2.8.1. For more about the Xtend language, see http://xtend-lang.org
 
 Gotchas
 =======
