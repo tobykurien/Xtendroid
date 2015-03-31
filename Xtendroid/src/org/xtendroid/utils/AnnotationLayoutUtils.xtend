@@ -194,6 +194,6 @@ class AnnotationLayoutUtils {
             return null
          }
       }
-      return value.toString
+      return try { value.toString } catch (NullPointerException e) { null }
    }
 }
