@@ -60,24 +60,18 @@ Dialogs in Android have become quite painful, because you can either use ```Aler
    // A default dialog is created for us with an "Ok" button
    // We can optionally implement our own dialog quite simply as follows:
    override onCreateDialog(Bundle instance) {
-      
+
       // Instead of AlertDialog.Buider, we for example could use 
       // MaterialDialog.Builder from https://github.com/afollestad/material-dialogs
-      var dlg = new AlertDialog.Builder(activity)
+      new AlertDialog.Builder(activity)
          .setTitle("My dialog")
-         .setView(contentView)  // contentView is the view specified in the annotation
+         .setView(contentView)  // contentView is the layout specified in the annotation
          .setPositiveButton("Hello", [
             toast("Well, hello to you too!")
           ])
          .create
-         
-      dlg.show() // show the dialog
-         
-      return dlg
    }
-
 }
-
 ```
 
 When using ```@AndroidDialogFrament```, note the following:
