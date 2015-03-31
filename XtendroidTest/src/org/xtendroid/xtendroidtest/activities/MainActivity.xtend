@@ -15,6 +15,7 @@ import org.xtendroid.adapter.BeanAdapter
 	// Xtendroid API demos
 	var demos = #[
 		new Demo('@AndroidFragment', FragmentActivity),
+      new Demo('@AndroidDialogFragment', DialogFragmentActivity),
 		new Demo('@AndroidDatabase, BgTask', DbTestActivity),
 		new Demo('@AndroidAdapter', AndroidAdapterActivity),
 		new Demo('@AndroidPreference', SettingsActivity),
