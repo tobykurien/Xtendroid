@@ -52,7 +52,7 @@ You can do something similar in a fragment using the ```@AndroidFragment``` anno
 
 ```
 
-Dialogs in Android have become quite painful, because you can either use ```AlertDialog.Builder```, or implement a ```DialogFragment``` with a custom view, where you have to provide the buttons and theme it yourself (which is difficult, since AppCompat doesn't help you with dialogs). To make this simpler, you can use the ```@AndroidDialogFragment``` annotation, which implements a default dialog box using ```AlertDialog.Builder```:
+Dialogs in Android have become quite painful, because you can either use ```AlertDialog.Builder```, or implement a ```DialogFragment``` with a custom view, where you have to provide the title and buttons, and theme it yourself (which is difficult, since AppCompat doesn't help you with dialogs). To make this simpler, you can use the ```@AndroidDialogFragment``` annotation to implement an (for example) ```AlertDialog.Builder``` based dialog with custom content, and allows you to code the view widgets the same way you would in a regular ```DialogFragment```:
 
 ```xtend
 @AndroidDialogFragment(R.layout.my_dialog_fragment) class MyDialogFragment {
@@ -70,6 +70,12 @@ Dialogs in Android have become quite painful, because you can either use ```Aler
             toast("Well, hello to you too!")
           ])
          .create
+   }
+   
+   @OnCreate
+   def init() {
+   	// here we can refer to widgets in the layout, like in an Activity or regular Fragment
+   	message.text = "Click Hello button for a message."
    }
 }
 ```
