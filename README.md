@@ -277,7 +277,9 @@ The latest version of Xtendroid is built with Xtend v2.8.1. For more about the X
 Gotchas
 =======
 
-Note that Xtend and Xtendroid are currently only supported in Eclipse (Xtend is an Eclipse project), although projects using them can be compiled with Maven or Gradle. IntelliJ support for Xtend is [being worked on][xtend_intellij], so it will be [usable in Android Studio][android_studio] soon.
+Note that Xtend and Xtendroid are currently supported in Eclipse (Xtend is an Eclipse project), although  projects using them can be compiled with Maven or Gradle. You can [use Xtendroid in Android Studio][android_studio], but the Android Studio Xtend editor is currently still under development. 
+
+If you'd like to use Gradle for your build configuration, but still be able to develop in Eclipse, use the [Eclipse AAR plugin for Gradle][eclipse_aar_gradle]. This also allows you to use either Eclipse or Android Studio while maintaining a single build configuration.
 
 There are currently some bugs with the Eclipse Xtend editor that can lead to unexpected behaviour (e.g. compile errors).
 Here are the current bugs you should know about:
@@ -295,6 +297,6 @@ If in doubt, clean the project, and re-open the editor.
 [database]: /Xtendroid/docs/index.md#database
 [examples]: /examples
 [Xtendroid Test app]: /XtendroidTest
-[xtend_intellij]: http://blog.efftinge.de/2014/10/eclipse-xtext-goes-intellij-idea.html
 [xtendapp]: https://github.com/tobykurien/XtendApp
 [android_studio]: https://github.com/tobykurien/Xtendroid/issues/62
+[eclipse_aar_gradle]: https://github.com/ksoichiro/gradle-eclipse-aar-plugin
