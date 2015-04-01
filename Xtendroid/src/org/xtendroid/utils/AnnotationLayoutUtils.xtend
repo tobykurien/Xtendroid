@@ -71,11 +71,15 @@ class AnnotationLayoutUtils {
 
 	def static addLazyGetter(extension TransformationContext context, extension Element element,
 		MutableClassDeclaration clazz) {
-
+		
 		// determine android:id
 		val id = element?.id
 		val name = element?.fieldName
-		val fieldType = element?.fieldType?.newTypeReference
+		var fieldTypeReference = element?.fieldType?.newTypeReference;
+		if (fieldTypeReference == null) {
+			fieldTypeReference = findTypeGlobally(element?.nodeName)?.newTypeReference;
+		}
+		val fieldType = fieldTypeReference
 		if (name != null && fieldType != null) {
 			val fieldName = '_' + name.toFirstLower
 			if (clazz.findDeclaredField(fieldName) == null) {
