@@ -16,7 +16,6 @@ class BgTask<R> extends AsyncTask<Void, Void, R> {
    var ()=>R bgFunction
    var (R)=>void uiFunction
    var (Exception)=>void errFunction
-   var boolean skipUiFunction = false
    var ProgressDialog pd
    var Exception exception
 
@@ -45,7 +44,7 @@ class BgTask<R> extends AsyncTask<Void, Void, R> {
       bgFunction = bg
       uiFunction = ui
       errFunction = error
-      skipUiFunction = false
+      exception = null
 
       if(pd != null && !pd.showing) pd.show()
 
@@ -64,23 +63,24 @@ class BgTask<R> extends AsyncTask<Void, Void, R> {
       try {
          return bgFunction.apply
       } catch (Exception e) {
-         skipUiFunction = true
          exception = e
          return null
       }
    }
 
    override protected onPostExecute(R result) {
+      if (isCancelled) return;
+      
       try {
-         if (skipUiFunction && errFunction != null) {
+         if (exception != null) {
             try {
                // run error function in UI thread
-               errFunction.apply(exception)
+               if (errFunction != null) errFunction.apply(exception)
+               else throw exception
             } catch (Exception e2) {
-               Log.e("Xtendroid", "Error while executing error handler: " + e2.message, e2)
+               throw e2
             } finally {
                exception = null
-               skipUiFunction = false
             }
          } else {
             if (uiFunction != null) uiFunction.apply(result)
