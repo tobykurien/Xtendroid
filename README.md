@@ -50,15 +50,17 @@ var results = #[
 
 Blink a button 3 times (equivalent Java code is too verbose to include here):
 ```xtend
+import static extension org.xtendroid.utils.AsyncBuilder.*
+
 // Blink button 3 times using AsyncTask
-new BgTask().runInBg [
+async [
     for (i : 1..3) { // number ranges, nice!
         runOnUiThread [ myButton.pressed = true ]
         Thread.sleep(250) // look ma! no try/catch!
         runOnUiThread [ myButton.pressed = false ]
         Thread.sleep(250)
     }
-]
+].start()
 ```
 
 Documentation
@@ -115,16 +117,16 @@ Now the activity class to fetch the quote from the internet (in a background thr
          pd.message = "Loading quote..."
 
          // load quote in the background
-         new BgTask().runInBgWithProgress(pd,[
+         async(pd) [
             // get the data in the background
             getData('http://www.iheartquotes.com/api/v1/random')
-         ],[result|
+         ].then [String result|
             // update the UI with new data
             mainQuote.text = Html.fromHtml(result)
-         ],[error|
+         ].onError [Exception error|
             // handle any errors by toasting it
             toast("Error: " + error.message)
-         ])
+         ].start()
       ]
    }
 
