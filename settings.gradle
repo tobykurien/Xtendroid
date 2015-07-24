@@ -1,2 +1,2 @@
-include 'Xtendroid', 'examples:Sample1'//, 'examples:HelloWorld', 'examples:HandlerExample', 'examples:MovieSearchApp'
+include 'Xtendroid'//, 'examples:Sample1', 'examples:HelloWorld', 'examples:HandlerExample', 'examples:MovieSearchApp'
 
