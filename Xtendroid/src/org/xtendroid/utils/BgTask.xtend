@@ -11,7 +11,10 @@ import android.util.Log
  * be passed into the UI task. To run progress updates, etc. from the background
  * closure, simply use runOnUiThread, e.g.: 
  *    runOnUiThread [| progressBar.setValue(progress) ]
+ * 
+ * @deprecated Use AsyncBuilder instead
  */
+@Deprecated
 class BgTask<R> extends AsyncTask<Void, Void, R> {
    var ()=>R bgFunction
    var (R)=>void uiFunction

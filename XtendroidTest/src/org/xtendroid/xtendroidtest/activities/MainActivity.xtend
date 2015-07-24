@@ -17,7 +17,7 @@ import org.xtendroid.adapter.BeanAdapter
       new Demo('AsyncBuilder', BgTaskActivity),
 		new Demo('@AndroidFragment', FragmentActivity),
       new Demo('@AndroidDialogFragment', DialogFragmentActivity),
-		new Demo('@AndroidDatabase, BgTask', DbTestActivity),
+		new Demo('@AndroidDatabase', DbTestActivity),
 		new Demo('@AndroidAdapter', AndroidAdapterActivity),
 		new Demo('@AndroidPreference', SettingsActivity),
 		new Demo('@AndroidLoader', LoaderActivity),

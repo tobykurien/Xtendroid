@@ -7,9 +7,10 @@ import java.util.List
 import org.xtendroid.adapter.BeanAdapter
 import org.xtendroid.app.AndroidActivity
 import org.xtendroid.app.OnCreate
-import org.xtendroid.utils.BgTask
 import org.xtendroid.xtendroidtest.R
 import org.xtendroid.xtendroidtest.models.ManyItem
+
+import static org.xtendroid.utils.AsyncBuilder.*
 
 import static extension org.xtendroid.utils.AlertUtils.*
 import static extension org.xtendroid.xtendroidtest.db.DbService.*
@@ -32,7 +33,7 @@ import static extension org.xtendroid.xtendroidtest.db.DbService.*
 			pd.progress = 0
 			val now = new Date
 			
-			new BgTask<String>.runInBgWithProgress(pd, [|
+			async(pd) [a, params|
 				(0..1000).forEach [i|
 					db.insert("manyitems", #{
 						'createdAt' -> now,
@@ -40,16 +41,18 @@ import static extension org.xtendroid.xtendroidtest.db.DbService.*
 						'itemOrder' -> i
 					})
 
-					// TODO - stop this process if pd is cancelled
-					runOnUiThread [| pd.progress = i ]
+               if (a.isCancelled) return;
+					a.progress(i)
 				]
 				"done"
-			], [r|
+			].then [String r|
 				manyItems = db.lazyFindAll("manyitems", "id", ManyItem)
 				(mainList.adapter as BaseAdapter).notifyDataSetChanged
-			], [e|
+			].onProgress[Object[] values|
+			   pd.progress = values.get(0) as Integer
+			].onError [Exception e|
 				toast("ERROR: " + e.message)
-			])
+			].start()
 		}
 	}
 }
