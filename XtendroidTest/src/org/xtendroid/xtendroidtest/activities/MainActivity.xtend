@@ -14,7 +14,7 @@ import org.xtendroid.adapter.BeanAdapter
 @AndroidActivity(R.layout.activity_main) class MainActivity {
 	// Xtendroid API demos
 	var demos = #[
-      new Demo('BgTask', BgTaskActivity),
+      new Demo('AsyncBuilder', BgTaskActivity),
 		new Demo('@AndroidFragment', FragmentActivity),
       new Demo('@AndroidDialogFragment', DialogFragmentActivity),
 		new Demo('@AndroidDatabase, BgTask', DbTestActivity),

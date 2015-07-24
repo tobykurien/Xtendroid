@@ -3,30 +3,30 @@ package org.xtendroid.utils
 import android.app.ProgressDialog
 import android.os.AsyncTask
 import android.os.Build
-import org.eclipse.xtext.xbase.lib.Functions.Function1
+import org.eclipse.xtext.xbase.lib.Functions.Function2
 
-class AsyncBuilder<T> extends AsyncTask<Object, Object, T> {
+class AsyncBuilder<Result> extends AsyncTask<Object, Object, Result> {
    var ProgressDialog progressDialog
-   var (Object[])=>T bgTask
-   var (T)=>void uiTask
+   var (AsyncBuilder, Object[])=>Result bgTask
+   var (Result)=>void uiTask
    var ()=>void onPreExecute
    var (Object[])=>void onProgress
    var (Exception)=>void onError
    var ()=>void onCancelled
    var Exception error
 
-   def static AsyncBuilder async(Function1<Object[], ?> task) {
+   def static AsyncBuilder async(Function2<AsyncBuilder, Object[], ?> task) {
       return async(null, task)
    }
    
-   def static AsyncBuilder async(ProgressDialog progressDialog, Function1<Object[], ?> task) {      
+   def static AsyncBuilder async(ProgressDialog progressDialog, Function2<AsyncBuilder, Object[], ?> task) {      
       var ab = new AsyncBuilder()
       ab.bgTask = task
       ab.progressDialog = progressDialog
       return ab
    }
 
-   def AsyncBuilder then((T)=>void task) {
+   def AsyncBuilder then((Result)=>void task) {
       this.uiTask = task
       return this
    }
@@ -50,32 +50,37 @@ class AsyncBuilder<T> extends AsyncTask<Object, Object, T> {
       this.onProgress = task
       return this
    }
+   
+   def void progress(Object... values) {
+      publishProgress(values)
+   }
 
    def AsyncTask start() {
       return start(null)
    }
    
-   def AsyncTask start(Object[] params) {
+   def AsyncTask start(Object... params) {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
          // newer versions of Android use a single thread, rather default to multiple threads
-        super.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
+        super.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, params)
       } else {
          // older versions of Android already use a thread pool
-        super.execute()
+        super.execute(params)
       }
    }
    
    override protected doInBackground(Object... params) {
-      error = null
+      if (cancelled || error != null) return null
+      
       try {
-        if (bgTask != null) return bgTask.apply(params)
+        if (bgTask != null) return bgTask.apply(this, params)
       } catch (Exception e) {
          error = e
          return null
       }
    }
 
-   override protected onPostExecute(T result) {
+   override protected onPostExecute(Result result) {
       super.onPostExecute(result)
       if (!cancelled && error == null && uiTask != null) try {
          uiTask.apply(result)
@@ -89,7 +94,6 @@ class AsyncBuilder<T> extends AsyncTask<Object, Object, T> {
       
       if (error != null) {
          if (!cancelled) onError.apply(error)
-         return
       }
    }
 
@@ -104,6 +108,7 @@ class AsyncBuilder<T> extends AsyncTask<Object, Object, T> {
    
    override protected onPreExecute() {
       super.onPreExecute()
+      error = null
       if (!cancelled && progressDialog != null) {
          progressDialog.show()
       }
@@ -117,11 +122,7 @@ class AsyncBuilder<T> extends AsyncTask<Object, Object, T> {
    
    override protected onProgressUpdate(Object... values) {
       super.onProgressUpdate(values)
-      if (!cancelled && onProgress != null) try { 
-         onProgress.apply(values)
-      } catch (Exception e) {
-         error = e
-      }
+      onProgress.apply(values)
    }
    
 }
