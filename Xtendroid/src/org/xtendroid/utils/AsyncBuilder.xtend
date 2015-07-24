@@ -89,7 +89,7 @@ class AsyncBuilder<Result> extends AsyncTask<Object, Object, Result> {
       }
 
       if (!cancelled && progressDialog != null) {
-         progressDialog.hide()
+         progressDialog.dismiss()
       }
       
       if (error != null) {
