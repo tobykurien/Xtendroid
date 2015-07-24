@@ -93,7 +93,10 @@ class AsyncBuilder<Result> extends AsyncTask<Object, Object, Result> {
       }
       
       if (error != null) {
-         if (!cancelled) onError.apply(error)
+         if (!cancelled) {
+            if (onError != null) onError.apply(error)
+            else throw error
+         }
       }
    }
 
