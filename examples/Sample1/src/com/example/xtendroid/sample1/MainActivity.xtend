@@ -27,7 +27,7 @@ import static extension org.xtendroid.utils.AlertUtils.*
       pd.message = "Loading quote..."
       
       // load quote in the background
-      async(pd) [
+      async(pd) [task, params|
          // get the data in the background
          getData('http://www.iheartquotes.com/api/v1/random')               
       ].then [String result|
