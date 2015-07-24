@@ -24,6 +24,8 @@
             </intent-filter>
         </activity>
         <activity
+            android:name="org.xtendroid.xtendroidtest.activities.BgTaskActivity"/>
+        <activity
             android:name="org.xtendroid.xtendroidtest.activities.DbTestActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
@@ -31,6 +33,9 @@
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
             android:name="org.xtendroid.xtendroidtest.activities.FragmentActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name="org.xtendroid.xtendroidtest.activities.DialogFragmentActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
             android:name="org.xtendroid.xtendroidtest.activities.AndroidAdapterActivity"

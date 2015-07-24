@@ -5,7 +5,7 @@ Documentation
 
 - [Activities and Fragments](#activities-and-fragments)
 - Background Tasks
-  - [BgTask](#background-tasks-using-asynctask)
+  - [AsyncBuilder](#background-tasks-using-asynctask)
 - Data storage
   - [Shared Preferences](#shared-preferences)
   - [Database](#database)
@@ -52,6 +52,39 @@ You can do something similar in a fragment using the ```@AndroidFragment``` anno
 
 ```
 
+Dialogs in Android have become quite painful, because you can either use ```AlertDialog.Builder```, or implement a ```DialogFragment``` with a custom view, where you have to provide the title and buttons, and theme it yourself (which is difficult, since AppCompat doesn't help you with dialogs). To make this simpler, you can use the ```@AndroidDialogFragment``` annotation to implement an (for example) ```AlertDialog.Builder``` based dialog with custom content, and allows you to code the view widgets the same way you would in a regular ```DialogFragment```:
+
+```xtend
+@AndroidDialogFragment(R.layout.my_dialog_fragment) class MyDialogFragment {
+
+   // A default dialog is created for us with an "Ok" button
+   // We can optionally implement our own dialog quite simply as follows:
+   override onCreateDialog(Bundle instance) {
+
+      // Instead of AlertDialog.Buider, we for example could use 
+      // MaterialDialog.Builder from https://github.com/afollestad/material-dialogs
+      new AlertDialog.Builder(activity)
+         .setTitle("My dialog")
+         .setView(contentView)  // contentView is the layout specified in the annotation
+         .setPositiveButton("Hello", [
+            toast("Well, hello to you too!")
+          ])
+         .create
+   }
+   
+   @OnCreate
+   def init() {
+   	// here we can refer to widgets in the layout, like in an Activity or regular Fragment
+   	message.text = "Click Hello button for a message."
+   }
+}
+```
+
+When using ```@AndroidDialogFrament```, note the following:
+
+- ```getView()``` will always return null, otherwise the AlertDialog does not display its title or buttons
+- ```getContentView()``` will return the view inside the dialog
+
 The ```@AndroidView``` annotation is a simple way to access your views inside an activity or fragment, without using the above class-level annotations, e.g.
 
 ```xtend
@@ -68,53 +101,94 @@ class MyActivity extends Activity {
 Background tasks using AsyncTask
 --------------------------------
 
-A class called ```BgTask``` is provided, that extends the standard ```AsyncTask``` and works in much the same way, but provides lambda parameters for the background task and the UI task, thus reducing boilerplate:
+A class called ```AsyncBuilder``` is provided, that extends the standard ```AsyncTask``` and works in much the same way, but provides lambda parameters for the background task and the UI task, thus reducing boilerplate. It also takes care of cancelling UI callbacks if the AsyncTask is cancelled, and also handles any errors occurring in the background or UI threads by passing the error to the ```onError``` lambda.
+
+A simple example of usage:
 
 ```xtend
-new BgTask().runInBg([
+async [
    // this bit runs in a background thread
    return getSomeString()
-],[result|
+].then [result|
    // this runs in the UI thread
    toast("Got back: " + result) // note how toast() works here too!
-])
+].start()
 ```
 
-ProgressDialog is also handled automatically when using this syntax:
+ProgressDialog is also handled automatically when it is passed into the ```async``` method:
 
 ```xtend
 val progressBar = new ProgressDialog(...)
 
-new BgTask().runInBgWithProgress(progressBar, [
+async(progressBar) [task, params|
    // this bit runs in a background thread, progressDialog automatically displayed
    var retVal = fetchStringFromSomewhere()
 
    // update progress UI from background thread
-   runOnUiThread [ progressBar.progress = 10 ]
+   task.progress(100)
 
    return retVal // return keyword is optional
-],[result|
+].then [result|
    // this runs in the UI thread, progressDialog automatically dismissed afterwards
    toast("Got back: " + result)
-])
+].onProgress [Object[] values|
+   progressBar.progress = values.get(0) as Integer
+].start()
 ```
 
-No ```onProgressUpdate``` method is needed, since it is trivial to use the ```runOnUiThread``` method instead, as shown above.  Handling errors in a background task is made easy: you can simply pass a third lambda function that will be executed (in the UI thread) if an error occurs during the background task:
+As an alternative to the above ```onProgress``` call, it is trivial to use ```runOnUiThread``` method instead, inside the background task.  Handling errors in a background task is made easy: you can simply pass a lambda function to ```onError``` that will be executed (in the UI thread) if an error occurs during the background task (or onPostExecute):
 
 ```xtend
-new BgTask().runInBg([
+async [
    // this runs in the background thread
    fetchStringFromSomewhere()
-],[result|
+].then [result|
    // this runs in the UI thread
    toast("Got back: " + result)
-],[error|
+].onError [error|
    // this runs in the UI thread
    toast("Oops, this went wrong: " + error.message)
-)
+).start()
 ```
 
->Note: Since Honeycomb, Android has defaulted to using a single thread for all AsyncTasks, because too many developers were writing non-thread-safe code. BgTask changes that, so that multiple AsyncTasks will run simultaneously using the THREAD_POOL_EXECUTOR, so be careful to write thread-safe code.
+Here is a complete example of using the ```AsyncBuilder```:
+
+```xtend
+// Use AsynBuilder to run a background task      
+val pd = new ProgressDialog()
+
+async(pd) [task, params|
+   // Do some work in the background thread
+   for (i : 1..50) {
+      Thread.sleep(100)
+
+      // update the progress
+      task.progress(i)
+      
+      // abort if cancelled
+      if (task.cancelled) return
+   }
+
+   // we have access to the parameters too         
+   return "Back from bg task with " + params?.get(0)
+].first [
+   // This runs before the background task
+   mainHello.text = "Running bg task..."
+].then [String result|
+   // this runs with the result of the background thread
+   mainHello.text = result
+].onProgress [Object[] values|
+   // this runs if progress is published in the background thread
+   pd.progress = values.get(0) as Integer
+].onCancelled [
+   Log.d("async", "AsyncTask was cancelled")
+].onError [Exception error|
+   // this runs if an error occurred anywhere else
+   mainHello.text = '''Error! «error.class.name» «error.message»'''
+].start("Param1") // don't forget to call start to kick-off the task
+```
+
+>Note: Since Honeycomb, Android has defaulted to using a single thread for all AsyncTasks, because too many developers were writing non-thread-safe code. When using AsyncBuilder's ```start()``` method instead of the ```execute()``` method,  it will run multiple AsyncTasks simultaneously using the THREAD_POOL_EXECUTOR, so be careful to write thread-safe code.
 
 
 Shared Preferences

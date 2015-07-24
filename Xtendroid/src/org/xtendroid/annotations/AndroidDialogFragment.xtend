@@ -1,44 +1,34 @@
 package org.xtendroid.annotations
 
+import android.app.Dialog
+import android.app.DialogFragment
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import org.eclipse.xtend.lib.macro.AbstractClassProcessor
 import org.eclipse.xtend.lib.macro.Active
 import org.eclipse.xtend.lib.macro.TransformationContext
 import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
 import org.eclipse.xtend.lib.macro.declaration.Visibility
+import org.xtendroid.app.OnCreate
+import org.xtendroid.utils.AnnotationLayoutUtils
 
 import static extension org.xtendroid.utils.AnnotationLayoutUtils.*
-import org.xtendroid.utils.AnnotationLayoutUtils
-import android.app.Fragment
-import org.xtendroid.app.OnCreate
 
-@Active(typeof(FragmentProcessor))
-annotation AndroidFragment {
+/**
+ * @AndroidDialogFragment is an annotation to allow DialogFragment classes to be based on
+ * AlertDialog.Builder and other such dialog builders. The default implementation will create 
+ * a dialog with the specified layout and an Ok button. Override the onCreateDialog() to 
+ * create your own dialog using AlertDialog.Builder or other.
+ */
+@Active(typeof(DialogFragmentProcessor))
+annotation AndroidDialogFragment {
    int layout = -1
    int value = -1
 }
 
-class FragmentProcessor extends AbstractClassProcessor {
+class DialogFragmentProcessor extends AbstractClassProcessor {
 
    override doTransform(MutableClassDeclaration clazz, extension TransformationContext context) {
-
-      // add #findViewById just like the Activity
-      var exists = clazz.declaredMethods.exists[m|m.simpleName == "findViewById"]
-      if (!exists)
-         clazz.addMethod("findViewById") [
-            visibility = Visibility::PUBLIC
-            addParameter("resId", primitiveInt)
-            returnType = typeof(View).newTypeReference
-            body = [
-               '''
-                  return getView().findViewById(resId);
-               '''
-            ]
-         ]
-
       // add ctor, orientation changes cause crashes without it
       if (!clazz.declaredConstructors.exists[ctor|ctor.parameters.empty]) {
          clazz.addConstructor [
@@ -51,16 +41,16 @@ class FragmentProcessor extends AbstractClassProcessor {
       }
 
       // See if a layout is defined, then create accessors for them, if they actually exist
-      val String layoutResId = AnnotationLayoutUtils.getLayoutValue(clazz, context, AndroidFragment.newTypeReference)
+      val String layoutResId = AnnotationLayoutUtils.getLayoutValue(clazz, context, AndroidDialogFragment.newTypeReference)
       if (layoutResId == null || "-1".equals(layoutResId) || !layoutResId.contains('R.layout')) {
          clazz.addWarning(
-            'You may add a layout resource id to the annotation, like this: @AndroidFragment(layout=R.layout...).')
+            'You may add a layout resource id to the annotation, like this: @AndroidDialogFragment(layout=R.layout...).')
          return;
       }
 
       // add 'extends Fragment' if necessary
       if (clazz.extendedClass == Object.newTypeReference()) {
-         clazz.extendedClass = Fragment.newTypeReference
+         clazz.extendedClass = DialogFragment.newTypeReference
       }
 
       val layoutFileName = layoutResId?.substring(layoutResId.lastIndexOf('.') + 1)
@@ -84,24 +74,8 @@ class FragmentProcessor extends AbstractClassProcessor {
 
       if (!onCreateMethods.nullOrEmpty) {
 
-         // create onViewCreated if not present
-         if (clazz.findDeclaredMethod("onViewCreated") == null) {
-
-            clazz.addMethod("onViewCreated") [
-               addAnnotation(Override.newAnnotationReference)
-               addParameter("view", View.newTypeReference)
-               addParameter("savedInstanceState", Bundle.newTypeReference)
-               body = [
-                  '''
-                     super.onViewCreated(view, savedInstanceState);
-                     «FOR method : onCreateMethods»
-                        «method.simpleName»(savedInstanceState);
-                     «ENDFOR»
-                  ''']
-            ]
-
-         // use the next best thing	         
-         } else if (clazz.findDeclaredMethod("onActivityCreated") == null) {
+         // create onActivityCreated if not present
+         if (!clazz.declaredMethods.exists[simpleName == "onActivityCreated"]) {
             clazz.addMethod("onActivityCreated") [
                addAnnotation(Override.newAnnotationReference)
                addParameter("savedInstanceState", Bundle.newTypeReference)
@@ -113,9 +87,8 @@ class FragmentProcessor extends AbstractClassProcessor {
                      «ENDFOR»
                   ''']
             ]
-
          // last chance
-         } else if (clazz.findDeclaredMethod("onStart") == null) {
+         } else if (!clazz.declaredMethods.exists[simpleName == "onStart"]) {
             clazz.addMethod("onStart") [
                addAnnotation(Override.newAnnotationReference)
                body = [
@@ -127,25 +100,70 @@ class FragmentProcessor extends AbstractClassProcessor {
                   ''']
             ]
          } else {
-            clazz.addWarning('The @AndroidFragment annotation failed to process the @OnCreate annotation')
+            clazz.addWarning('Call the @OnCreate method from inside onActivityCreated() or onStart()')
          }
       }
 
-      // create onCreateView method to load the layout, if method is not defined
-      if (clazz.findDeclaredMethod("onCreateView") == null) {
-         clazz.addMethod("onCreateView") [
+      // The getView() method must return null to prevent this view overwriting the actual dialog
+      // This took me half a frustrating day to figure out *grrrr*
+      clazz.addMethod("getView") [
+         addAnnotation(Override.newAnnotationReference)
+         returnType = View.newTypeReference
+         body = [
+            '''
+               return null;
+            ''']
+      ]
+
+      // The getContentView() method will inflate and return the specified layout
+      clazz.addMethod("getContentView") [
+         returnType = View.newTypeReference
+         body = [
+            '''
+               if (rootView == null) { 
+                  rootView = android.view.LayoutInflater.from(getActivity()).inflate(«layoutResId», null);
+               }
+               
+               return rootView;
+            ''']
+      ]
+
+
+      clazz.addField("rootView") [f|
+         f.type = View.newTypeReference
+      ]
+
+      // create onCreateDialog method to create the dialog, if method is not defined
+      if (!clazz.declaredMethods.exists[simpleName == "onCreateDialog"]) {
+         clazz.addMethod("onCreateDialog") [
             addAnnotation(Override.newAnnotationReference)
-            returnType = View.newTypeReference
-            addParameter("inflater", LayoutInflater.newTypeReference)
-            addParameter("container", ViewGroup.newTypeReference)
+            returnType = Dialog.newTypeReference
             addParameter("savedInstanceState", Bundle.newTypeReference)
             body = [
                '''
-                  View view = inflater.inflate(«layoutResId», container, false);
-                  return view;
+                  Dialog dlg = new android.app.AlertDialog.Builder(getActivity())
+                     .setView(getContentView())
+                     .setPositiveButton(android.R.string.ok, null)
+                     .create();                  
+                  dlg.show();
+                  
+                  return dlg;
                ''']
          ]
       }
+
+      // add #findViewById just like the Activity
+      if (!clazz.declaredMethods.exists[simpleName == "findViewById"])
+         clazz.addMethod("findViewById") [
+            visibility = Visibility::PUBLIC
+            addParameter("resId", primitiveInt)
+            returnType = typeof(View).newTypeReference
+            body = [
+               '''
+                  return getContentView().findViewById(resId);
+               '''
+            ]
+         ]
 
       context.createViewGetters(layoutFileName, clazz)
    }

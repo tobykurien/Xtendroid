@@ -18,7 +18,7 @@ class BasePreferences {
    }
 
    static def <T extends BasePreferences> T getPreferences(Context context, Class<T> subclass) {
-      if(cache.keySet.length > 5) cache.clear // avoid memory leaks by clearing often
+      if(cache.keySet.size > 5) cache.clear // avoid memory leaks by clearing often
       if (cache.get(context.hashCode) == null) {
          val preferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext())
          cache.put(context.hashCode, newInstance(subclass, preferences))

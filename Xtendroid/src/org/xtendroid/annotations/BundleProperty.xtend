@@ -72,7 +72,7 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
       'byte[]' -> 'null',
       'char' -> "'\\0'",
       'char[]' -> 'null',
-      'CharSequence' -> 'null',
+      'CharSequence' -> 'special', // special case
       'CharSequence[]' -> 'null',
       'ArrayList<CharSequence>' -> 'null',
       'double' -> '0.0',
@@ -152,13 +152,18 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
             body = '''
                «IF isDataSourceFragment»
                   «IF field.type.primitive || fieldInitializer != null»
-                     «field.type.name» «field.simpleName» = «prefix».get«mapTypeToMethodName.get(field.type.simpleName)»("«keyValue»");
-                     return «field.simpleName» == «mapTypeToNilValue.get(field.type.simpleName)» ? «field.simpleName» : «getterMethodDefaultName»();
+                     «field.type.name» «field.simpleName» = «prefix».get«mapTypeToMethodName.get(field.type.simpleName)»("«keyValue»"«IF mapTypeToNilValue.get(field.type.simpleName) != 'null'», «getterMethodDefaultName»()«ENDIF»);
+                     «IF mapTypeToNilValue.get(field.type.simpleName) == 'null'»
+                     	return «field.simpleName» == «mapTypeToNilValue.get(field.type.simpleName)» ? «field.simpleName» : «getterMethodDefaultName»();
+                     «ELSE»
+                     	return «field.simpleName»;
+                     «ENDIF»
                   «ELSEIF field.isParcelable(context)»
                   	 return «prefix».get«field.parcelableSuffix»("«keyValue»"); 
                   «ELSE»
                      return «prefix».get«mapTypeToMethodName.get(field.type.simpleName)»("«keyValue»");
                   «ENDIF»
+				««« /* if activity or pojo */
                «ELSE»
 				  «IF field.isParcelable(context)»
 				     return «prefix».get«field.parcelableSuffix»Extra("«keyValue»"); 

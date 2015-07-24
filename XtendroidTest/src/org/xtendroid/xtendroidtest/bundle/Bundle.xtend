@@ -164,6 +164,9 @@ class BundleActivity extends Activity {
 	CharSequence almostString
 	
 	@BundleProperty
+	CharSequence csWithDefault = "meh"
+	
+	@BundleProperty
 	CharSequence[] lotsaAlmostStrings
 	
 	@BundleProperty
@@ -262,6 +265,9 @@ class BundleFragment1 extends Fragment {
 	
 	@BundleProperty
 	CharSequence almostString
+	
+	@BundleProperty
+	CharSequence csWithDefault = "meh";
 	
 	@BundleProperty
 	CharSequence[] lotsaAlmostStrings

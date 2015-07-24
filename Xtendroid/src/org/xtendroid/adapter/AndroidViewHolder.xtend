@@ -39,16 +39,6 @@ class AndroidViewHolderProcessor extends AbstractClassProcessor {
 			return;
 		}
 
-		val pathToCU = clazz.compilationUnit.filePath
-		// TODO support res/layout-{suffix} 
-		val xmlFile = pathToCU.projectFolder.append("res/layout/" + layoutFileName + ".xml")
-
-		// error handling, there is no file
-		if (!xmlFile.exists) {
-			clazz.annotations.head.addError("There is no file in '" + xmlFile + "'.")
-			return;
-		}
-
       clazz.addField("view") [f|
          f.type = View.newTypeReference
       ]  
@@ -104,7 +94,7 @@ class AndroidViewHolderProcessor extends AbstractClassProcessor {
                   View cv = convertView;
                   if (convertView == null) {
                      cv = android.view.LayoutInflater.from(context).inflate(«layoutResId», parent, false);
-                     cv.setTag(new ViewHolder(cv));
+                     cv.setTag(new «clazz.simpleName»(cv));
                   }
                   
                   return («clazz.simpleName») cv.getTag();
@@ -112,6 +102,6 @@ class AndroidViewHolderProcessor extends AbstractClassProcessor {
             ]
          ]
 
-		context.createViewGetters(xmlFile, clazz)
+		context.createViewGetters(layoutFileName, clazz)
 	}
 }

@@ -5,9 +5,8 @@ buildscript {
     }
 
     dependencies {
-	classpath "org.xtend:xtend-android-gradle-plugin:0.3.4"
-        classpath 'com.android.tools.build:gradle:1.0.+'
-        //classpath 'com.jakewharton.sdkmanager:gradle-plugin:0.10.+'
+	classpath "org.xtend:xtend-android-gradle-plugin:0.4.7"
+        classpath 'com.android.tools.build:gradle:1.2.3'
     }
 }
 
@@ -16,7 +15,6 @@ subprojects {
    repositories {
       mavenCentral()
    }
-   
-   //apply plugin:'android-sdk-manager'
+
 }
 

@@ -47,14 +47,6 @@ class AndroidActivityProcessor extends AbstractClassProcessor {
       if (viewFileName == null) {
          return;
       }
-      val pathToCU = annotatedClass.compilationUnit.filePath
-      
-      // TODO support res/layout-{suffix} 
-      val xmlFile = pathToCU.projectFolder.append("res/layout/"+viewFileName+".xml")
-      if (!xmlFile.exists) {
-         annotatedClass.annotations.head.addError("There is no file in '"+xmlFile+"'.")
-         return;
-      }
       
       // add 'extends Activity' if necessary
       if (annotatedClass.extendedClass == Object.newTypeReference()) {
@@ -101,6 +93,6 @@ class AndroidActivityProcessor extends AbstractClassProcessor {
          ]
       }
       
-      context.createViewGettersWithCallBack(xmlFile, annotatedClass, callBacksType)
+      context.createViewGettersWithCallBack(viewFileName, annotatedClass, callBacksType)
    }
 }

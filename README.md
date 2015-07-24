@@ -50,15 +50,17 @@ var results = #[
 
 Blink a button 3 times (equivalent Java code is too verbose to include here):
 ```xtend
+import static extension org.xtendroid.utils.AsyncBuilder.*
+
 // Blink button 3 times using AsyncTask
-new BgTask().runInBg [
+async [
     for (i : 1..3) { // number ranges, nice!
         runOnUiThread [ myButton.pressed = true ]
         Thread.sleep(250) // look ma! no try/catch!
         runOnUiThread [ myButton.pressed = false ]
         Thread.sleep(250)
     }
-]
+].start()
 ```
 
 Documentation
@@ -115,16 +117,16 @@ Now the activity class to fetch the quote from the internet (in a background thr
          pd.message = "Loading quote..."
 
          // load quote in the background
-         new BgTask().runInBgWithProgress(pd,[
+         async(pd) [
             // get the data in the background
             getData('http://www.iheartquotes.com/api/v1/random')
-         ],[result|
+         ].then [String result|
             // update the UI with new data
             mainQuote.text = Html.fromHtml(result)
-         ],[error|
+         ].onError [Exception error|
             // handle any errors by toasting it
             toast("Error: " + error.message)
-         ])
+         ].start()
       ]
    }
 
@@ -209,6 +211,8 @@ Note that the Active Annotations run at edit-time and simply generate the usual 
 Getting Started
 ===============
 
+Have a look at the [XtendApp skeleton app][xtendapp] to jump-start your project. It is pre-configured and works in Android Studio as well (although support for Xtend in Android Studio is still in development).
+
 Method 1: Copy JAR file in
 ------------------------
 - Download the latest release from https://github.com/tobykurien/Xtendroid/tree/master/Xtendroid/release
@@ -231,7 +235,7 @@ Method 2: Add as library project
 
 Method 3: Gradle build config
 ---------------------------
-- In your `build.gradle` file, add a compile dependency for 'com.github.tobykurien:xtendroid:0.11.+' and also add the [Xtend compiler](https://github.com/oehme/xtend-gradle-plugin)
+- In your `build.gradle` file, add a compile dependency for ```com.github.tobykurien:xtendroid:0.12.0``` and also add the [Xtend compiler](https://github.com/oehme/xtend-gradle-plugin)
 - A typical `build.gradle` file looks as follows:
 
 ```groovy
@@ -242,8 +246,8 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.0.+'
-        classpath 'org.xtend:xtend-android-gradle-plugin:0.3.+'
+        classpath 'com.android.tools.build:gradle:1.2.3'
+        classpath 'org.xtend:xtend-android-gradle-plugin:0.4.7'
     }
 }
 
@@ -256,11 +260,9 @@ repositories {
 
 android {
 	dependencies {
-		compile 'com.github.tobykurien:xtendroid:0.11.+'
+		compile 'com.github.tobykurien:xtendroid:0.12.0'
 		
-		compile 'org.eclipse.xtext:org.eclipse.xtext.xbase.lib:2.7.+'
-		// Use this instead if you're not using Google Guava, for a slimmer runtime:
-		// compile 'org.eclipse.xtext:org.eclipse.xtext.xbase.lib.slim:2.7.+'
+		compile 'org.eclipse.xtext:org.eclipse.xtext.xbase.lib:2.8.1'
 
 		// other dependencies here
 	}
@@ -272,12 +274,14 @@ android {
 Xtend
 =====
 
-For more about the Xtend language, see http://xtend-lang.org
+The latest version of Xtendroid is built with Xtend v2.8.1. For more about the Xtend language, see http://xtend-lang.org
 
 Gotchas
 =======
 
-Note that Xtend and Xtendroid are currently only supported in Eclipse (Xtend is an Eclipse project), although projects using them can be compiled with Maven or Gradle. IntelliJ support for Xtend is [being worked on][xtend_intellij], so it will be usable in Android Studio soon.
+Note that Xtend and Xtendroid are currently supported in Eclipse (Xtend is an Eclipse project), although  projects using them can be compiled with Maven or Gradle. You can [use Xtendroid in Android Studio][android_studio], but the Android Studio Xtend editor is currently still under development. 
+
+If you'd like to use Gradle for your build configuration, but still be able to develop in Eclipse, use the [Eclipse AAR plugin for Gradle][eclipse_aar_gradle]. This also allows you to use either Eclipse or Android Studio while maintaining a single build configuration.
 
 There are currently some bugs with the Eclipse Xtend editor that can lead to unexpected behaviour (e.g. compile errors).
 Here are the current bugs you should know about:
@@ -295,4 +299,6 @@ If in doubt, clean the project, and re-open the editor.
 [database]: /Xtendroid/docs/index.md#database
 [examples]: /examples
 [Xtendroid Test app]: /XtendroidTest
-[xtend_intellij]: http://blog.efftinge.de/2014/10/eclipse-xtext-goes-intellij-idea.html
+[xtendapp]: https://github.com/tobykurien/XtendApp
+[android_studio]: https://github.com/tobykurien/Xtendroid/issues/62
+[eclipse_aar_gradle]: https://github.com/ksoichiro/gradle-eclipse-aar-plugin

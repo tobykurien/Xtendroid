@@ -8,7 +8,8 @@ import java.io.ByteArrayOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
 import org.xtendroid.app.AndroidActivity
-import org.xtendroid.utils.BgTask
+
+import static org.xtendroid.utils.AsyncBuilder.*
 
 import static extension org.xtendroid.utils.AlertUtils.*
 
@@ -26,16 +27,16 @@ import static extension org.xtendroid.utils.AlertUtils.*
       pd.message = "Loading quote..."
       
       // load quote in the background
-      new BgTask<String>.runInBgWithProgress(pd,[|
+      async(pd) [task, params|
          // get the data in the background
          getData('http://www.iheartquotes.com/api/v1/random')               
-      ],[result|
+      ].then [String result|
          // update the UI with new data
          mainQuote.text = Html.fromHtml(result)
-      ],[error|
+      ].onError [Exception error|
          // handle any errors by toasting it
          toast("Error: " + error.message)
-      ])
+      ].start()
 	}
 
    /**
