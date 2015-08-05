@@ -222,18 +222,7 @@ Method 1: Copy JAR file in
   - Click Libraries -> Add library -> Xtend Library
 - Now you can use it as documented [here][doc].
 
-
-Method 2: Add as library project
------------------------------
-- Git clone this repository and import it using Eclipse.
-- Add it as a library project to your Android project:
-  - Right-click your project -> Properties -> Android -> (Library) Add -> Xtendroid
-- If your project isn't Xtend-enabled yet:
-  - Right-click on your project -> Properties -> Java Build Path
-  - Click Libraries -> Add library -> Xtend Library
-- Now you can use it as documented [here][doc].
-
-Method 3: Gradle build config
+Method 2: Gradle build config
 ---------------------------
 - In your `build.gradle` file, add a compile dependency for ```com.github.tobykurien:xtendroid:0.12.0``` and also add the [Xtend compiler](https://github.com/oehme/xtend-gradle-plugin)
 - A typical `build.gradle` file looks as follows:
@@ -260,7 +249,7 @@ repositories {
 
 android {
 	dependencies {
-		compile 'com.github.tobykurien:xtendroid:0.12.0'
+		compile 'com.github.tobykurien:xtendroid:0.12.1'
 		
 		compile 'org.eclipse.xtext:org.eclipse.xtext.xbase.lib:2.8.1'
 
@@ -274,12 +263,14 @@ android {
 Xtend
 =====
 
-The latest version of Xtendroid is built with Xtend v2.8.1. For more about the Xtend language, see http://xtend-lang.org
+The latest version of Xtendroid is built with Xtend v2.8.1. For more about the Xtend language, see [http://xtend-lang.org][xtend].
+
+A port of Xtendroid to [Groovy][] is in the works, see [android-groovy-support][]
 
 Gotchas
 =======
 
-Note that Xtend and Xtendroid are currently supported in Eclipse (Xtend is an Eclipse project), although  projects using them can be compiled with Maven or Gradle. You can [use Xtendroid in Android Studio][android_studio], but the Android Studio Xtend editor is currently still under development. 
+Note that Xtend and Xtendroid are currently supported in Eclipse (Xtend is an Eclipse project), although  projects using them can be compiled with Maven or Gradle. You can [use Xtendroid in Android Studio][android_studio], but the Android Studio Xtend editor is currently still under development. For Android Studio, an alternative is to use the [android-groovy-support] project.
 
 If you'd like to use Gradle for your build configuration, but still be able to develop in Eclipse, use the [Eclipse AAR plugin for Gradle][eclipse_aar_gradle]. This also allows you to use either Eclipse or Android Studio while maintaining a single build configuration.
 
@@ -302,3 +293,5 @@ If in doubt, clean the project, and re-open the editor.
 [xtendapp]: https://github.com/tobykurien/XtendApp
 [android_studio]: https://github.com/tobykurien/Xtendroid/issues/62
 [eclipse_aar_gradle]: https://github.com/ksoichiro/gradle-eclipse-aar-plugin
+[Groovy]: http://groovy-lang.org
+[android-groovy-support]: https://github.com/tobykurien/android-groovy-support 
