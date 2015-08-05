@@ -15,13 +15,12 @@ class AnnotationLayoutUtils {
 	def static getFieldType(extension TransformationContext context, Element e) {
 		var clazz = findTypeGlobally("android.widget." + e.nodeName.toFirstUpper)
 
-		if (clazz == null) clazz = findTypeGlobally("android.view." + e.nodeName.toFirstUpper)
-
+		if (clazz == null) {
+		   clazz = findTypeGlobally("android.view." + e.nodeName.toFirstUpper)
+      }
+      
       if (clazz == null) {
          clazz = findTypeGlobally(e.nodeName)
-         if (clazz != null && !clazz.isAssignableFrom(View.newTypeReference.type)) {
-            clazz = null
-         }
       }
       
 		return clazz
