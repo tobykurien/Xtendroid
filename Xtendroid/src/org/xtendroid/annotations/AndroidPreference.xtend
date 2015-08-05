@@ -100,7 +100,7 @@ class AndroidPreferenceProcessor implements TransformationParticipant<MutableMem
          addParameter("value", field.type)
          val methodName = "put" + field.type.prefMethodName
          body = '''
-            pref.edit().«methodName»("«NamingUtils.toResourceName(field.simpleName)»", value).commit();
+            pref.edit().«methodName»("«NamingUtils.toResourceName(field.simpleName)»", value).apply();
             return true;
          '''
       ]
