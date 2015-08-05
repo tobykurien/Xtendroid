@@ -12,49 +12,19 @@ import static extension org.xtendroid.utils.NamingUtils.*
 import static extension org.xtendroid.utils.XmlUtils.*
 
 class AnnotationLayoutUtils {
-	def static getFieldType(Element e) {
-		
-		val clazz = try {
-			// 100% applicable
-			Class.forName("android.widget." + e.nodeName)
-		} catch (ClassNotFoundException exception) {
-			try {
-				// 100% applicable
-				Class.forName("android.view." + e.nodeName)
-			} catch (ClassNotFoundException exception1) {
-               try {
-               	  // Custom type, anyone's guess, at least jvm/dalvik/ART confirms it exists
-                  Class.forName(e.nodeName)
-               } catch (ClassNotFoundException exception2) {
-                  null
-               } catch (ExceptionInInitializerError exception3) {
-                  null
-               }
-			}
-		}
-		 
-		if (clazz != null)
-		{
-			// if (android.support.v7.widget.CardView.isAssignableFrom(clazz)) { return null }
-			// TODO the previous statement is what we want actually, so any child type of CardView
-			// including the parent-type CardView can be filtered out,
-			// but this needs to be added as a gradle dependency.
-			if ("android.support.v7.widget.CardView".equals(e.nodeName))
-			{		
-				try {
-					Class.forName(e.nodeName, false, Class.classLoader)
-				}catch (ClassNotFoundException exception)
-				{
-					// get outta here, because it explodes, for some reason
-					return null
-				}
-			}else if (View.isAssignableFrom(clazz))
-			{
-				return clazz
-			}
-		}
+	def static getFieldType(extension TransformationContext context, Element e) {
+		var clazz = findTypeGlobally("android.widget." + e.nodeName.toFirstUpper)
 
-		return null
+		if (clazz == null) clazz = findTypeGlobally("android.view." + e.nodeName.toFirstUpper)
+
+      if (clazz == null) {
+         clazz = findTypeGlobally(e.nodeName)
+         if (clazz != null && !clazz.isAssignableFrom(View.newTypeReference.type)) {
+            clazz = null
+         }
+      }
+      
+		return clazz
 	}
 
 	def static getFieldName(Element e) {
@@ -75,11 +45,7 @@ class AnnotationLayoutUtils {
 		// determine android:id
 		val id = element?.id
 		val name = element?.fieldName
-		var fieldTypeReference = element?.fieldType?.newTypeReference;
-		if (fieldTypeReference == null) {
-			fieldTypeReference = findTypeGlobally(element?.nodeName)?.newTypeReference;
-		}
-		val fieldType = fieldTypeReference
+		val fieldType = getFieldType(context, element)?.newTypeReference;
 		if (name != null && fieldType != null) {
 			val fieldName = '_' + name.toFirstLower
 			if (clazz.findDeclaredField(fieldName) == null) {
@@ -131,7 +97,7 @@ class AnnotationLayoutUtils {
 			context.addLazyGetter(it, clazz)
 			// check for strings
 			val onClick = getAttribute("android:onClick")
-			if (!onClick.nullOrEmpty && fieldType != null) {
+			if (!onClick.nullOrEmpty && getFieldType(context, it) != null) {
 				callbacksType.addMethod(NamingUtils.toJavaIdentifier(onClick)) [
 					addParameter("element", viewType)
 				]
