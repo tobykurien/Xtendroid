@@ -236,7 +236,7 @@ buildscript {
 
     dependencies {
         classpath 'com.android.tools.build:gradle:1.2.3'
-        classpath 'org.xtend:xtend-android-gradle-plugin:0.4.7'
+        classpath 'org.xtend:xtend-android-gradle-plugin:0.4.8'
     }
 }
 
@@ -251,7 +251,7 @@ android {
 	dependencies {
 		compile 'com.github.tobykurien:xtendroid:0.12.1'
 		
-		compile 'org.eclipse.xtext:org.eclipse.xtext.xbase.lib:2.8.1'
+		compile 'org.eclipse.xtext:org.eclipse.xtext.xbase.lib:2.8.3'
 
 		// other dependencies here
 	}
