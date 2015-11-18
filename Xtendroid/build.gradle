@@ -1,15 +1,16 @@
-apply plugin: 'android-library'
+apply plugin: 'com.android.library'
 apply plugin: "org.xtend.xtend-android"
 
 dependencies {
-  compile 'com.android.support:support-v4:20.0.0'
-  compile 'org.eclipse.xtend:org.eclipse.xtend.lib:2.7.3'
-  xtendCompileOnly 'com.github.oehme.xtend:xtend-contrib:0.4.+'
+   compile 'com.android.support:support-v4:23.1.1'
+   compile 'org.eclipse.xtend:org.eclipse.xtend.lib:2.8.3'
+   xtendCompileOnly 'org.eclipse.xtend:org.eclipse.xtend.lib:2.8.3'
+   compile 'com.android.support:appcompat-v7:23.1.1'
 }
 
 android {
-   compileSdkVersion 19
-   buildToolsVersion "21.1.1"
+   compileSdkVersion 23
+   buildToolsVersion "23.0.2"
    
    sourceSets {
       main {
@@ -35,4 +36,14 @@ android {
    }
 }
 
-apply from: 'maven-push.gradle'
+//apply from: 'maven-push.gradle'
+
+buildscript {
+   repositories {
+      jcenter()
+   }
+   dependencies {
+      classpath 'org.xtend:xtend-android-gradle-plugin:0.4.12'
+   }
+}
+apply plugin: 'org.xtend.xtend-android'

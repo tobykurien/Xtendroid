@@ -3,12 +3,12 @@
 
   dependencies {
     compile project(':Xtendroid')
-    compile 'org.eclipse.xtext:org.eclipse.xtext.xbase.lib:2.7.+'
+    compile 'org.eclipse.xtext:org.eclipse.xtext.xbase.lib:2.8.+'
   }
 
   android {
-     compileSdkVersion 19
-     buildToolsVersion "21.1.1"
+     compileSdkVersion 23
+     buildToolsVersion "23.0.2"
 
      sourceSets {
         main {
