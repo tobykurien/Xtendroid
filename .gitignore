@@ -21,3 +21,7 @@ local.properties
 .gradle
 build
 gradle.properties
+
+# IDEA
+./out
+.DS_Store
