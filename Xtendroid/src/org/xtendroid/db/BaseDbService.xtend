@@ -140,7 +140,7 @@ class BaseDbService extends AbatisService {
       for (String key : values.keySet) {
          var value = values.get(key)
          if (value instanceof Date) {
-            vals.put(key, (value as Date).time)
+            vals.put(key, value.time)
          } else {
             vals.put(key, String.valueOf(value))
          }
