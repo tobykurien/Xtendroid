@@ -23,7 +23,6 @@ apply plugin: 'org.xtend.xtend-android'
 dependencies {
   compile fileTree(dir: 'libs', include: ['*.jar'])
   xtendCompileOnly 'org.eclipse.xtend:org.eclipse.xtend.lib:2.9.+'
-  compile project(':Xtendroid')
   compile project(':XtendroidTest')
   androidTestCompile 'com.android.support:support-annotations:23.1.1'
   androidTestCompile 'com.android.support.test:runner:0.4.1'
