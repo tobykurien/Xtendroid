@@ -13,11 +13,8 @@ buildscript {
 apply plugin: 'org.xtend.xtend'
 
 dependencies {
-  compile ':Xtendroid'
-  compile ':examples:Sample1'
-  compile ':examples:HelloWorld'
-  compile ':examples:HandlerExample'
-  compile ':examples:MovieSearchApp'
-  compile ':examples'
-  compile ':XtendroidTest'
+  compile ':Sample1'
+  compile ':HelloWorld'
+  compile ':HandlerExample'
+  compile ':MovieSearchApp'
 }
