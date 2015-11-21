@@ -13,8 +13,6 @@ buildscript {
 apply plugin: 'org.xtend.xtend'
 
 dependencies {
-  compile ':Xtendroid'
-  compile ':XtendroidTest'
   compile ':Sample1'
   compile ':HelloWorld'
   compile ':HandlerExample'

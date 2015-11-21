@@ -23,7 +23,13 @@ apply plugin: 'org.xtend.xtend-android'
 dependencies {
   compile fileTree(dir: 'libs', include: ['*.jar'])
   xtendCompileOnly 'org.eclipse.xtend:org.eclipse.xtend.lib:2.9.+'
-  compile project(':Xtendroid')
+  compile project(':XtendroidTest')
+  androidTestCompile 'com.android.support:support-annotations:23.1.1'
+  androidTestCompile 'com.android.support.test:runner:0.4.1'
+  androidTestCompile 'com.android.support.test:rules:0.4.1'
+  androidTestCompile 'org.hamcrest:hamcrest-library:1.3'
+  androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.1'
+  androidTestCompile 'com.android.support.test.uiautomator:uiautomator-v18:2.1.2'
 }
 
 repositories {
@@ -34,14 +40,18 @@ android {
   compileSdkVersion 23
   buildToolsVersion "23.0.2"
 
+  defaultConfig {
+    testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+  }
+
   sourceSets {
     main {
       manifest { srcFile 'AndroidManifest.xml' }
-      java.srcDirs = ['src']
-      res.srcDirs = ['res']
-      assets.srcDirs = ['assets']
-      resources.srcDirs += ['src']
-      aidl.srcDirs = ['src']
+      java.srcDirs = ['src', ':XtendroidTest/src']
+      res.srcDirs = ['res', ':XtendroidTest/res']
+      assets.srcDirs = ['assets', ':XtendroidTest/assets']
+      resources.srcDirs += ['src', ':XtendroidTest/src']
+      aidl.srcDirs = ['src', ':XtendroidTest/src']
     }
 
     compileOptions {

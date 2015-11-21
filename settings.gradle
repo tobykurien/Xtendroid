@@ -1,2 +1,17 @@
-include 'Xtendroid'//, 'examples:Sample1', 'examples:HelloWorld', 'examples:HandlerExample', 'examples:MovieSearchApp'
+include(':Xtendroid')
+project(':Xtendroid').projectDir = new File(settingsDir, './Xtendroid/')
 
+include ':Sample1'
+project(':Sample1').projectDir = new File(settingsDir, './examples/Sample1')
+
+include ':HelloWorld'
+project(':HelloWorld').projectDir = new File(settingsDir, './examples/HelloWorld')
+
+include ':HandlerExample'
+project(':HandlerExample').projectDir = new File(settingsDir, './examples/HandlerExample')
+
+include ':MovieSearchApp'
+project(':MovieSearchApp').projectDir = new File(settingsDir, './examples/MovieSearchApp')
+
+include(':XtendroidTest')
+project(':XtendroidTest').projectDir = new File(settingsDir, './XtendroidTest/')
