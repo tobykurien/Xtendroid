@@ -25,3 +25,5 @@ gradle.properties
 # IDEA
 ./out
 .DS_Store
+.idea
+*.iml
