@@ -224,7 +224,7 @@ Method 1: Copy JAR file in
 
 Method 2: Gradle build config
 ---------------------------
-- In your `build.gradle` file, add a compile dependency for ```com.github.tobykurien:xtendroid:0.12.0``` and also add the [Xtend compiler](https://github.com/oehme/xtend-gradle-plugin)
+- In your `build.gradle` file, add a compile dependency for ```com.github.tobykurien:xtendroid:0.12.1``` and also add the [Xtend compiler](https://github.com/oehme/xtend-gradle-plugin)
 - A typical `build.gradle` file looks as follows:
 
 ```groovy
@@ -236,7 +236,7 @@ buildscript {
 
     dependencies {
         classpath 'com.android.tools.build:gradle:1.2.3'
-        classpath 'org.xtend:xtend-android-gradle-plugin:0.4.8'
+        classpath 'org.xtend:xtend-android-gradle-plugin:0.4.9'
     }
 }
 
@@ -267,12 +267,15 @@ The latest version of Xtendroid is built with Xtend v2.8.1. For more about the X
 
 A port of Xtendroid to [Groovy][] is in the works, see [android-groovy-support][]
 
-Gotchas
-=======
+IDE Support
+===========
 
-Note that Xtend and Xtendroid are currently supported in Eclipse (Xtend is an Eclipse project), although  projects using them can be compiled with Maven or Gradle. You can [use Xtendroid in Android Studio][android_studio], but the Android Studio Xtend editor is currently still under development. For Android Studio, an alternative is to use the [android-groovy-support] project.
+Xtend and Xtendroid are currently supported in Eclipse (Xtend is an Eclipse project) as well as Android Studio 2+ (or IntelliJ 15+). Here's how to [use Xtendroid in Android Studio][android_studio]. Also for Android Studio, check out the [android-groovy-support] project for a similar library for the Groovy language.
 
 If you'd like to use Gradle for your build configuration, but still be able to develop in Eclipse, use the [Eclipse AAR plugin for Gradle][eclipse_aar_gradle]. This also allows you to use either Eclipse or Android Studio while maintaining a single build configuration.
+
+Gotchas
+=======
 
 There are currently some bugs with the Eclipse Xtend editor that can lead to unexpected behaviour (e.g. compile errors).
 Here are the current bugs you should know about:
@@ -281,6 +284,11 @@ Here are the current bugs you should know about:
 - [Android: First-opened Xtend editor shows many errors and never clears those errors after build ](https://bugs.eclipse.org/bugs/show_bug.cgi?id=433589)
 
 If in doubt, clean the project, and re-open the editor.
+
+Some Xtend Gradle plugin gotchas:
+
+- [First Gradle build fails, but works thereafter](https://github.com/xtext/xtend-gradle-plugin/issues/32)
+
 
 [Xtend]: http://xtend-lang.org
 [xtend-doc]: http://www.eclipse.org/xtend/documentation.html
@@ -291,7 +299,7 @@ If in doubt, clean the project, and re-open the editor.
 [examples]: /examples
 [Xtendroid Test app]: /XtendroidTest
 [xtendapp]: https://github.com/tobykurien/XtendApp
-[android_studio]: https://github.com/tobykurien/Xtendroid/issues/62
+[android_studio]: https://github.com/tobykurien/Xtendroid/wiki/HowTo-setup-Android-Studio-%28aka-Intellij%29-support
 [eclipse_aar_gradle]: https://github.com/ksoichiro/gradle-eclipse-aar-plugin
 [Groovy]: http://groovy-lang.org
 [android-groovy-support]: https://github.com/tobykurien/android-groovy-support 
