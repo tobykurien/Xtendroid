@@ -1,4 +1,9 @@
-ext.deps = {
+// only tested on gradle v2.9
+ext {
+    compileSdkVersion = 23
+    minSdkVersion = 15
+    buildToolsVersion = '23.0.2'
+
     android_gradle_ver = '1.3.1'
     xtend_gradle_ver = '0.4.12'
 
@@ -9,7 +14,7 @@ ext.deps = {
     ]
 
     xtend_lib_ver = '2.9.+'
-    android_sdk_support_ver = '23.1.1'
+    android_sdk_support_ver = '23.1.+'
 
     lib = [
         xtend : "org.eclipse.xtend:org.eclipse.xtend.lib:${xtend_lib_ver}",
@@ -19,3 +24,4 @@ ext.deps = {
         ]
     ]
 }
+
