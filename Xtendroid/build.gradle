@@ -1,7 +1,7 @@
 // only tested on gradle v2.9
 buildscript {scriptHandler->
-    apply from: '../../repositories.gradle', to: scriptHandler
-    apply from: '../../dependencies.gradle'
+    apply from: '../repositories.gradle', to: scriptHandler
+    apply from: '../dependencies.gradle'
     dependencies {
         classpath(project.ext.build.android_gradle)
     }
