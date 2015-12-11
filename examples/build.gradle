@@ -1,16 +1,13 @@
-buildscript {
-    repositories {
-        jcenter()
-        mavenCentral()
-    }
-
+buildscript {scriptHandler->
+    apply from: '../repositories.gradle', to: scriptHandler
+    apply from: '../dependencies.gradle'
     dependencies {
-	    classpath "org.xtend:xtend-android-gradle-plugin:0.4.9"
-        classpath 'com.android.tools.build:gradle:1.3.1'
+        classpath(project.ext.build.xtend_android_gradle)
+        classpath(project.ext.build.android_gradle)
     }
 }
 
-apply plugin: 'org.xtend.xtend'
+apply plugin: 'org.xtend.xtend' // required to compile
 
 dependencies {
   compile ':Sample1'
