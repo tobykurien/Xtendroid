@@ -181,6 +181,7 @@ class AdapterizeProcessor extends AbstractClassProcessor {
 				''']
 			returnType = int.newTypeReference
 			visibility = Visibility.PUBLIC
+            primarySourceElement = dataContainerField.primarySourceElement
 		]
 
 		clazz.addMethod("getItem") [

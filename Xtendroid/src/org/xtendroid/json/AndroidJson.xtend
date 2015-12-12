@@ -131,6 +131,7 @@ class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDec
 		var getter = if(field.type.simpleName.equalsIgnoreCase("Boolean")) "is" else "get"
 		field.markAsRead
 		field.declaringType.addMethod(getter + field.simpleName.replaceAll('_', '').toFirstUpper) [
+			primarySourceElement = field.primarySourceElement
 			visibility = Visibility.PUBLIC
 			returnType = field.type
 			exceptions = #[JSONException.newTypeReference]

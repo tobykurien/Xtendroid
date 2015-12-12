@@ -51,6 +51,7 @@ class AndroidViewProcessor extends AbstractFieldProcessor {
                return («field.type») findViewById(«rclass».id.«fieldName.toResourceName»);
             '''
          ]
+         primarySourceElement = field.primarySourceElement
       ]
 
       // add a getter method which lazily initializes the field
@@ -62,6 +63,7 @@ class AndroidViewProcessor extends AbstractFieldProcessor {
                «field.simpleName» = _init_«fieldName»();
                return «field.simpleName»;
             ''']
+         primarySourceElement = field.primarySourceElement
       ]
       
       field.declaringType.addField(field.simpleName) [

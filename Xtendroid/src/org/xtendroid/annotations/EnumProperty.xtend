@@ -144,6 +144,7 @@ class EnumPropertyProcessor extends AbstractFieldProcessor {
 						return PREVENT_NPE;
 					}
 				''']
+				primarySourceElement = field.primarySourceElement
 			]
 		}
 		
@@ -167,6 +168,7 @@ class EnumPropertyProcessor extends AbstractFieldProcessor {
 					}
 					return enumArray;
 				''']
+				primarySourceElement = field.primarySourceElement
 			]
 		}
 
@@ -184,6 +186,7 @@ class EnumPropertyProcessor extends AbstractFieldProcessor {
 					}
 					return «toJavaCode(Arrays.newTypeReference)».asList(«stringArrayMethodName»((String[]) s.toArray()));
 				''']
+				primarySourceElement = field.primarySourceElement
 			]
 		}
     }
