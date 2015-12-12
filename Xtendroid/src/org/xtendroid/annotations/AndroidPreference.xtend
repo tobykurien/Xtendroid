@@ -91,6 +91,7 @@ class AndroidPreferenceProcessor implements TransformationParticipant<MutableMem
          body = '''
             return pref.«methodName»("«NamingUtils.toResourceName(field.simpleName)»", «field.simpleName»);
          '''
+          primarySourceElement = field.primarySourceElement
       ]
 
       // add a getter method which lazily initializes the field
@@ -103,6 +104,7 @@ class AndroidPreferenceProcessor implements TransformationParticipant<MutableMem
             pref.edit().«methodName»("«NamingUtils.toResourceName(field.simpleName)»", value).apply();
             return true;
          '''
+         primarySourceElement = field.primarySourceElement
       ]
    }
 

@@ -262,6 +262,7 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 				visibility = Visibility.PUBLIC
 				body = f.initializer
 				returnType = f.type
+				primarySourceElement = f.primarySourceElement
 			]
 		]
 
