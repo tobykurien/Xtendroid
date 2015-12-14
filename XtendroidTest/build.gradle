@@ -44,13 +44,14 @@ android {
 
   sourceSets {
 
-    // TODO xtend android gradle issue, because android gradle instrumentation expects java files
+    // Add external (instrumentation) unit tests
+    // This was done to maintain compatibility with eclipse users
     String sharedTestDir = 'XtendroidTestCasesTest/src'
     test {
       java.srcDirs = [ sharedTestDir ]
     }
     androidTest {
-      java.srcDir sharedTestDir
+      java.srcDirs = [ sharedTestDir ]
     }
 
     main {
