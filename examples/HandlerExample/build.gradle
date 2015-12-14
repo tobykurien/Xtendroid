@@ -19,7 +19,7 @@ dependencies {
   compile fileTree(dir: 'libs', include: ['*.jar'])
   compile(project.ext.lib.android.support_v4)
   compile(project.ext.lib.android.appcompat_v7)
-  xtendCompileOnly(project.ext.lib.xtend)
+  compile(project.ext.lib.xtend)
   compile project(':Xtendroid')
 }
 
