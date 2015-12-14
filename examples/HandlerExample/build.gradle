@@ -12,7 +12,7 @@ repositories {
 }
 
 apply plugin: 'com.android.application'
-apply plugin: 'org.xtend.xtend-android'
+apply plugin: 'org.xtext.android.xtend'
 apply from: '../../dependencies.gradle'
 
 dependencies {
