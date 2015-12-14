@@ -19,7 +19,6 @@ dependencies {
     compile(project.ext.lib.android.support_v4)
     compile(project.ext.lib.android.appcompat_v7)
     compile(project.ext.lib.xtend)
-    compile(project.ext.lib.xtend)
 }
 
 android {
