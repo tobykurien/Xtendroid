@@ -7,7 +7,7 @@ buildscript {scriptHandler->
     }
 }
 
-apply plugin: 'org.xtend.xtend'
+apply plugin: 'org.xtext.xtend'
 
 dependencies {
   compile ':Xtendroid'
