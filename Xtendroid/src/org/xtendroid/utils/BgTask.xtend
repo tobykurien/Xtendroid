@@ -3,7 +3,6 @@ package org.xtendroid.utils
 import android.app.ProgressDialog
 import android.os.AsyncTask
 import android.os.Build
-import android.util.Log
 
 /**
  * Convenience class to run tasks in the background using AsyncTask.

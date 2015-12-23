@@ -13,7 +13,6 @@ import org.eclipse.xtend.lib.macro.declaration.MutableFieldDeclaration
 import org.eclipse.xtend.lib.macro.declaration.Visibility
 import android.os.Parcelable
 import org.eclipse.xtend.lib.macro.declaration.TypeReference
-import java.util.ArrayList
 
 @Active(BundlePropertyProcessor)
 @Target(ElementType.FIELD)

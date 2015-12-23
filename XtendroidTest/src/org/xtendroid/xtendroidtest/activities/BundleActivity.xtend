@@ -1,7 +1,6 @@
 package org.xtendroid.xtendroidtest.activities
 
 import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import org.xtendroid.annotations.BundleProperty
 import org.xtendroid.xtendroidtest.R

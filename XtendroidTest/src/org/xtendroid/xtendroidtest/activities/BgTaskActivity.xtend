@@ -5,11 +5,8 @@ import android.os.AsyncTask
 import java.util.ArrayList
 import org.xtendroid.app.AndroidActivity
 import org.xtendroid.app.OnCreate
-import org.xtendroid.utils.BgTask
 import org.xtendroid.xtendroidtest.R
 
-import static extension org.xtendroid.utils.AlertUtils.*
-import static extension org.xtendroid.utils.TimeUtils.*
 import static extension org.xtendroid.utils.AsyncBuilder.*
 
 @AndroidActivity(R.layout.activity_main) class BgTaskActivity {

@@ -16,7 +16,6 @@ import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
 import org.eclipse.xtend.lib.macro.declaration.Visibility
 
 import static extension org.xtendroid.utils.NamingUtils.*
-import org.xtendroid.app.OnCreate
 
 /**
  * 

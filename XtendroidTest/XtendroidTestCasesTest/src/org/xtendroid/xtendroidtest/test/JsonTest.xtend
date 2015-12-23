@@ -6,9 +6,6 @@ import java.util.Date
 import java.util.List
 import org.json.JSONObject
 import org.xtendroid.json.AndroidJson
-import org.xtendroid.annotations.BundleProperty
-import java.lang.annotation.Documented
-import android.annotation.SuppressLint
 
 /**
  * 
