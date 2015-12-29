@@ -6,7 +6,6 @@ import android.app.IntentService
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
-import android.util.SparseArray
 import java.io.Serializable
 import java.util.ArrayList
 import org.xtendroid.annotations.AndroidFragment

@@ -21,7 +21,6 @@ import org.json.JSONException
 import org.json.JSONObject
 import org.xtendroid.json.AndroidJsonProcessor
 import org.xtendroid.json.AndroidJson
-import org.xtendroid.json.JsonProperty
 
 @Active(ParcelableProcessor)
 @Target(ElementType.TYPE)

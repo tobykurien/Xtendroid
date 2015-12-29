@@ -1,7 +1,6 @@
 package org.xtendroid.xtendroidtest.test
 
 import android.test.AndroidTestCase
-import android.test.suitebuilder.annotation.SmallTest
 import android.util.Log
 import org.xtendroid.xtendroidtest.models.ManyItem
 

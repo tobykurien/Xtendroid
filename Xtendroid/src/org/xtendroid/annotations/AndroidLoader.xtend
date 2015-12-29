@@ -16,7 +16,6 @@ import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
 import org.eclipse.xtend.lib.macro.declaration.Visibility
 
 import static extension org.xtendroid.utils.NamingUtils.*
-import org.xtendroid.app.OnCreate
 
 /**
  * 
@@ -84,8 +83,8 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 
 		// generate ID tags with random numbers for each Loader
 		val className = clazz.simpleName // this was added to decrease the chance of collisions (but there are no guarantees)
-		val randomInitialInt = loaderFields.map[f|className + f.simpleName].join().bytes.fold(0 as int,
-			[_1, _2|_1 as int + _2 as int])
+		val randomInitialInt = loaderFields.map[f|className + f.simpleName].join().bytes.fold(0,
+			[_1, _2|_1 + _2])
 
 		for (var i = 0; i < loaderFields.length; i++) {
 			val int integer = i + randomInitialInt * (i + 1)

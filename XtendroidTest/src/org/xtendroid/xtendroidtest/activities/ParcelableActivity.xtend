@@ -1,14 +1,11 @@
 package org.xtendroid.xtendroidtest.activities
 
 import android.content.Intent
-import android.os.Parcelable
 import java.util.Date
 import org.xtendroid.app.AndroidActivity
 import org.xtendroid.app.OnCreate
 import org.xtendroid.parcel.AndroidParcelable
 import org.xtendroid.xtendroidtest.R
-
-import static extension org.xtendroid.utils.AlertUtils.*
 
 @AndroidActivity(R.layout.activity_parcelable) class ParcelableActivity {
 	//@BundleProperty 
