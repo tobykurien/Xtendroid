@@ -45,6 +45,7 @@
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity android:name="org.xtendroid.xtendroidtest.activities.ParcelableActivity" />
         <activity android:name="org.xtendroid.xtendroidtest.activities.BundleActivity" />
+        <activity android:name="org.xtendroid.xtendroidtest.activities.AndroidResourcesActivity" />
     </application>
 
 </manifest>
