@@ -171,6 +171,10 @@ class AndroidResourcesProcessor implements TransformationParticipant<MutableMemb
                     returnType = mapResourceTypeToReturnType.get(resourceTypeName).newTypeReference
                     body = [
                         '''
+                        if (mResources == null)
+                        {
+                            mResources = mContext.getResources();
+                        }
                         return mResources.«mapResourceTypeToGetMethod.get(resourceTypeName)»(«toJavaCode(resourceType)».«name»);
                         '''
                     ]
@@ -184,6 +188,10 @@ class AndroidResourcesProcessor implements TransformationParticipant<MutableMemb
                     returnType = mapAggregateResourceTypeReturnType.get(aggregateResourceNodeName).newTypeReference.newArrayTypeReference
                     body = [
                         '''
+                        if (mResources == null)
+                        {
+                            mResources = mContext.getResources();
+                        }
                         return mResources.«mapAggregateResourceTypeToGetMethod.get(aggregateResourceNodeName)»(R.array.«name»);
                         '''
                     ]
@@ -234,7 +242,6 @@ class AndroidResourcesProcessor implements TransformationParticipant<MutableMemb
         resourceHelperClass.addField("mResources") [
             visibility = Visibility.PRIVATE
             type = Resources.newTypeReference
-            final = true
         ]
 
         resourceHelperClass.addConstructor [
@@ -242,7 +249,6 @@ class AndroidResourcesProcessor implements TransformationParticipant<MutableMemb
             body = [
                 '''
                     this.mContext = context;
-                    this.mResources = mContext.getResources();
 				''']
             addParameter("context", Context.newTypeReference)
         ]
