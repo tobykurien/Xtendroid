@@ -253,8 +253,24 @@ class AndroidResourcesProcessor implements TransformationParticipant<MutableMemb
             addParameter("context", Context.newTypeReference)
         ]
 
+        /*
+        if (field...extendedClass.equals(Context.newTypeReference) {
+            field.initializer = '''new «field.simpleName.toFirstUpper»(this)''' // TODO when instantiating in an Activity or Service
+        }else if (field...extendedClass.equals(android.app.Fragment.newTypeReference)) { // api level >=11, TODO also add supportlib support
+        {
+            field.initializer = '''new «field.simpleName.toFirstUpper»(getActivity())''' // TODO when instantiating in a fragment
+        }else if (field...extendedClass.equals(	android.view.View.newTypeReference)) {
+        {
+            field.initializer = '''new «field.simpleName.toFirstUpper»(mContext)''' // TODO when instantiating in a custom view
+        }else
+        {
+            clazz.addWarning("Currently the use-case beyond Activity/Service/View is out-of-scope.")
+            return // get out, you're on your own
+        }
+        */
+
         // instantiate resource helper object
-        field.initializer = '''new «field.simpleName.toFirstUpper»(this)''' // TODO when instantiating in a fragment or poxo, change 'this' to something else
+        field.initializer = '''new «field.simpleName.toFirstUpper»(this)''' // TODO see the code block above, right now we only support Activity
         field.type = resourceHelperClass.newTypeReference
         field.final = true
     }
