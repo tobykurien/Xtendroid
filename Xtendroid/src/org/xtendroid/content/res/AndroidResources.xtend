@@ -173,38 +173,7 @@ class AndroidResourcesProcessor implements TransformationParticipant<MutableMemb
     1. Apply to any type (Activity, Fragment, View, Poxo) type pray you don't have a name collision
     2. Apply to a member variable
 
-    val drawables (..., ...)
-    val colors (<color>, int getColor)
-    val dimens (<dimen>, float getDimension)
-    val bool (<bool>, boolean getBoolean)
-    val integer (<integer>, int getInteger)
-    val array (<integer-array>, int[] getIntArray)
-    val fraction (<item type="fraction">, ... getFraction)
-
-
-    @AndroidResources(type=R.string)
-    var strings
-
-    @AndroidResources(type=R.drawable)
-    var drawables
-
-    @AndroidResources(type=R.color)
-    var colors
-
-    @AndroidResources(type=R.dimen)
-    var dimens
-
-    @AndroidResources(type=R.bool)
-    var booleans
-
-    @AndroidResources(type=R.integer)
-    var integers
-
-    @AndroidResources(type=R.fraction)
-    var fractions
-
-
-     */
+    */
 
     val androidResourcesString = "AndroidResources"
     def dispatch void transform(MutableFieldDeclaration field, extension TransformationContext context) {
