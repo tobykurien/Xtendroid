@@ -65,7 +65,7 @@ class AndroidResourcesProcessor implements TransformationParticipant<MutableMemb
 
       // Does this work with new style android gradle default file structure?
       // This should be parameterizable, to support something like:
-      // ./XtendroidTest/build/intermediates/res/merged/release/values/values.xml,
+      // ./XtendroidTest/build/intermediates/res/merged/debug/values/values.xml,
       // because everything is merged here, and there is no guarantee that strings are stored in strings.xml
       // these could be placed into e.g. strings1.xml, strings2.xml, moar-strings.xml, tanga.xml
       // also there are no guarantees that these will be put into res/values either e.g.
@@ -127,7 +127,7 @@ class AndroidResourcesProcessor implements TransformationParticipant<MutableMemb
 
     val mapResourceTypeReturnType = #{
         'R.string' -> String
-        , 'R.color' -> Float
+        , 'R.color' -> Integer
         , 'R.dimen' -> Float
         , 'R.bool' -> Boolean // TODO see also getBooleanArray... or something
         , 'R.integer' -> Integer
@@ -266,6 +266,8 @@ class AndroidResourcesProcessor implements TransformationParticipant<MutableMemb
      *
      * Create a new type based on the R.<type>
      *
+     * This must hold: assertTrue(field.simpleName.equals(field.declaringType.simpleName))
+     *
      */
     override doRegisterGlobals(List list, RegisterGlobalsContext context) {
 
@@ -274,6 +276,8 @@ class AndroidResourcesProcessor implements TransformationParticipant<MutableMemb
             try {
                 val field = m as FieldDeclaration
 
+                // assertTrue(field.simpleName.equals(field.declaringType.simpleName))
+                // because field doesn't have a type yet during this pass
                 val fullClassName = field.packageNameFromField + field.simpleName.toFirstUpper
                 if (context.findSourceClass(fullClassName) == null)
                 {
