@@ -125,13 +125,23 @@ class AndroidResourcesProcessor implements TransformationParticipant<MutableMemb
         //, 'R.fraction' -> 'getFraction' // tricky bugger
     }
 
-    val mapResourceTypeReturnType = #{
+    val mapResourceTypeToReturnType = #{
         'R.string' -> String
         , 'R.color' -> Integer
         , 'R.dimen' -> Float
         , 'R.bool' -> Boolean // TODO see also getBooleanArray... or something
         , 'R.integer' -> Integer
         //, 'R.fraction' -> '?' // tricky bugger
+    }
+
+    val mapAggregateResourceTypeReturnType = #{
+        'integer-array' -> typeof(int) //.newTypeReference.newArrayTypeReference
+        , 'string-array' -> typeof(String) //.newTypeReference.newArrayTypeReference
+    }
+
+    val mapAggregateResourceTypeToGetMethod = #{
+        'integer-array' -> 'getIntArray'
+        , 'string-array' -> 'getStringArray'
     }
 
     def parseXmlAndGenerateGetters (MutableClassDeclaration annotatedClass, String xmlPath, String resourceTypeName, extension TransformationContext context)
@@ -151,14 +161,30 @@ class AndroidResourcesProcessor implements TransformationParticipant<MutableMemb
         // import package.R
         val resourceType = resourceTypeName.findTypeGlobally.newTypeReference
 
+        // actually only <integer-array /> and <string-array /> are supported
+        val aggregateResourceNodeName = resourceNodeName + '-array'
+
         xmlSource.contentsAsStream.document.traverseAllNodes [
             if (nodeName == resourceNodeName) {
                 val name = getAttribute('name')
                 annotatedClass.addMethod("get" + NamingUtils.toJavaIdentifier(name).toFirstUpper) [
-                    returnType = mapResourceTypeReturnType.get(resourceTypeName).newTypeReference
+                    returnType = mapResourceTypeToReturnType.get(resourceTypeName).newTypeReference
                     body = [
                         '''
                         return mResources.«mapResourceTypeToGetMethod.get(resourceTypeName)»(«toJavaCode(resourceType)».«name»);
+                        '''
+                    ]
+                ]
+            }
+
+            // actually only <integer-array /> and <string-array /> are supported
+            if (nodeName == aggregateResourceNodeName) {
+                val name = getAttribute('name')
+                annotatedClass.addMethod("get" + NamingUtils.toJavaIdentifier(name).toFirstUpper) [
+                    returnType = mapAggregateResourceTypeReturnType.get(aggregateResourceNodeName).newTypeReference.newArrayTypeReference
+                    body = [
+                        '''
+                        return mResources.«mapAggregateResourceTypeToGetMethod.get(aggregateResourceNodeName)»(R.array.«name»);
                         '''
                     ]
                 ]
@@ -190,7 +216,7 @@ class AndroidResourcesProcessor implements TransformationParticipant<MutableMemb
         // DIY if you want android.R (this is merged eventually), choose your xml path wisely
         if (resourceTypeName.contains('drawable'))
         {
-            // TODO file based, not xml
+            // TODO file based, not xml, als Resource#getDrawable/1 is deprecated from api level 22 onwards
         }else
         {
             parseXmlAndGenerateGetters(resourceHelperClass, annotation.getStringValue('path'), resourceTypeName, context)
