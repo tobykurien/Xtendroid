@@ -67,7 +67,7 @@ class EnumPropertyProcessor extends AbstractFieldProcessor {
 		    		)
 	}
 			
-	def getPackageNameFromField(FieldDeclaration field) {
+	def dispatch getPackageNameFromField(FieldDeclaration field) {
 		val fieldTypeSimpleName = field.declaringType.simpleName
 		val fieldTypeName = field.declaringType.qualifiedName
 		val package = fieldTypeName.replace(fieldTypeSimpleName, '')
