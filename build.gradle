@@ -3,17 +3,17 @@ buildscript {scriptHandler->
     apply from: 'dependencies.gradle'
     dependencies {
         classpath(project.ext.build.xtend_android_gradle)
-        classpath(project.ext.build.xtend_gradle)
+        classpath(project.ext.build.xtext_gradle)
     }
 }
 
-apply plugin: 'org.xtend.xtend'
+apply plugin: 'org.xtext.xtend'
 
 dependencies {
-  compile ':Xtendroid'
-  compile ':XtendroidTest'
-  compile ':Sample1'
-  compile ':HelloWorld'
-  compile ':HandlerExample'
-  compile ':MovieSearchApp'
+  compile project(':Xtendroid')
+  compile project(':XtendroidTest')
+  compile project(':Sample1')
+  compile project(':HelloWorld')
+  compile project(':HandlerExample')
+  compile project(':MovieSearchApp')
 }
