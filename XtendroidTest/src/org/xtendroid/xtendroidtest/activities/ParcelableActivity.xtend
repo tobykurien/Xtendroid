@@ -7,6 +7,8 @@ import org.xtendroid.app.OnCreate
 import org.xtendroid.parcel.AndroidParcelable
 import org.xtendroid.xtendroidtest.R
 
+import org.xtendroid.xtendroidtest.activities.ParcelableData
+
 @AndroidActivity(R.layout.activity_parcelable) class ParcelableActivity {
 	//@BundleProperty 
 	ParcelableData parcel
@@ -43,5 +45,7 @@ class ParcelableData {
 	override toString() {
 		'''«age», «createdAt», «likeAButterfly», «likeABee»'''
 	}
+
+	//new () {}
 }
 	

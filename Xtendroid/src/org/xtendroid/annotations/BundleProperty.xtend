@@ -263,7 +263,7 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
       } else if (intentField != null) {
          return intentField.simpleName
       } else {
-         field.declaringType.addError(
+         field.declaringType.addWarning(
             'You must provide an instantiated member of type Intent, if the declaring type of this field is not an Activity or Fragment.')
       }
       return _prefix

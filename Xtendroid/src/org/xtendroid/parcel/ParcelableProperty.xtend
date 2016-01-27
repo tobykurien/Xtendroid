@@ -277,13 +277,20 @@ class ParcelableProcessor extends AbstractClassProcessor
 						return new «clazz.simpleName»[size];
 					}
 				}''']
-		]			
-		
-		clazz.addConstructor[
-			body = ['''
-				// empty ctor
-			''']
 		]
+
+//		clazz.declaredConstructors.forEach[ /*body === null &&*/ clazz.addWarning(String.format('%s: %b', simpleName, parameters.empty)) ] // debug
+		val isEmptyCtorProvidedByUser = clazz.declaredConstructors.exists[ /*body === null &&*/ parameters.empty ]
+		if (!isEmptyCtorProvidedByUser)
+		{
+			clazz.addWarning('The user did not add an empty ctor. One will be generated.')
+			clazz.addConstructor[
+				visibility = Visibility::PUBLIC
+				body = ['''
+					// empty ctor
+				''']
+			]
+		}
 
 		val exceptionsTypeRef = if (fields.exists[type.name.startsWith("org.json.JSON")])  #[ JSONException.newTypeReference() ] else #[]
 		clazz.addConstructor[

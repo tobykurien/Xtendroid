@@ -15,20 +15,24 @@ import org.xtendroid.utils.BgSupportLoader
 import org.xtendroid.xtendroidtest.R
 import org.xtendroid.app.OnCreate
 
+import org.xtendroid.xtendroidtest.loaders.LoaderPayLoad
+
 @AndroidParcelable
 class LoaderPayLoad implements Parcelable {
 	String a
 	String b
 	String c
+
+	//new () {}
 }
 
 // NOTE: the sequence of the annotations matter
 @AndroidLoader
 @AndroidActivity(layout=R.layout.activity_bundle)
 class LoaderTestActivity0 extends FragmentActivity implements android.support.v4.app.LoaderManager.LoaderCallbacks {
-	var BgSupportLoader<LoaderPayLoad> something = new BgSupportLoader<LoaderPayLoad>(this, [|new LoaderPayLoad()], [])
-	var BgSupportLoader<LoaderPayLoad> anotherThing = new BgSupportLoader<LoaderPayLoad>(this, [|new LoaderPayLoad()], [])
-	var BgSupportLoader<LoaderPayLoad> babyThatsWhat = new BgSupportLoader<LoaderPayLoad>(this, [|new LoaderPayLoad()], [])
+	var BgSupportLoader<LoaderPayLoad> something = new BgSupportLoader<LoaderPayLoad>(this, [|new LoaderPayLoad], [])
+	var BgSupportLoader<LoaderPayLoad> anotherThing = new BgSupportLoader<LoaderPayLoad>(this, [|new LoaderPayLoad], [])
+	var BgSupportLoader<LoaderPayLoad> babyThatsWhat = new BgSupportLoader<LoaderPayLoad>(this, [|new LoaderPayLoad], [])
 
 	override onLoadFinished(android.support.v4.content.Loader loader, Object data) {
 		if (loader.id == LOADER_ANOTHER_THING_ID)
@@ -45,9 +49,9 @@ class LoaderTestActivity0 extends FragmentActivity implements android.support.v4
 @AndroidLoader
 @AndroidActivity(layout=R.layout.activity_bundle)
 class LoaderTestActivity1 extends FragmentActivity implements android.support.v4.app.LoaderManager.LoaderCallbacks {
-	var BgSupportLoader<LoaderPayLoad> something = new BgSupportLoader<LoaderPayLoad>(this, [|new LoaderPayLoad()], [])
-	var BgSupportLoader<LoaderPayLoad> anotherThing = new BgSupportLoader<LoaderPayLoad>(this, [|new LoaderPayLoad()], [])
-	var BgSupportLoader<LoaderPayLoad> babyThatsWhat = new BgSupportLoader<LoaderPayLoad>(this, [|new LoaderPayLoad()], [])
+	var BgSupportLoader<LoaderPayLoad> something = new BgSupportLoader<LoaderPayLoad>(this, [|new LoaderPayLoad], [])
+	var BgSupportLoader<LoaderPayLoad> anotherThing = new BgSupportLoader<LoaderPayLoad>(this, [|new LoaderPayLoad], [])
+	var BgSupportLoader<LoaderPayLoad> babyThatsWhat = new BgSupportLoader<LoaderPayLoad>(this, [|new LoaderPayLoad], [])
 
 	override onLoadFinished(android.support.v4.content.Loader loader, Object data) {
 		if (loader.id == LOADER_ANOTHER_THING_ID)
@@ -79,9 +83,9 @@ class LoaderTestActivity2 extends Activity implements LoaderManager.LoaderCallba
 @AndroidLoader
 @AndroidFragment
 class LoaderTestFragment1 extends android.support.v4.app.Fragment implements android.support.v4.app.LoaderManager.LoaderCallbacks {
-	val BgSupportLoader<LoaderPayLoad> something = new BgSupportLoader<LoaderPayLoad>(this.activity, [|new LoaderPayLoad()], [])
-	val BgSupportLoader<LoaderPayLoad> anotherThing = new BgSupportLoader<LoaderPayLoad>(this.activity, [|new LoaderPayLoad()], [])
-	val BgSupportLoader<LoaderPayLoad> babyThatsWhat = new BgSupportLoader<LoaderPayLoad>(this.activity, [|new LoaderPayLoad()], [])
+	val BgSupportLoader<LoaderPayLoad> something = new BgSupportLoader<LoaderPayLoad>(this.activity, [|new LoaderPayLoad], [])
+	val BgSupportLoader<LoaderPayLoad> anotherThing = new BgSupportLoader<LoaderPayLoad>(this.activity, [|new LoaderPayLoad], [])
+	val BgSupportLoader<LoaderPayLoad> babyThatsWhat = new BgSupportLoader<LoaderPayLoad>(this.activity, [|new LoaderPayLoad], [])
 	
 	override onLoadFinished(android.support.v4.content.Loader arg0, Object arg1) {
 		throw new UnsupportedOperationException("TODO: auto-generated method stub")
