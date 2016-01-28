@@ -20,6 +20,33 @@ annotation BundleProperty {
    String value = ''
 }
 
+/**
+   Design decisions:
+
+   This magical active annotation can be used inside three types of classes
+   1. android.app.Activity
+   2. android.app.Fragment
+   3. java.lang.Object
+
+   For all three cases, if there are multiple Intent and Bundle fields defined
+   The fields tagged with @org.xtendroid.annotations.BundleProperty will not be
+   hooked on to any particular Intent and/or Bundle type field.
+   Except for the instances returned by Activity#getIntent and Fragment#getArguments
+   (see the following paragraphs).
+
+   In the case of an Activity with annotated fields, these fields will connect via
+   generated methods with the intent returned by Activity#getIntent
+
+   In the case of a Fragment with annotated fields, these fields will connect via
+   generated methods with the bundle returned by Fragment#getArguments.
+   If a Bundle instance wasn't passed to the fragment before the onAttach-event,
+   the fragment will be provided with an auto-generated Bundle instance.
+
+   For POJO (plain old java objects), if there is exactly ONE unannotated Intent xor
+   unannotated Bundle (not one of both together!) field defined in the class definition,
+   the annotated fields will hook on to this unannotated Intent xor unannotated Bundle
+   via generated methods.
+ */
 class BundlePropertyProcessor extends AbstractFieldProcessor {
 	
 	val mapTypeToIntentPutInFix = #{
@@ -107,21 +134,35 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
             
       val isDataSourceActivity = Activity.findTypeGlobally.isAssignableFrom(clazz)
       val isDataSourceFragment = Fragment.findTypeGlobally.isAssignableFrom(clazz) ||
-         android.support.v4.app.Fragment.findTypeGlobally.isAssignableFrom(clazz)
+         android.support.v4.app.Fragment.findTypeGlobally.isAssignableFrom(clazz) // TODO discuss if we should still support api level < 14
 
       //		val bundleField = clazz.declaredFields.findFirst[f|f.type.equals(Bundle.newTypeReference)
       //			&& (f.annotations.findFirst[a|a.equals(BundleProperty.newAnnotationReference)] == null)
       //		]
-      val intentField = clazz.declaredFields.findFirst[type == Intent.newTypeReference]
 
-      // TODO #A: this should work together with #B and #C
-      val prefix = context.determinePrefix(field, isDataSourceActivity, isDataSourceFragment, intentField)
+
+      var decFields = clazz.declaredFields
+
+      val int areMultipleIntentsDefined = decFields.filter[type == Intent.newTypeReference].size
+      val int areMultipleBundlesDefined = decFields.filter[type == Bundle.newTypeReference && !annotations.exists[ annotationTypeDeclaration.equals(BundleProperty.newAnnotationReference.annotationTypeDeclaration) ] ].size
+
+      val intentField = decFields.findFirst[type == Intent.newTypeReference]
+
+      // the designated Bundle field to attach others must not be annotated with BundleProperty
+      val bundleField = decFields.findFirst[type == Bundle.newTypeReference && !annotations.exists[ annotationTypeDeclaration.equals(BundleProperty.newAnnotationReference.annotationTypeDeclaration) ] ]
+
+      field.addWarning(String.format("Testing!!!!!!! isActivity: %b, isFragment: %b, multipleIntents: %d, multipleBundles: %d", isDataSourceActivity, isDataSourceFragment, areMultipleIntentsDefined, areMultipleIntentsDefined))
+
+      val prefix = context.determinePrefix(field, isDataSourceActivity, isDataSourceFragment, areMultipleIntentsDefined, areMultipleBundlesDefined, intentField, bundleField)
 
       val alias = field.findAnnotation(BundleProperty.findTypeGlobally)?.getStringValue('value')
 
       val fieldName = field.simpleName.santizedName
 
-      // TODO #B
+      // I wouldn't add additional fields by default, let the user define these explicitly
+      // we would be creating waste, especially if the user doesn't even know they were
+      // generated, despite the tree-shaking process
+      /*
       if (!clazz.declaredFields.exists[f|
          f.simpleName.equalsIgnoreCase('_bundleHolder') && f.type == Bundle.newTypeReference]) {
          clazz.addField('_bundleHolder') [
@@ -130,7 +171,6 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
          ]
       }
 
-      // TODO #C
       if (intentField == null && !isDataSourceFragment &&
          !clazz.declaredFields.exists[f|
             f.simpleName.equalsIgnoreCase('_intentHolder') && f.type == Intent.newTypeReference]) {
@@ -139,19 +179,23 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
             type = Intent.newTypeReference
          ]
       }
+      */
 
-      val getterMethodDefaultName = "get" + fieldName.toFirstUpper + 'Default'
-      val fieldInitializer = field.initializer
-
-      // add get method
-      val getterMethodName = "get" + fieldName.toFirstUpper
       val keyValue = if(alias.nullOrEmpty) fieldName else alias
-      if (!clazz.declaredMethods.exists[m|m.simpleName.equalsIgnoreCase(getterMethodName)]) {
-         field.markAsRead
-         clazz.addMethod(getterMethodName) [
-            visibility = Visibility.PUBLIC
-            returnType = field.type
-            body = '''
+
+      if ((areMultipleBundlesDefined + areMultipleIntentsDefined) == 1 || isDataSourceActivity || isDataSourceFragment)
+      {
+         val getterMethodDefaultName = "get" + fieldName.toFirstUpper + 'Default'
+         val fieldInitializer = field.initializer
+
+         // add get method
+         val getterMethodName = "get" + fieldName.toFirstUpper
+         if (!clazz.declaredMethods.exists[m|m.simpleName.equalsIgnoreCase(getterMethodName)]) {
+            field.markAsRead
+            clazz.addMethod(getterMethodName) [
+               visibility = Visibility.PUBLIC
+               returnType = field.type
+               body = '''
                «IF isDataSourceFragment»
                   «IF field.type.primitive || fieldInitializer != null»
                      «field.type.name» «field.simpleName» = «prefix».get«mapTypeToMethodName.get(field.type.simpleName)»("«keyValue»"«IF mapTypeToNilValue.get(field.type.simpleName) != 'null'», «getterMethodDefaultName»()«ENDIF»);
@@ -161,14 +205,14 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
                      	return «field.simpleName»;
                      «ENDIF»
                   «ELSEIF field.isParcelable(context)»
-                  	 return «prefix».get«field.parcelableSuffix»("«keyValue»"); 
+                  	 return «prefix».get«field.parcelableSuffix»("«keyValue»");
                   «ELSE»
                      return «prefix».get«mapTypeToMethodName.get(field.type.simpleName)»("«keyValue»");
                   «ENDIF»
 				««« /* if activity or pojo */
                «ELSE»
 				  «IF field.isParcelable(context)»
-				     return «prefix».get«field.parcelableSuffix»Extra("«keyValue»"); 
+				     return «prefix».get«field.parcelableSuffix»Extra("«keyValue»");
                   «ELSEIF field.type.primitive»
                      return «prefix».get«mapTypeToMethodName.get(field.type.simpleName)»Extra("«keyValue»", «getterMethodDefaultName»());
                   «ELSEIF fieldInitializer != null»
@@ -179,28 +223,28 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
                   «ENDIF»
                «ENDIF»
             '''
-         ]
-      }
+            ]
+         }
 
-      if (!clazz.declaredMethods.exists[m|m.simpleName.equalsIgnoreCase(getterMethodDefaultName)] &&
-         fieldInitializer != null) {
-         field.markAsRead
-         clazz.addMethod(getterMethodDefaultName) [
+         if (!clazz.declaredMethods.exists[m|m.simpleName.equalsIgnoreCase(getterMethodDefaultName)] &&
+                 fieldInitializer != null) {
+            field.markAsRead
+            clazz.addMethod(getterMethodDefaultName) [
+               visibility = Visibility.PUBLIC
+               returnType = field.type
+               body = fieldInitializer
+            ]
+         } else if (field.type.primitive && isDataSourceActivity) {
+            field.addError(
+                    'You must provide a default value for this primitive type. Or declare a function that provides this default value.')
+         }
+
+         // add put method, with chainable invocation
+         clazz.addMethod("put" + field.simpleName.toFirstUpper) [
             visibility = Visibility.PUBLIC
-            returnType = field.type
-            body = fieldInitializer
-         ]
-      } else if (field.type.primitive && isDataSourceActivity) {
-         field.addError(
-            'You must provide a default value for this primitive type. Or declare a function that provides this default value.')
-      }
-
-      // add put method, with chainable invocation
-      clazz.addMethod("put" + field.simpleName.toFirstUpper) [
-         visibility = Visibility.PUBLIC
-         returnType = clazz.newTypeReference
-         addParameter("value", if (field.isParcelable(context)) field.getParcelableType(context) else field.type)
-         body = '''
+            returnType = clazz.newTypeReference
+            addParameter("value", if (field.isParcelable(context)) field.getParcelableType(context) else field.type)
+            body = '''
 			«IF field.isParcelable(context)»
 				«IF isDataSourceFragment»
 					«prefix».put«field.parcelableSuffix»("«keyValue»", value);
@@ -216,7 +260,8 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
            	«ENDIF»
 			return this;
          '''
-      ]
+         ]
+      } // else use static methods, to decide which Intent or Bundle you're operating on
 
       // add static put method for adding to Intent
       clazz.addMethod("put" + field.simpleName.toFirstUpper) [
@@ -256,19 +301,28 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
       field.remove
    }
 
-   def determinePrefix(extension TransformationContext context, MutableFieldDeclaration field,
-      boolean isDataSourceActivity, boolean isDataSourceFragment, MutableFieldDeclaration intentField) {
-      var _prefix = ''
+   def String determinePrefix(extension TransformationContext context, MutableFieldDeclaration field,
+      boolean isDataSourceActivity, boolean isDataSourceFragment,
+      int areMultipleIntentsDefined, int areMultipleBundlesDefined,
+      MutableFieldDeclaration intentField, MutableFieldDeclaration bundleField) {
+
+      var _prefix = '/* complain to the maintainers, something went horribly wrong */'
       if (isDataSourceActivity) {
          return 'getIntent()'
       } else if (isDataSourceFragment) {
          return 'getArguments()'
-      } else if (intentField != null) {
-         return intentField.simpleName
-      } else {
-         field.declaringType.addWarning(
-            'You must provide an instantiated member of type Intent, if the declaring type of this field is not an Activity or Fragment.')
+      } else if (((areMultipleIntentsDefined + areMultipleBundlesDefined) == 1) && (intentField != null || bundleField != null))
+      {
+         if(intentField != null)
+         {
+            return intentField.simpleName
+         }else if(bundleField != null)
+            {
+               // This will not be deleted at the end, unlike the annotated Bundle field
+               return bundleField.simpleName
+         }
       }
+
       return _prefix
    }
 

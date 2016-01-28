@@ -12,6 +12,7 @@ import android.app.Fragment
 import org.xtendroid.annotations.AndroidFragment
 import android.content.Intent
 import android.os.Parcelable
+import android.os.Bundle
 
 @AndroidParcelable
 class AddMyOwnBlankCtor
@@ -45,7 +46,7 @@ class TestBundlePropertyFragment extends Fragment
 
    // Parcelable subtype test
    @BundleProperty
-   UseGeneratedCtor parcelableSubtype
+   UseGeneratedCtor parcelableSubType
 
 }
 
@@ -63,10 +64,10 @@ class TestBundlePropertyActivity extends Activity
 
    // Parcelable subtype test
    @BundleProperty
-   UseGeneratedCtor parcelableSubtype
+   UseGeneratedCtor parcelableSubType
 }
 
-class TestBundlePropertyPojo // Service ... whateva
+class TestBundlePropertyPojoWithUndecoratedIntent // Service ... whateva
 {
    val intent = new Intent
 
@@ -81,14 +82,51 @@ class TestBundlePropertyPojo // Service ... whateva
 
    // Parcelable subtype test
    @BundleProperty
-   UseGeneratedCtor parcelableSubtype
+   UseGeneratedCtor parcelableSubType
+}
+
+class TestBundlePropertyPojoWithUndecoratedBundle
+{
+   val bundle = new Bundle
+
+   @BundleProperty
+   String meh
+
+   @BundleProperty
+   Parcelable addMyOwnBlankCtor
+
+   @BundleProperty
+   Parcelable UseGeneratedCtor
+
+   // Parcelable subtype test
+   @BundleProperty
+   UseGeneratedCtor parcelableSubType
+}
+
+class TestBundlePropertyPojoWithUndecoratedMix
+{
+   val bundle = new Bundle
+   val intent = new Intent
+
+   @BundleProperty
+   String meh
+
+   @BundleProperty
+   Parcelable addMyOwnBlankCtor
+
+   @BundleProperty
+   Parcelable UseGeneratedCtor
+
+   // Parcelable subtype test
+   @BundleProperty
+   UseGeneratedCtor parcelableSubType
 }
 
 /**
  * Test the Xtendroid database service
  */
 @MediumTest
-class ParcelableTest extends AndroidTestCase {
+class ParcelableAndBundlePropertyTest extends AndroidTestCase {
 
    /**
       Issue #96: The generated putXXX() method must first check if getArguments() is null, and if it is, then simply setArguments(new Bundle()). This allows code like this:
@@ -102,11 +140,10 @@ class ParcelableTest extends AndroidTestCase {
       val activity = new TestBundlePropertyActivity
       assertTrue("This activity will not crash", activity.putMeh("Meh") != null) // chainable by design
 
-      /**
-       TODO determine the policy for hooking up POJOs with put/get ...
-       */
+      /*
       val pojo = new TestBundlePropertyPojo
       assertTrue("This pojo will not crash", pojo.putMeh("Meh") != null) // chainable by design
+      */
 
    }
 
@@ -128,14 +165,22 @@ class ParcelableTest extends AndroidTestCase {
    def testPutParcelableInBundle() {
       (new TestBundlePropertyFragment).putAddMyOwnBlankCtor(new AddMyOwnBlankCtor as Parcelable)
       (new TestBundlePropertyActivity).putAddMyOwnBlankCtor(new AddMyOwnBlankCtor as Parcelable)
-      (new TestBundlePropertyPojo)    .putAddMyOwnBlankCtor(new AddMyOwnBlankCtor as Parcelable)
+      /*
+      (new TestBundlePropertyPojoUndecoratedBundle).putParcelableSubType(new UseGeneratedCtor)
+      (new TestBundlePropertyPojoUndecoratedIntent).putParcelableSubType(new UseGeneratedCtor)
+      (new TestBundlePropertyPojoUndecoratedMix)   .putParcelableSubType(new UseGeneratedCtor) // TODO check that this doesn't even compile
+      */
    }
 
    def testPutParcelableInBundlePartDeux()
    {
-      (new TestBundlePropertyFragment).putParcelableSubtype(new UseGeneratedCtor)
-      (new TestBundlePropertyActivity).putParcelableSubtype(new UseGeneratedCtor)
-      (new TestBundlePropertyPojo)    .putParcelableSubtype(new UseGeneratedCtor)
+      (new TestBundlePropertyFragment).putParcelableSubType(new UseGeneratedCtor)
+      (new TestBundlePropertyActivity).putParcelableSubType(new UseGeneratedCtor)
+      /*
+      (new TestBundlePropertyPojoUndecoratedBundle).putParcelableSubType(new UseGeneratedCtor)
+      (new TestBundlePropertyPojoUndecoratedIntent).putParcelableSubType(new UseGeneratedCtor)
+      (new TestBundlePropertyPojoUndecoratedMix)   .putParcelableSubType(new UseGeneratedCtor) // TODO check that this doesn't even compile
+      */
    }
 
 }
