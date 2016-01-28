@@ -46,6 +46,7 @@ class ParcelableData {
 		'''«age», «createdAt», «likeAButterfly», «likeABee»'''
 	}
 
-	//new () {}
+	// TODO issue #98, temporary fix
+	new () {}
 }
 	

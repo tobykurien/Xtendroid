@@ -23,7 +23,8 @@ class LoaderPayLoad implements Parcelable {
 	String b
 	String c
 
-	//new () {}
+	// TODO issue #98, temporary fix
+	new () {}
 }
 
 // NOTE: the sequence of the annotations matter

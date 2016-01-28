@@ -114,12 +114,14 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
       //		]
       val intentField = clazz.declaredFields.findFirst[type == Intent.newTypeReference]
 
+      // TODO #A: this should work together with #B and #C
       val prefix = context.determinePrefix(field, isDataSourceActivity, isDataSourceFragment, intentField)
 
       val alias = field.findAnnotation(BundleProperty.findTypeGlobally)?.getStringValue('value')
 
       val fieldName = field.simpleName.santizedName
 
+      // TODO #B
       if (!clazz.declaredFields.exists[f|
          f.simpleName.equalsIgnoreCase('_bundleHolder') && f.type == Bundle.newTypeReference]) {
          clazz.addField('_bundleHolder') [
@@ -128,6 +130,7 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
          ]
       }
 
+      // TODO #C
       if (intentField == null && !isDataSourceFragment &&
          !clazz.declaredFields.exists[f|
             f.simpleName.equalsIgnoreCase('_intentHolder') && f.type == Intent.newTypeReference]) {
