@@ -196,7 +196,7 @@ class ParcelableProcessor extends AbstractClassProcessor
 				this.«f.simpleName» = in.createTypedArrayList(«f.type.actualTypeArguments.head.name».CREATOR);
 			«ENDIF»
 		«ELSE»
-			this.«f.simpleName» = («f.type.name») «f.type.name».CREATOR.createFromParcel(in);
+			this.«f.simpleName» = («f.type.name») CREATOR.createFromParcel(in);
 		«ENDIF»
 	'''
 	
