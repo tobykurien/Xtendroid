@@ -151,7 +151,7 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
       // the designated Bundle field to attach others must not be annotated with BundleProperty
       val bundleField = decFields.findFirst[type == Bundle.newTypeReference && !annotations.exists[ annotationTypeDeclaration.equals(BundleProperty.newAnnotationReference.annotationTypeDeclaration) ] ]
 
-      field.addWarning(String.format("Testing!!!!!!! isActivity: %b, isFragment: %b, multipleIntents: %d, multipleBundles: %d", isDataSourceActivity, isDataSourceFragment, areMultipleIntentsDefined, areMultipleIntentsDefined))
+      //field.addWarning(String.format("className: %s, isActivity: %b, isFragment: %b, multipleIntents: %d, multipleBundles: %d", clazz.simpleName, isDataSourceActivity, isDataSourceFragment, areMultipleIntentsDefined, areMultipleIntentsDefined))
 
       val prefix = context.determinePrefix(field, isDataSourceActivity, isDataSourceFragment, areMultipleIntentsDefined, areMultipleBundlesDefined, intentField, bundleField)
 
@@ -245,6 +245,9 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
             returnType = clazz.newTypeReference
             addParameter("value", if (field.isParcelable(context)) field.getParcelableType(context) else field.type)
             body = '''
+            «IF isDataSourceFragment»
+            if (getArguments() == null) { this.setArguments(new Bundle()); }
+            «ENDIF»
 			«IF field.isParcelable(context)»
 				«IF isDataSourceFragment»
 					«prefix».put«field.parcelableSuffix»("«keyValue»", value);
@@ -289,11 +292,11 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
          addParameter("value", if (field.isParcelable(context)) field.getParcelableType(context) else field.type)
          body = [
             '''
-«««				«IF field.isParcelable(context)»
-«««					bundle.put«field.parcelableSuffix»("«keyValue»", value);
-«««				«ELSE»             	
+				«IF field.isParcelable(context)»
+					bundle.put«field.parcelableSuffix»("«keyValue»", value);
+				«ELSE»
 					bundle.put«mapTypeToMethodName.get(field.type.simpleName)»("«keyValue»", value);
-«««				«ENDIF»
+				«ENDIF»
             ''']
       ]
 
