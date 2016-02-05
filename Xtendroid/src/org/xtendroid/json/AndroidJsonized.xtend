@@ -57,15 +57,15 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
     override doTransform(MutableClassDeclaration clazz, extension TransformationContext context) {
         clazz.addWarning("className: " + clazz.simpleName)
         enhanceClassesRecursively(clazz, clazz.jsonEntries, context)
+    }
+
+    def void enhanceClassesRecursively(MutableClassDeclaration clazz, Iterable<? extends JsonObjectEntry> entries, extension TransformationContext context) {
         clazz.addConstructor [
             addParameter('jsonObject', JSONObject.newTypeReference)
             body = '''
                 mJsonObject = jsonObject;
             '''
         ]
-    }
-
-    def void enhanceClassesRecursively(MutableClassDeclaration clazz, Iterable<? extends JsonObjectEntry> entries, extension TransformationContext context) {
 
         clazz.addField("mDirty") [
             type = typeof(boolean).newTypeReference
@@ -92,12 +92,6 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
                 return mDirty;
             '''
         ]
-
-/*
-        // TODO remove
-        val string = clazz.annotations.head.getValue('value').toString
-        clazz.addWarning(String.format('value = %s', string))
-*/
 
         // add accessors for the entries
         for (entry : entries) {
@@ -176,10 +170,6 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
                 }
             ]
 
-            // TODO determine array types are correct
-            // if it's a JSON Object call enhanceClass recursively
-            // TODO for some reason this is fuxxored, this only applies
-            // to org.json.JSONObject and org.json.JSONArray
             if (entry.isJsonObject)
                 enhanceClassesRecursively(findClass(entry.className), entry.childEntries, context)
         }

@@ -2,21 +2,31 @@ package org.xtendroid.xtendroidtest.test
 
 import android.test.AndroidTestCase
 import org.xtendroid.json.AndroidJsonized
-
+import org.json.JSONObject
 
 /**
  * We generate getters/setters/models, depending on the JSON model
  * Minimal manual work is required
 */
-@AndroidJsonized('{ "aBoolean" : true }') class ABoolean {}
-@AndroidJsonized('{ "anInteger" : 800 }') class ALong {}
-@AndroidJsonized('{ "aFloat" : 800.01 }') class ADouble {}
-@AndroidJsonized('{ "aString" : "string" }') class AString {}
+@AndroidJsonized('{ "aBoolean" : true }') class ABooleanJz {}
+@AndroidJsonized('{ "anInteger" : 800 }') class ALongJz {}
+@AndroidJsonized('{ "aFloat" : 800.01 }') class ADoubleJz {}
+@AndroidJsonized('{ "aString" : "string" }') class AStringJz {}
 
 @AndroidJsonized('{ "bString" : "string", "bFloat" : 800.00 }') class AHeterogenousObject {}
 
 // NOTE: suffixed 'Parent' because of name collision TODO create test case
-@AndroidJsonized('{ "anObjectWithAStringFirst" : { "aString" : "string" } }') class AnObjectWithAStringParent {}
+@AndroidJsonized('{ "anObjectWithAStringFirstJz" : { "aString" : "string" } }') class ATypeWithAStringParent {}
+
+@AndroidJsonized('{
+	"aDeepNesting0Jz" : {
+		"aDeepNesting1Jz" : {
+			"aDeepNesting2Jz" : {
+				"aDeepNesting3Jz" : { "anInteger" : 4321 }
+			}
+		}
+	}
+}') class ATypeWithDeepNesting {}
 
 /*
 @AndroidJsonized('{ "manyBooleans" : [ true, false, true ] }') class ManyBooleansParent {}
@@ -31,11 +41,11 @@ import org.xtendroid.json.AndroidJsonized
 	, "anInteger" : 800
 	, "aFloat" : 800.00
 	, "aString" : "string"
-	, "anObjectWithAStringSecond" : { "aString" : "string" }
-	, "deepNesting0" : {
-		"deepNesting1" : {
-			"deepNesting2" : {
-				"deepNesting3" : { "anInteger" : 4321 }
+	, "anObjectWithAStringSecondJz" : { "aString" : "string" }
+	, "deepNesting0Jz" : {
+		"deepNesting1Jz" : {
+			"deepNesting2Jz" : {
+				"deepNesting3Jz" : { "anInteger" : 4321 }
 			}
 		}
 	}
@@ -64,10 +74,16 @@ import org.xtendroid.json.AndroidJsonized
 }') class EverythingTogether {}
 */
 
-// TODO write test case that checks that_this_is_a_good_member
+// TODO write test case that checks that_this_is_a_good_member // snake case
+// TODO write test case that checks type name collisions, and gives a warning?
+// Add (randomized? overkill?) version number to prevent name collision.
 
 class JsonizedTest extends AndroidTestCase {
-	def testJson() {
-
+	def testScalarJson() {
+		/*
+		// TODO make this stable
+		assertTrue(new ABoolean(new JSONObject('{ "aBoolean" : true }')).aBoolean)
+		assertTrue(new ALong(new JSONObject('{ "anInteger" : 800 }')).anInteger == 800)
+		*/
 	}
 }
