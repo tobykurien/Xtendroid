@@ -78,6 +78,13 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
             visibility = Visibility.PRIVATE
         ]
 
+        clazz.addMethod("toJSONObject") [
+            returnType = JSONObject.newTypeReference
+            body = '''
+                return mJsonObject;
+            '''
+        ]
+
         // TODO deterimine the (generated) difference between this and typeof(boolean).newTypeReference
         clazz.addMethod("isDirty") [
             returnType = Boolean.newTypeReference
@@ -86,48 +93,95 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
             '''
         ]
 
+/*
         // TODO remove
         val string = clazz.annotations.head.getValue('value').toString
         clazz.addWarning(String.format('value = %s', string))
+*/
 
         // add accessors for the entries
         for (entry : entries) {
-            val type = entry.getComponentType(context)
-            val realType = if(entry.isArray) getList(type) else type
+            val basicType = entry.getComponentType(context)
+            val realType = if(entry.isArray) getList(basicType) else basicType
+            val memberName = basicType.simpleName.toFirstLower
 
             // TODO remove
-            clazz.addWarning(String.format('property = %s, type = %s, realType = %s', entry.propertyName, type, realType))
+            clazz.addWarning(String.format('property = %s, basicType = %s, realType = %s, entry.isJsonObject = %b', entry.propertyName, basicType.simpleName, realType.simpleName, entry.isJsonObject))
 
-            // TODO map realType to real getter
+            // add JSONObject container for lazy-getting
+            // TODO determine if this also works for aggregate types
+            if (entry.isJsonObject || entry.isArray)
+            {
+                clazz.addField(realType.simpleName.toFirstLower) [
+                    type = realType
+                    visibility = Visibility.PROTECTED
+                    // make it possible to extend, e.g. BigInteger, BigNumber
+                    // TODO add an option to annotation to mark fields as special fields
+                    // generate Date converters, BigInteger/BigNumber etc.
+                    // @AndroidJsonizer(value = "http://...", mapping = # { 'anInteger' -> BigInteger, 'aFloat' -> BigNumber, 'timestamp' -> Date })
+                    // @AndroidJsonizer(value = '{ "anInteger" : 1234, "aFloat" : 12.34 }', mapping = # { 'anInteger' -> BigInteger, 'aFloat' -> BigNumber, 'timestamp' -> Date })
+                ]
+            }
+
             clazz.addMethod("get" + entry.key.toFirstUpper) [
-                // TODO throws JSONException
                 returnType = realType
-                body = ['''
-                    return mJsonObject.get«realType.simpleName.toFirstUpper»("«entry.key»");
-				''']
                 exceptions = JSONException.newTypeReference
+                // TODO primitive aggregate and non-primitive aggregate
+                if (entry.isArray)
+                {
+                    body = ['''
+                        // TODO array implementation, primitive and non-primitive (i.e. JSONObject)
+                    ''']
+                }else if (entry.isJsonObject)
+                {
+                    body = ['''
+                        if («memberName» == null) {
+                            «memberName» = new «basicType.simpleName»(mJsonObject.getJSONObject("«entry.key»"));
+                        }
+                        return «memberName»;
+				    ''']
+                }else {
+                    body = ['''
+                        return mJsonObject.get«basicType.simpleName.toFirstUpper»("«entry.key»");
+                    ''']
+                }
             ]
 
             // chainable
+            // TODO primitive aggregate and non-primitive aggregate
+            // TODO set composite type (i.e. JSONObject) in the JSONObject,
+            // TODO this requires a toJSONString method
             clazz.addMethod("set" + entry.key.toFirstUpper) [
                 addParameter(entry.key, realType)
                 returnType = clazz.newTypeReference
-                body = ['''
-                    mDirty = true;
-                    mJsonObject.put("«entry.key»", «entry.key»);
-                    return this;
-				''']
                 exceptions = JSONException.newTypeReference
+                if (entry.isArray)
+                {
+                    body = ['''
+                        // TODO array implementation, primitive and non-primitive (i.e. JSONObject)
+                    ''']
+                }else if (entry.isJsonObject) // TODO determine if this is applicable for arrays
+                {
+                    body = ['''
+                        mDirty = true;
+                        mJsonObject.put("«entry.key»", «entry.key».toJSONObject());
+                        return this;
+				    ''']
+                }else {
+                    body = ['''
+                        mDirty = true;
+                        mJsonObject.put("«entry.key»", «entry.key»);
+                        return this;
+                    ''']
+                }
             ]
 
             // TODO determine array types are correct
             // if it's a JSON Object call enhanceClass recursively
-            /*
             // TODO for some reason this is fuxxored, this only applies
             // to org.json.JSONObject and org.json.JSONArray
             if (entry.isJsonObject)
                 enhanceClassesRecursively(findClass(entry.className), entry.childEntries, context)
-            */
         }
     }
 }

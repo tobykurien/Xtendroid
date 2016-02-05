@@ -32,6 +32,13 @@ import org.xtendroid.json.AndroidJsonized
 	, "aFloat" : 800.00
 	, "aString" : "string"
 	, "anObjectWithAStringSecond" : { "aString" : "string" }
+	, "deepNesting0" : {
+		"deepNesting1" : {
+			"deepNesting2" : {
+				"deepNesting3" : { "anInteger" : 4321 }
+			}
+		}
+	}
 }') class ScalarsTogether {}
 
 /*
@@ -56,6 +63,8 @@ import org.xtendroid.json.AndroidJsonized
 	, "manyObjectsWithStringsSecond" : [ { "aString" : "string" } ]
 }') class EverythingTogether {}
 */
+
+// TODO write test case that checks that_this_is_a_good_member
 
 class JsonizedTest extends AndroidTestCase {
 	def testJson() {
