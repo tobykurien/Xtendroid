@@ -123,9 +123,18 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
                 // TODO primitive aggregate and non-primitive aggregate
                 if (entry.isArray)
                 {
+                    // TODO if primitive... necessary?
+                    // populate List
                     body = ['''
-                        // TODO array implementation, primitive and non-primitive (i.e. JSONObject)
+                        if («memberName» == null) {
+                            «memberName» = new ArrayList<«basicType»>();
+                            for (int i=0; i<«memberName».size(); i++) {
+                                «memberName».add((basicType) mJsonObject.getJSONArray(i));
+                            }
+                        }
+                        return «memberName»;
                     ''']
+                    // TODO else ... necessary?
                 }else if (entry.isJsonObject)
                 {
                     body = ['''
@@ -134,7 +143,7 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
                         }
                         return «memberName»;
 				    ''']
-                }else {
+                }else { // is primitive (e.g. String, Number, Boolean)
                     body = ['''
                         return mJsonObject.get«basicType.simpleName.toFirstUpper»("«entry.key»");
                     ''']
@@ -151,8 +160,11 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
                 exceptions = JSONException.newTypeReference
                 if (entry.isArray)
                 {
+                    // ArrayList<T> === Collection<T>
                     body = ['''
-                        // TODO array implementation, primitive and non-primitive (i.e. JSONObject)
+                        mDirty = true;
+                        mJsonObject.put("«memberName»", new JSONArray(«memberName»));
+                        return this;
                     ''']
                 }else if (entry.isJsonObject) // TODO determine if this is applicable for arrays
                 {

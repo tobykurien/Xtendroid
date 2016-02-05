@@ -28,8 +28,8 @@ import org.json.JSONObject
 	}
 }') class ATypeWithDeepNesting {}
 
-/*
 @AndroidJsonized('{ "manyBooleans" : [ true, false, true ] }') class ManyBooleansParent {}
+/*
 @AndroidJsonized('{ "manyIntegers" : [ 0, 1, 2 ] }') class ManyIntegersParent {}
 @AndroidJsonized('{ "manyFloats" : [ 0.0, 1.1, 2.2 ] }') class ManyFloatsParent {}
 @AndroidJsonized('{ "manyStrings" : [ "str0", "str1" ] }') class ManyStringsParent {}
