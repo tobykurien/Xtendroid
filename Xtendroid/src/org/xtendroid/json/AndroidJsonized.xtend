@@ -67,7 +67,7 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
      * Called secondly. Modify the types.
      */
     override doTransform(MutableClassDeclaration clazz, extension TransformationContext context) {
-        clazz.addWarning("className: " + clazz.simpleName)
+        //clazz.addWarning("className: " + clazz.simpleName) // TODO remove DEBUG
         enhanceClassesRecursively(clazz, clazz.jsonEntries, context)
     }
 
@@ -112,7 +112,7 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
             val memberName = entry.key
 
             // TODO remove
-            clazz.addWarning(String.format('property = %s, basicType = %s, realType = %s, entry.isJsonObject = %b', entry.propertyName, basicType.simpleName, realType.simpleName, entry.isJsonObject))
+            //clazz.addWarning(String.format('property = %s, basicType = %s, realType = %s, entry.isJsonObject = %b', entry.propertyName, basicType.simpleName, realType.simpleName, entry.isJsonObject))
 
             // add JSONObject container for lazy-getting
             // TODO determine if this also works for aggregate types

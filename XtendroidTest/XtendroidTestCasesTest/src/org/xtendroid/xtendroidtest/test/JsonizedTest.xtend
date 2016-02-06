@@ -62,12 +62,12 @@ import org.json.JSONObject
 	, "anInteger" : 800
 	, "aFloat" : 800.00
 	, "aString" : "string"
-	, "anObjectWithAStringSecond" : { "aString" : "string" }
+	, "anObjectWithAStringThird" : { "aString" : "string" }
 	, "manyBooleans" : [ true, false, true ]
 	, "manyIntegers" : [ 0, 1, 2 ]
 	, "manyFloats" : [ 0.0, 1.1, 2.2 ]
 	, "manyStrings" : [ "str0", "str1" ]
-	, "manyObjectsWithStringsSecond" : [ { "aString" : "string" } ]
+	, "manyObjectsWithStringsThird" : [ { "aString" : "string" } ]
 }') class EverythingTogether {}
 
 // TODO write test case that checks that_this_is_a_good_member // snake case
