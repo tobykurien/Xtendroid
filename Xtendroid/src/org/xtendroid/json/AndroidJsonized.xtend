@@ -139,7 +139,7 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
                     // populate List
                     body = ['''
                         if («memberName» == null) {
-                            «memberName» = new «ArrayList.newTypeReference»<«basicType.simpleName.toFirstUpper»>();
+                            «memberName» = new «ArrayList.newTypeReference.simpleName»<«basicType.simpleName.toFirstUpper»>();
                             for (int i=0; i<«memberName».size(); i++) {
                                 «memberName».add((«basicType.simpleName.toFirstUpper») mJsonObject.getJSONArray("«memberName»").get(i));
                             }
@@ -177,7 +177,7 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
                     // ArrayList<T> === Collection<T>
                     body = ['''
                         mDirty = true;
-                        mJsonObject.put("«memberName»", new «JSONArray.newTypeReference»(«memberName»));
+                        mJsonObject.put("«memberName»", new «JSONArray.newTypeReference.simpleName»(«memberName»));
                         return this;
                     ''']
                 }else if (entry.isJsonObject) // TODO determine if this is applicable for arrays
