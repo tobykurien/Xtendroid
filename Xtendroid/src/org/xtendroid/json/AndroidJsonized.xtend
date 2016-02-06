@@ -137,7 +137,7 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
                 {
                     // TODO if primitive... necessary?
                     // populate List
-                    val arrayListName = ArrayList.newTypeReference.simpleName
+                    val arrayListName = ArrayList.newTypeReference // import on concatenation
                     body = ['''
                         if («memberName» == null) {
                             «memberName» = new «arrayListName»<«basicType.simpleName.toFirstUpper»>();
@@ -176,7 +176,7 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
                     // TODO attempt to import ArrayList
 
                     // ArrayList<T> === Collection<T>
-                    val jsonArrayName = JSONArray.newTypeReference.simpleName
+                    val jsonArrayName = JSONArray.newTypeReference // import on concatenation
                     body = ['''
                         mDirty = true;
                         mJsonObject.put("«memberName»", new «jsonArrayName»(«memberName»));
