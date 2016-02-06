@@ -97,9 +97,8 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
             '''
         ]
 
-        // TODO deterimine the (generated) difference between this and typeof(boolean).newTypeReference
         clazz.addMethod("isDirty") [
-            returnType = Boolean.newTypeReference
+            returnType = typeof(boolean).newTypeReference
             body = '''
                 return mDirty;
             '''
@@ -132,21 +131,19 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
             clazz.addMethod("get" + entry.key.toFirstUpper) [
                 returnType = realType
                 exceptions = JSONException.newTypeReference
-                // TODO primitive aggregate and non-primitive aggregate
                 if (entry.isArray)
                 {
-                    // TODO if primitive... necessary?
                     // populate List
+                    val arrayListName = ArrayList.findTypeGlobally.simpleName
                     body = ['''
                         if («memberName» == null) {
-                            «memberName» = new «ArrayList.newTypeReference.simpleName»<«basicType.simpleName.toFirstUpper»>();
+                            «memberName» = new «arrayListName»<«basicType.simpleName.toFirstUpper»>();
                             for (int i=0; i<«memberName».size(); i++) {
                                 «memberName».add((«basicType.simpleName.toFirstUpper») mJsonObject.getJSONArray("«memberName»").get(i));
                             }
                         }
                         return «memberName»;
                     ''']
-                    // TODO else ... necessary?
                 }else if (entry.isJsonObject)
                 {
                     body = ['''
@@ -163,24 +160,20 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
             ]
 
             // chainable
-            // TODO primitive aggregate and non-primitive aggregate
-            // TODO set composite type (i.e. JSONObject) in the JSONObject,
-            // TODO this requires a toJSONString method
             clazz.addMethod("set" + memberName.toFirstUpper) [
                 addParameter(memberName, realType)
                 returnType = clazz.newTypeReference
                 exceptions = JSONException.newTypeReference
                 if (entry.isArray)
                 {
-                    // TODO attempt to import ArrayList
-
                     // ArrayList<T> === Collection<T>
+                    val jsonArrayName = JSONArray.findTypeGlobally.simpleName
                     body = ['''
                         mDirty = true;
-                        mJsonObject.put("«memberName»", new «JSONArray.newTypeReference.simpleName»(«memberName»));
+                        mJsonObject.put("«memberName»", new «jsonArrayName»(«memberName»));
                         return this;
                     ''']
-                }else if (entry.isJsonObject) // TODO determine if this is applicable for arrays
+                }else if (entry.isJsonObject)
                 {
                     body = ['''
                         mDirty = true;
