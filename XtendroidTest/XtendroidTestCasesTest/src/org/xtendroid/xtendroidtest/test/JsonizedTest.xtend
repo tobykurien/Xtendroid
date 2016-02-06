@@ -29,12 +29,10 @@ import org.json.JSONObject
 }') class ATypeWithDeepNesting {}
 
 @AndroidJsonized('{ "manyBooleans" : [ true, false, true ] }') class ManyBooleansParent {}
-/*
 @AndroidJsonized('{ "manyIntegers" : [ 0, 1, 2 ] }') class ManyIntegersParent {}
 @AndroidJsonized('{ "manyFloats" : [ 0.0, 1.1, 2.2 ] }') class ManyFloatsParent {}
 @AndroidJsonized('{ "manyStrings" : [ "str0", "str1" ] }') class ManyStringsParent {}
 @AndroidJsonized('{ "manyObjectsWithStringsFirst" : [ { "aString" : "string" } ] }') class ManyObjectsWithStringsParent {}
-*/
 
 @AndroidJsonized('{
 	"aBoolean" : true
@@ -51,9 +49,8 @@ import org.json.JSONObject
 	}
 }') class ScalarsTogether {}
 
-/*
 @AndroidJsonized('{
-	, "manyBooleans" : [ true, false, true ]
+	"manyBooleans" : [ true, false, true ]
 	, "manyIntegers" : [ 0, 1, 2 ]
 	, "manyFloats" : [ 0.0, 1.1, 2.2 ]
 	, "manyStrings" : [ "str0", "str1" ]
@@ -72,7 +69,6 @@ import org.json.JSONObject
 	, "manyStrings" : [ "str0", "str1" ]
 	, "manyObjectsWithStringsSecond" : [ { "aString" : "string" } ]
 }') class EverythingTogether {}
-*/
 
 // TODO write test case that checks that_this_is_a_good_member // snake case
 // TODO write test case that checks type name collisions, and gives a warning?

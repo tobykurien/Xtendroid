@@ -13,11 +13,14 @@ import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
 import org.eclipse.xtend.lib.macro.declaration.Visibility
 
 import org.json.JSONObject
+import org.json.JSONArray
+import org.json.JSONException
+
+import java.util.ArrayList
 
 // for some reason I can't import from a different package within the same -ing module
 //import static extension de.itemis.jsonized.JsonObjectEntry.*
 import static extension org.xtendroid.json.JsonObjectEntry.*
-import org.json.JSONException
 
 /**
  * Structure by example.
@@ -45,8 +48,17 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
     private def void registerClassNamesRecursively(Iterable<JsonObjectEntry> json, RegisterGlobalsContext context) {
         for (jsonEntry : json) {
             if (jsonEntry.isJsonObject) {
-                context.registerClass(jsonEntry.className)
-                registerClassNamesRecursively(jsonEntry.childEntries, context)
+//                try {
+                    context.registerClass(jsonEntry.className)
+                    registerClassNamesRecursively(jsonEntry.childEntries, context)
+//                }catch (java.lang.IllegalArgumentException e)
+//                {
+                    // TODO figure out how to warn the user of repeated type registers
+                    // for now just ignore it, and assume the generated types are exactly the same
+
+                    // TODO explore mitigation strategy, add random number suffix behind generated type
+                    // or get a int hash of the value?
+//                }
             }
         }
     }
@@ -97,7 +109,7 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
         for (entry : entries) {
             val basicType = entry.getComponentType(context)
             val realType = if(entry.isArray) getList(basicType) else basicType
-            val memberName = basicType.simpleName.toFirstLower
+            val memberName = entry.key
 
             // TODO remove
             clazz.addWarning(String.format('property = %s, basicType = %s, realType = %s, entry.isJsonObject = %b', entry.propertyName, basicType.simpleName, realType.simpleName, entry.isJsonObject))
@@ -106,7 +118,7 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
             // TODO determine if this also works for aggregate types
             if (entry.isJsonObject || entry.isArray)
             {
-                clazz.addField(realType.simpleName.toFirstLower) [
+                clazz.addField(memberName) [
                     type = realType
                     visibility = Visibility.PROTECTED
                     // make it possible to extend, e.g. BigInteger, BigNumber
@@ -127,9 +139,9 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
                     // populate List
                     body = ['''
                         if («memberName» == null) {
-                            «memberName» = new ArrayList<«basicType»>();
+                            «memberName» = new «ArrayList.newTypeReference.simpleName»<«basicType.simpleName.toFirstUpper»>();
                             for (int i=0; i<«memberName».size(); i++) {
-                                «memberName».add((basicType) mJsonObject.getJSONArray(i));
+                                «memberName».add((«basicType.simpleName.toFirstUpper») mJsonObject.getJSONArray("«memberName»").get(i));
                             }
                         }
                         return «memberName»;
@@ -139,13 +151,13 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
                 {
                     body = ['''
                         if («memberName» == null) {
-                            «memberName» = new «basicType.simpleName»(mJsonObject.getJSONObject("«entry.key»"));
+                            «memberName» = new «basicType.simpleName»(mJsonObject.getJSONObject("«memberName»"));
                         }
                         return «memberName»;
 				    ''']
                 }else { // is primitive (e.g. String, Number, Boolean)
                     body = ['''
-                        return mJsonObject.get«basicType.simpleName.toFirstUpper»("«entry.key»");
+                        return mJsonObject.get«basicType.simpleName.toFirstUpper»("«memberName»");
                     ''']
                 }
             ]
@@ -154,29 +166,31 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
             // TODO primitive aggregate and non-primitive aggregate
             // TODO set composite type (i.e. JSONObject) in the JSONObject,
             // TODO this requires a toJSONString method
-            clazz.addMethod("set" + entry.key.toFirstUpper) [
-                addParameter(entry.key, realType)
+            clazz.addMethod("set" + memberName.toFirstUpper) [
+                addParameter(memberName, realType)
                 returnType = clazz.newTypeReference
                 exceptions = JSONException.newTypeReference
                 if (entry.isArray)
                 {
+                    // TODO attempt to import ArrayList
+
                     // ArrayList<T> === Collection<T>
                     body = ['''
                         mDirty = true;
-                        mJsonObject.put("«memberName»", new JSONArray(«memberName»));
+                        mJsonObject.put("«memberName»", new «JSONArray.newTypeReference.simpleName»(«memberName»));
                         return this;
                     ''']
                 }else if (entry.isJsonObject) // TODO determine if this is applicable for arrays
                 {
                     body = ['''
                         mDirty = true;
-                        mJsonObject.put("«entry.key»", «entry.key».toJSONObject());
+                        mJsonObject.put("«memberName»", «memberName».toJSONObject());
                         return this;
 				    ''']
                 }else {
                     body = ['''
                         mDirty = true;
-                        mJsonObject.put("«entry.key»", «entry.key»);
+                        mJsonObject.put("«memberName»", «memberName»);
                         return this;
                     ''']
                 }
