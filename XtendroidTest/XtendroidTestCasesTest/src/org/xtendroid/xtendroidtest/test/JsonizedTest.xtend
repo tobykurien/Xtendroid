@@ -81,6 +81,91 @@ import org.json.JSONObject
 // the http plumbing seems broken, besides the call is incomplete
 // the VERB could be POST or something else (TODO add parameters)
 
+@AndroidJsonized('{
+ "query": {
+  "count": 24,
+  "created": "2013-03-21T20:13:42Z",
+  "lang": "en-US",
+  "results": {
+   "Release": [
+    {
+     "UPC": "602527291567",
+     "explicit": "0",
+     "flags": "2",
+     "id": "218641405",
+     "label": "Streamline/Interscope/Kon Live",
+     "rating": "-1",
+     "releaseDate": "2009-11-23T08:00:00Z",
+     "releaseYear": "2009",
+     "rights": "160",
+     "title": "The Fame Monster",
+     "typeID": "2",
+     "url": "http://new.music.yahoo.com/lady-gaga/albums/fame-monster--218641405",
+     "Artist": {
+      "catzillaID": "0",
+      "flags": "115202",
+      "hotzillaID": "1810013384",
+      "id": "58959115",
+      "name": "Lady Gaga",
+      "rating": "-1",
+      "trackCount": "172",
+      "url": "http://new.music.yahoo.com/lady-gaga/",
+      "website": "http://www.ladygaga.com/"
+     },
+     "ItemInfo": {
+      "ChartPosition": {
+       "last": "1",
+       "now": "1"
+      }
+     }
+    }]
+   }
+  }
+}')
+class MusicReleases {
+	public static val input = '{
+ "query": {
+  "count": 24,
+  "created": "2013-03-21T20:13:42Z",
+  "lang": "en-US",
+  "results": {
+   "Release": [
+    {
+     "UPC": "602527291567",
+     "explicit": "0",
+     "flags": "2",
+     "id": "218641405",
+     "label": "Streamline/Interscope/Kon Live",
+     "rating": "-1",
+     "releaseDate": "2009-11-23T08:00:00Z",
+     "releaseYear": "2009",
+     "rights": "160",
+     "title": "The Fame Monster",
+     "typeID": "2",
+     "url": "http://new.music.yahoo.com/lady-gaga/albums/fame-monster--218641405",
+     "Artist": {
+      "catzillaID": "0",
+      "flags": "115202",
+      "hotzillaID": "1810013384",
+      "id": "58959115",
+      "name": "Lady Gaga",
+      "rating": "-1",
+      "trackCount": "172",
+      "url": "http://new.music.yahoo.com/lady-gaga/",
+      "website": "http://www.ladygaga.com/"
+     },
+     "ItemInfo": {
+      "ChartPosition": {
+       "last": "1",
+       "now": "1"
+      }
+     }
+    }]
+   }
+  }
+}'
+}
+
 class JsonizedTest {
 
 	@Test
@@ -139,6 +224,12 @@ class JsonizedTest {
 	{
 		var randomQuote = '{ "type": "success", "value": { "id": 417, "joke": "meh", "categories": [] } }'
 		//assertTrue(new ChuckNorrisApi(new JSONObject(randomQuote)).getValue.getJoke.equals("meh"))
+	}
+
+	@Test
+	public def testTheOriginalExampleAtJsonizer()
+	{
+		assertTrue(new MusicReleases(new JSONObject(MusicReleases.input)).getQuery.getResults.getRelease.get(0).getUPC.equals("602527291567"))
 	}
 
 	// TODO do the other tests... like isDirty etc. getJSONObject
