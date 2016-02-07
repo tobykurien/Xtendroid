@@ -27,6 +27,8 @@ dependencies {
 
   // can't use uiautomator with api level <18
 //  androidTestCompile 'com.android.support.test.uiautomator:uiautomator-v18:2.1.2'
+
+  testCompile 'junit:junit:4.12'
 }
 
 repositories {

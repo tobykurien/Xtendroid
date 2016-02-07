@@ -1,7 +1,8 @@
 package org.xtendroid.xtendroidtest.test
 
-import android.test.AndroidTestCase
 import org.xtendroid.json.AndroidJsonized
+import org.junit.Test
+import static org.junit.Assert.*
 import org.json.JSONObject
 
 /**
@@ -72,16 +73,49 @@ import org.json.JSONObject
 
 // TODO write test case that checks that_this_is_a_good_member // snake case
 // TODO write test case that checks type name collisions, and gives a warning?
+// TODO null tests
 // Add (randomized? overkill?) version number to prevent name collision.
 
 // TODO write unit test with URLs
+//@AndroidJsonized("http://api.icndb.com/jokes/random") ChuckNorrisApi {}
 
-class JsonizedTest extends AndroidTestCase {
-	def testScalarJson() {
-		/*
-		// TODO make this stable
-		assertTrue(new ABoolean(new JSONObject('{ "aBoolean" : true }')).aBoolean)
-		assertTrue(new ALong(new JSONObject('{ "anInteger" : 800 }')).anInteger == 800)
-		*/
+class JsonizedTest {
+
+	@Test
+	public def testScalarJson() {
+		assertTrue(new ABooleanJz(new JSONObject('{ "aBoolean" : true }')).getABoolean)
+		assertTrue(new ALongJz(new JSONObject('{ "anInteger" : 800 }')).getAnInteger == 800)
+		assertTrue(new ADoubleJz(new JSONObject('{ "aFloat" : 800.008 }')).getAFloat == 800.008)
+		assertTrue(new AStringJz(new JSONObject('{ "aString" : "string" }')).getAString.equals("string"))
+		assertTrue(new AHeterogenousObject(new JSONObject('{ "bString" : "meh" }')).getBString.equals("meh"))
+		assertTrue(new ATypeWithAStringParent(new JSONObject('{ "anObjectWithAStringFirstJz" : { "aString" : "string" } }')).getAnObjectWithAStringFirstJz.getAString.equals("string"))
+		assertTrue(new ATypeWithDeepNesting(new JSONObject('{
+			"aDeepNesting0Jz" : {
+				"aDeepNesting1Jz" : {
+					"aDeepNesting2Jz" : {
+						"aDeepNesting3Jz" : { "anInteger" : 4321 }
+					}
+				}
+			}
+		}')).getADeepNesting0Jz.getADeepNesting1Jz.getADeepNesting2Jz.getADeepNesting3Jz.getAnInteger == 4321)
 	}
+
+	@Test
+	public def testVectorJson()
+	{
+		assertFalse(new ManyBooleansParent(new JSONObject('{ "manyBooleans" : [ true, false, true, false ] }')).getManyBooleans.get(3))
+		assertTrue (new ManyIntegersParent(new JSONObject('{ "manyIntegers" : [ 0, 1, 2, 3, 4 ] }')).getManyIntegers.get(3) == 3)
+		assertTrue (new ManyFloatsParent(new JSONObject('{ "manyFloats" : [ 0.0, 1.0, 2.0, 3, 4.0 ] }')).getManyIntegers.get(3) == 3.0f) // float === double?
+		assertTrue (new ManyStringsParent(new JSONObject('{ "manyStrings" : [ "0", "1", "2", "3" ] }')).getManyStrings.get(3) .equals ("3"))
+		assertTrue (new ManyObjectsWithStringsParent(new JSONObject('{ "manyObjectsWithStringsFirst" : [ { "aString" : "string" } ] }')).getManyObjectsWithStringsFirst.get(0).getAString.equals("string"))
+	}
+
+//	@Test // TODO
+	public def testChuckNorrisHttpJson()
+	{
+		var randomQuote = '{ "type": "success", "value": { "id": 417, "joke": "meh", "categories": [] } }'
+		assertTrue(new ChuckNorrisApi(new JSONObject(randomQuote)).getValue.getJoke.equals("meh"))
+	}
+
+	// TODO do the other tests... like isDirty etc. getJSONObject
 }
