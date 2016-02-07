@@ -3,7 +3,6 @@ package org.xtendroid.json
 // the annotation refuses to import from a different package
 // NOTE: the IDE plugin gives a false impression.
 
-import com.google.common.base.CaseFormat
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
@@ -109,7 +108,7 @@ import org.eclipse.xtend.lib.annotations.Data
 	 * @return the property name. It's the JSON entry key turned into a Java identifer.
 	 */
 	def getPropertyName() {
-		val result = CaseFormat::UPPER_UNDERSCORE.to(CaseFormat::LOWER_CAMEL, entry.key.replace(' ', '_'))
+		val result = entry.key.replace(' ', '_').toFirstLower
 		if (isArray)
 			return if (result.endsWith('s')) result else result + 's' // TODO WTF plural is with an 's'?
 		return if (result=='class') {
@@ -124,7 +123,7 @@ import org.eclipse.xtend.lib.annotations.Data
 	 */
 	def getClassName() {
 		if (isJsonObject) {
-			val simpleName = CaseFormat::UPPER_UNDERSCORE.to(CaseFormat::UPPER_CAMEL, entry.key.replace(' ', '_'))
+			val simpleName = entry.key.replace(' ', '_').toFirstUpper
 			return if (unit.packageName != null)
 						unit.packageName + "." + simpleName
 					else
