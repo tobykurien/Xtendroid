@@ -110,7 +110,6 @@ import org.eclipse.xtend.lib.annotations.Data
 	 */
 	def getPropertyName() {
 		val result = CaseFormat::UPPER_UNDERSCORE.to(CaseFormat::LOWER_CAMEL, entry.key.replace(' ', '_'))
-        //val result = entry.key.replace(' ', '_') // simplify
 		if (isArray)
 			return if (result.endsWith('s')) result else result + 's' // TODO WTF plural is with an 's'?
 		return if (result=='class') {
@@ -126,8 +125,6 @@ import org.eclipse.xtend.lib.annotations.Data
 	def getClassName() {
 		if (isJsonObject) {
 			val simpleName = CaseFormat::UPPER_UNDERSCORE.to(CaseFormat::UPPER_CAMEL, entry.key.replace(' ', '_'))
-            //val simpleName = CaseFormat::UPPER_CAMEL.to(CaseFormat::UPPER_UNDERSCORE, entry.key.replace(' ', '_')) // 2nd try
-            //val simpleName = entry.key.replace(' ', '_').toFirstUpper // simplify
 			return if (unit.packageName != null)
 						unit.packageName + "." + simpleName
 					else

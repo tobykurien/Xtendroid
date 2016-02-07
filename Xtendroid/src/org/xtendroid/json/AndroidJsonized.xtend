@@ -48,16 +48,12 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
     private def void registerClassNamesRecursively(Iterable<JsonObjectEntry> json, RegisterGlobalsContext context) {
         for (jsonEntry : json) {
             if (jsonEntry.isJsonObject) {
-//                try {
                     context.registerClass(jsonEntry.className)
                     registerClassNamesRecursively(jsonEntry.childEntries, context)
 //                }catch (java.lang.IllegalArgumentException e)
 //                {
                     // TODO figure out how to warn the user of repeated type registers
                     // for now just ignore it, and assume the generated types are exactly the same
-
-                    // TODO explore mitigation strategy, add random number suffix behind generated type
-                    // or get a int hash of the value?
 //                }
             }
         }
@@ -67,7 +63,6 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
      * Called secondly. Modify the types.
      */
     override doTransform(MutableClassDeclaration clazz, extension TransformationContext context) {
-        //clazz.addWarning("className: " + clazz.simpleName) // TODO remove DEBUG
         enhanceClassesRecursively(clazz, clazz.jsonEntries, context)
     }
 
@@ -110,11 +105,7 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
             val realType = if(entry.isArray) getList(basicType) else basicType
             val memberName = entry.key
 
-            // TODO remove
-            //clazz.addWarning(String.format('property = %s, basicType = %s, realType = %s, entry.isJsonObject = %b', entry.propertyName, basicType.simpleName, realType.simpleName, entry.isJsonObject))
-
             // add JSONObject container for lazy-getting
-            // TODO determine if this also works for aggregate types
             if (entry.isJsonObject || entry.isArray)
             {
                 clazz.addField(memberName) [
@@ -122,6 +113,7 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
                     visibility = Visibility.PROTECTED
                     // make it possible to extend, e.g. BigInteger, BigNumber
                     // TODO add an option to annotation to mark fields as special fields
+                    // reason why not: @AndroidJson already does this.
                     // generate Date converters, BigInteger/BigNumber etc.
                     // @AndroidJsonizer(value = "http://...", mapping = # { 'anInteger' -> BigInteger, 'aFloat' -> BigNumber, 'timestamp' -> Date })
                     // @AndroidJsonizer(value = '{ "anInteger" : 1234, "aFloat" : 12.34 }', mapping = # { 'anInteger' -> BigInteger, 'aFloat' -> BigNumber, 'timestamp' -> Date })
@@ -134,7 +126,6 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
                 if (entry.isArray)
                 {
                     // populate List
-                    val arrayListName = ArrayList.findTypeGlobally.simpleName
                     body = ['''
                         if («memberName» == null) {
                             «memberName» = new «toJavaCode(ArrayList.newTypeReference)»<«basicType.simpleName.toFirstUpper»>();
