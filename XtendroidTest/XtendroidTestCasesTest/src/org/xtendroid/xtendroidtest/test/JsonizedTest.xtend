@@ -78,6 +78,8 @@ import org.json.JSONObject
 
 // TODO write unit test with URLs
 //@AndroidJsonized("http://api.icndb.com/jokes/random") ChuckNorrisApi {}
+// the http plumbing seems broken, besides the call is incomplete
+// the VERB could be POST or something else (TODO add parameters)
 
 class JsonizedTest {
 
@@ -101,20 +103,42 @@ class JsonizedTest {
 	}
 
 	@Test
-	public def testVectorJson()
+	public def testBooleanVectorJson()
 	{
 		assertFalse(new ManyBooleansParent(new JSONObject('{ "manyBooleans" : [ true, false, true, false ] }')).getManyBooleans.get(3))
+	}
+
+	@Test
+	public def testIntegerVectorJson()
+	{
 		assertTrue (new ManyIntegersParent(new JSONObject('{ "manyIntegers" : [ 0, 1, 2, 3, 4 ] }')).getManyIntegers.get(3) == 3)
-		assertTrue (new ManyFloatsParent(new JSONObject('{ "manyFloats" : [ 0.0, 1.0, 2.0, 3, 4.0 ] }')).getManyIntegers.get(3) == 3.0f) // float === double?
+	}
+
+	@Test
+	public def testFloatVectorJson()
+	{
+		assertTrue (new ManyFloatsParent(new JSONObject('{ "manyFloats" : [ 0.0, 1.0, 2.0, 3, 4.0 ] }')).getManyFloats.get(3) == 3.0f) // float === double?
+
+	}
+
+	@Test
+	public def testStringVectorJson()
+	{
 		assertTrue (new ManyStringsParent(new JSONObject('{ "manyStrings" : [ "0", "1", "2", "3" ] }')).getManyStrings.get(3) .equals ("3"))
+
+	}
+
+	@Test
+	public def testObjectVectorJson()
+	{
 		assertTrue (new ManyObjectsWithStringsParent(new JSONObject('{ "manyObjectsWithStringsFirst" : [ { "aString" : "string" } ] }')).getManyObjectsWithStringsFirst.get(0).getAString.equals("string"))
 	}
 
-//	@Test // TODO
+//	@Test // TODO fix the http call
 	public def testChuckNorrisHttpJson()
 	{
 		var randomQuote = '{ "type": "success", "value": { "id": 417, "joke": "meh", "categories": [] } }'
-		assertTrue(new ChuckNorrisApi(new JSONObject(randomQuote)).getValue.getJoke.equals("meh"))
+		//assertTrue(new ChuckNorrisApi(new JSONObject(randomQuote)).getValue.getJoke.equals("meh"))
 	}
 
 	// TODO do the other tests... like isDirty etc. getJSONObject
