@@ -74,6 +74,8 @@ import org.json.JSONObject
 // TODO write test case that checks type name collisions, and gives a warning?
 // Add (randomized? overkill?) version number to prevent name collision.
 
+// TODO write unit test with URLs
+
 class JsonizedTest extends AndroidTestCase {
 	def testScalarJson() {
 		/*

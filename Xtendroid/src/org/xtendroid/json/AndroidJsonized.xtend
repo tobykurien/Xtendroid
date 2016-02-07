@@ -137,7 +137,7 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
                     val arrayListName = ArrayList.findTypeGlobally.simpleName
                     body = ['''
                         if («memberName» == null) {
-                            «memberName» = new «arrayListName»<«basicType.simpleName.toFirstUpper»>();
+                            «memberName» = new «toJavaCode(ArrayList.newTypeReference)»<«basicType.simpleName.toFirstUpper»>();
                             for (int i=0; i<«memberName».size(); i++) {
                                 «memberName».add((«basicType.simpleName.toFirstUpper») mJsonObject.getJSONArray("«memberName»").get(i));
                             }
@@ -167,10 +167,9 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
                 if (entry.isArray)
                 {
                     // ArrayList<T> === Collection<T>
-                    val jsonArrayName = JSONArray.findTypeGlobally.simpleName
                     body = ['''
                         mDirty = true;
-                        mJsonObject.put("«memberName»", new «jsonArrayName»(«memberName»));
+                        mJsonObject.put("«memberName»", new «toJavaCode(JSONArray.newTypeReference)»(«memberName»));
                         return this;
                     ''']
                 }else if (entry.isJsonObject)
