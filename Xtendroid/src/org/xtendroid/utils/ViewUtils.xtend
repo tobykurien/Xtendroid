@@ -27,7 +27,7 @@ class ViewUtils {
 
    def static <T extends View> T getView(Fragment f, int resId) {
       if (cache.get(resId) == null) {
-        cache.put(resId, f.activity.findViewById(resId) as T) 
+        cache.put(resId, f.activity?.findViewById(resId) as T)
       }
       
       cache.get(resId) as T 

@@ -2,6 +2,7 @@ package org.xtendroid.utils
 
 import android.support.v4.content.AsyncTaskLoader
 import android.content.Context
+import android.app.Activity
 
 /**
  * 
@@ -19,6 +20,18 @@ class BgSupportLoader<R> extends AsyncTaskLoader<R> {
 	var ()=>R bgFunction
 	var (R)=>void disposeFunction
 	protected var R result
+
+	// Type-safety is thrown out of the window for convenience
+	public static def BgSupportLoader<Object> loaderSupport(Activity context, ()=>Object bg, (Object)=>void dispose)
+	{
+		return new BgSupportLoader<Object>(context, bg, dispose)
+	}
+
+	// 'defenestrated' comes to mind
+	public static def BgSupportLoader<Object> loaderSupport(Activity context, ()=>Object bg)
+	{
+		return new BgSupportLoader<Object>(context, bg)
+	}
 
 	new(Context context) {
 		super(context)
@@ -109,6 +122,18 @@ class BgLoader<R> extends android.content.AsyncTaskLoader<R> {
 	var ()=>R bgFunction
 	var (R)=>void disposeFunction
 	protected var R result
+
+	// Type-safety is thrown out of the window for convenience
+	public static def BgLoader<Object> loader(Activity context, ()=>Object bg, (Object)=>void dispose)
+	{
+		return new BgLoader<Object>(context, bg, dispose)
+	}
+
+	// 'defenestrated' comes to mind
+	public static def BgLoader<Object> loader(Activity context, ()=>Object bg)
+	{
+		return new BgLoader<Object>(context, bg)
+	}
 
 	new(Context context) {
 		super(context)

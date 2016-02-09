@@ -49,10 +49,12 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 		// we need at least one loader in the field
 		val mandatoryLoaderTypes = #['android.content.Loader', 'android.support.v4.content.Loader']
 		val loaderFields = clazz.declaredFields.filter[f|
-			!f.type.inferred && f.initializer != null && (
+			!f.type.inferred /*&& f.initializer != null*/ && (
 			android.content.Loader.newTypeReference.isAssignableFrom(f.type) ||
 				Loader.newTypeReference.isAssignableFrom(f.type)
 		)]
+		// we also accept fields that are uninitialized, because this will result
+		// in broken first compilation that require a second build to complete
 		
 		if (loaderFields.size == 0) {
 			clazz.declaredFields.filter[f|f.type.inferred].forEach[f|
@@ -259,17 +261,26 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 		loaderFields.forEach [ f |
 			clazz.addMethod("get" + f.simpleName.toJavaIdentifier.toFirstUpper + "Loader") [
 				visibility = Visibility.PUBLIC
-				body = f.initializer
+				if (f.initializer != null) {
+					body =  f.initializer
+				}else
+				{
+				    body = ['''
+						return «f.simpleName»;
+					''']
+				}
 				returnType = f.type
 				primarySourceElement = f.primarySourceElement
 			]
 		]
 
 		// remove useless fields
+		/*
 		clazz.declaredFields.filter[f|
 			!f.type.inferred && f.initializer == null && (
 				android.content.Loader.newTypeReference.isAssignableFrom(f.type) ||
 				Loader.newTypeReference.isAssignableFrom(f.type)
 			)].forEach[remove]
+		*/
 	}
 }
