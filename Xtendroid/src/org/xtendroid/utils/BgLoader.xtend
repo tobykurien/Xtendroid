@@ -21,16 +21,26 @@ class BgSupportLoader<R> extends AsyncTaskLoader<R> {
 	var (R)=>void disposeFunction
 	protected var R result
 
-	// Type-safety is thrown out of the window for convenience
-	public static def BgSupportLoader<Object> loaderSupport(Activity context, ()=>Object bg, (Object)=>void dispose)
+	/**
+	 * Convenient sugaring for initializing BgSupportLoaders
+	 * on fields with base type android.content.Loader<D>
+	 *
+	 * usage: <ReturnType>supportLoader(activity, [ "do something on the AsyncTask" ])[ "Cleanup"]
+	 */
+	public static def<T> BgSupportLoader<T> supportLoader(Activity context, ()=>T bg, (T)=>void dispose)
 	{
-		return new BgSupportLoader<Object>(context, bg, dispose)
+		return new BgSupportLoader<T>(context, bg, dispose)
 	}
 
-	// 'defenestrated' comes to mind
-	public static def BgSupportLoader<Object> loaderSupport(Activity context, ()=>Object bg)
+	/**
+	 * Convenient sugaring for initializing BgSupportLoaders
+	 * on fields with base type android.content.Loader<D>
+	 *
+	 * usage: <ReturnType>supportLoader(activity)[ "do something on the AsyncTask" ]
+	 */
+	public static def<T> BgSupportLoader<T> supportLoader(Activity context, ()=>T bg)
 	{
-		return new BgSupportLoader<Object>(context, bg)
+		return new BgSupportLoader<T>(context, bg)
 	}
 
 	new(Context context) {
@@ -123,16 +133,26 @@ class BgLoader<R> extends android.content.AsyncTaskLoader<R> {
 	var (R)=>void disposeFunction
 	protected var R result
 
-	// Type-safety is thrown out of the window for convenience
-	public static def BgLoader<Object> loader(Activity context, ()=>Object bg, (Object)=>void dispose)
+	/**
+	 * Convenient sugaring for initializing BgSupportLoaders
+ 	 * on fields with base type android.content.Loader<D>
+ 	 *
+ 	 * usage: <ReturnType>loader(activity, [ "do something on the AsyncTask" ])[ "Cleanup"]
+ 	 */
+	public static def<T> BgLoader<T> loader(Activity context, ()=>T bg, (T)=>void dispose)
 	{
-		return new BgLoader<Object>(context, bg, dispose)
+		return new BgLoader<T>(context, bg, dispose)
 	}
 
-	// 'defenestrated' comes to mind
-	public static def BgLoader<Object> loader(Activity context, ()=>Object bg)
+	/**
+	 * Convenient sugaring for initializing BgSupportLoaders
+ 	 * on fields with base type android.content.Loader<D>
+ 	 *
+     * usage: <ReturnType>loader(activity)[ "do something on the AsyncTask" ]
+ 	 */
+	public static def<T> BgLoader<T> loader(Activity context, ()=>T bg)
 	{
-		return new BgLoader<Object>(context, bg)
+		return new BgLoader<T>(context, bg)
 	}
 
 	new(Context context) {

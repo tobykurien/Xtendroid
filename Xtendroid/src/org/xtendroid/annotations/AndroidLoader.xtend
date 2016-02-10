@@ -211,7 +211,7 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 		]
 		
 		val onCreateLoaderMethodBody = loaderFieldNames.map[n|
-							String.format("if (%s == LOADER_ID) return get%sLoader();", n.loaderIdFromName,
+							String.format("if (%s == LOADER_ID) return get%s();", n.loaderIdFromName,
 								n.toJavaIdentifier.toFirstUpper)].join("\n")
 
 		// if multiple Loaders then no generic param
@@ -259,7 +259,7 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 
 		// add getters for Loaders (NOTE: workaround/hack, because I don't know how to evaluate initializer exprs)
 		loaderFields.forEach [ f |
-			clazz.addMethod("get" + f.simpleName.toJavaIdentifier.toFirstUpper + "Loader") [
+			clazz.addMethod("get" + f.simpleName.toJavaIdentifier.toFirstUpper) [
 				visibility = Visibility.PUBLIC
 				if (f.initializer != null) {
 					body =  f.initializer
@@ -273,14 +273,5 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 				primarySourceElement = f.primarySourceElement
 			]
 		]
-
-		// remove useless fields
-		/*
-		clazz.declaredFields.filter[f|
-			!f.type.inferred && f.initializer == null && (
-				android.content.Loader.newTypeReference.isAssignableFrom(f.type) ||
-				Loader.newTypeReference.isAssignableFrom(f.type)
-			)].forEach[remove]
-		*/
 	}
 }
