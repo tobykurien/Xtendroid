@@ -6,14 +6,14 @@ import android.os.Build
 import org.eclipse.xtext.xbase.lib.Functions.Function2
 
 class AsyncBuilder<Result> extends AsyncTask<Object, Object, Result> {
-   var ProgressDialog progressDialog
-   var (AsyncBuilder, Object[])=>Result bgTask
-   var (Result)=>void uiTask
-   var ()=>void onPreExecute
-   var (Object[])=>void onProgress
-   var (Exception)=>void onError
-   var ()=>void onCancelled
-   var Exception error
+   var protected ProgressDialog progressDialog
+   var protected (AsyncBuilder, Object[])=>Result bgTask
+   var protected (Result)=>void uiTask
+   var protected ()=>void onPreExecute
+   var protected (Object[])=>void onProgress
+   var protected (Exception)=>void onError
+   var protected ()=>void onCancelled
+   var protected Exception error
 
    def static AsyncBuilder async(Function2<AsyncBuilder, Object[], ?> task) {
       return async(null, task)
