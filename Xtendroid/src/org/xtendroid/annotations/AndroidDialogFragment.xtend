@@ -36,6 +36,7 @@ class DialogFragmentProcessor extends AbstractClassProcessor {
             body = [
                '''
                   // empty ctor prevents crashes
+                  setArguments(new Bundle());
                ''']
          ]
       }
