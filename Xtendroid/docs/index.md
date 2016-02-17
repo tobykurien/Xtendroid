@@ -4,6 +4,7 @@ Documentation
 **Contents**
 
 - [Activities and Fragments](#activities-and-fragments)
+- [Dialogs](#dialogs)
 - Background Tasks
   - [AsyncBuilder](#background-tasks-using-asynctask)
 - Data storage
@@ -52,6 +53,9 @@ You can do something similar in a fragment using the ```@AndroidFragment``` anno
 
 ```
 
+Dialogs
+-------
+
 Dialogs in Android have become quite painful, because you can either use ```AlertDialog.Builder```, or implement a ```DialogFragment``` with a custom view, where you have to provide the title and buttons, and theme it yourself (which is difficult, since AppCompat doesn't help you with dialogs). To make this simpler, you can use the ```@AndroidDialogFragment``` annotation to implement an (for example) ```AlertDialog.Builder``` based dialog with custom content, and allows you to code the view widgets the same way you would in a regular ```DialogFragment```:
 
 ```xtend
@@ -61,7 +65,7 @@ Dialogs in Android have become quite painful, because you can either use ```Aler
    // We can optionally implement our own dialog quite simply as follows:
    override onCreateDialog(Bundle instance) {
 
-      // Instead of AlertDialog.Buider, we for example could use 
+      // Instead of AlertDialog.Builder, we for example could use 
       // MaterialDialog.Builder from https://github.com/afollestad/material-dialogs
       new AlertDialog.Builder(activity)
          .setTitle("My dialog")
@@ -101,7 +105,7 @@ class MyActivity extends Activity {
 Background tasks using AsyncTask
 --------------------------------
 
-A class called ```AsyncBuilder``` is provided, that extends the standard ```AsyncTask``` and works in much the same way, but provides lambda parameters for the background task and the UI task, thus reducing boilerplate. It also takes care of cancelling UI callbacks if the AsyncTask is cancelled, and also handles any errors occurring in the background or UI threads by passing the error to the ```onError``` lambda.
+A class called ```AsyncBuilder``` is provided, that extends the standard ```AsyncTask``` and works in much the same way, but provides lambda parameters for the background task and the UI task, thus reducing boilerplate. It also takes care of cancelling UI callbacks if the AsyncTask is cancelled, thread pooling, managing of progress bars/dialogs, handling of any errors occurring in the background or UI threads, and ensuring that the code executes in the correct thread (either background or UI thread). It also returns the ```AsyncTask``` reference, which you can use to cancel it or await completion, etc.
 
 A simple example of usage:
 
@@ -151,13 +155,14 @@ async [
 ).start()
 ```
 
-Here is a complete example of using the ```AsyncBuilder```:
+Here is a more complete example of using the ```AsyncBuilder```:
 
 ```xtend
-// Use AsynBuilder to run a background task      
+// Make a "loading" progress dialog
 val pd = new ProgressDialog()
+pd.message = "Loading..."
 
-async(pd) [task, params|
+val task = async(pd) [task, params|
    // Do some work in the background thread
    for (i : 1..50) {
       Thread.sleep(100)
@@ -185,7 +190,10 @@ async(pd) [task, params|
 ].onError [Exception error|
    // this runs if an error occurred anywhere else
    mainHello.text = '''Error! «error.class.name» «error.message»'''
-].start("Param1") // don't forget to call start to kick-off the task
+].start("Param1") // don't forget to call start, passing any needed params
+
+// in onPause() you could:
+if (task?.status == AsyncTask.Status.RUNNING) task.cancel(true)
 ```
 
 >Note: Since Honeycomb, Android has defaulted to using a single thread for all AsyncTasks, because too many developers were writing non-thread-safe code. When using AsyncBuilder's ```start()``` method instead of the ```execute()``` method,  it will run multiple AsyncTasks simultaneously using the THREAD_POOL_EXECUTOR, so be careful to write thread-safe code.
@@ -311,6 +319,8 @@ method to inflate and manage your recycled view.
    }
 }
 ```
+
+> Note: You can use the @AndroidViewHolder annotation in Activity and Fragment classes too, for example to load a header layout into a ListView header. You can even reuse the view holder across multiple classes that use the same layout!
 
 Database
 --------
@@ -467,15 +477,13 @@ In addition to using it at the class-level, you can also use it at the field-lev
 Intents and Bundles
 -------------------
 
-The member-level `@BundleProperty` annotation, will create a convenience methods for extracting a value from a Bundle or Intent.
-
-If a `@BundleProperty` is applied to a member of an Activity then the generated convenience method will be applied to the intent of the Activity. If applied to a Fragment, then it will be applied to the Bundle (through the `getArguments()` method). If applied to a bean or a Service or any other type other than an Activity or Fragment, then the annotation will attempt to find an Intent among the members and do the same.
+The member-level `@BundleProperty` annotation will create convenience methods for extracting a value from a Bundle or Intent. If a `@BundleProperty` is applied to a member of an Activity then the generated convenience method will be applied to the intent of the Activity. If applied to a Fragment, then it will be applied to the Bundle (through the `getArguments()` method). If applied to a bean or a Service or any other type other than an Activity or Fragment, then the annotation will attempt to find an Intent among the members and do the same.
 
 Suppose an Activity is expecting a "country" bundle extra, but will default to "South Africa" if not found:
 
 ```xtend
 class MyActivity extends Activity {
-	@BundleProperty String country = "South Africa"
+   @BundleProperty String country = "South Africa"
    @BundleProperty String category
 
    override onStart() {
@@ -497,23 +505,27 @@ startActivity(intent)
 The above also works for using an arguments Bundle for Fragments too.
 
 ```xtend
-var bundle = new Bundle
-MyActivity.putCountry(bundle, "Finland")
-MyActivity.putCategory(bundle, "Sports")
+@AndroidFragment(R.layout.my_fragment) class MyFragment {
+   @BundleProperty String country
+   @BundleProperty String category
+}
 
-// set bundle as arguments, etc.
+var frag = new MyFragment
+frag.putCountry("Finland")
+frag.putCategory("Sports")
+
+// display the fragment using fragmentManager...
 ```
+
+You can also attach the ```@BundleProperty``` annotation to any ```Parcelable``` member as well (see below).
 
 Parcelables
 -----------
 
-Currently, the `@AndroidParcelable` is a type-level (read: class) annotation that ensures that all the member fields will be serialized using the android Parcel way of serializing stuff.
-
-All you need to do is just slap the annotation on top of the bean, and pass the Parcelable through an Intent. Here's an example:
+Currently, the `@AndroidParcelable` is a type-level (read: class) annotation that ensures that all the member fields will be serialized using  the android ```Parcel``` way of serializing stuff. All you need to do is just slap the annotation on top of the bean. Here's an example:
 
 ```xtend
-@AndroidParcelable
-class ParcelableData {
+@AndroidParcelable class ParcelableData {
 	public int age
 	public long createdAt
 	public float likeAButterfly
@@ -528,7 +540,7 @@ class ParcelableData {
 Now this Parcelable can be added to an Intent:
 
 ```xtend
-var p = new ParcelableData
+var p = new ParcelableData()
 p.age = 1
 p.createdAt = new Date().time
 p.likeAButterfly = 0.1234f
@@ -539,7 +551,7 @@ intent2.putExtra("parcel", p)
 startActivity(intent2)
 ```
 
-The receiving Fragment or Activity can retrieve the data using `Intent.getParcelableExtra("parcel")`.
+The receiving Fragment or Activity can retrieve the data using ```Intent.getParcelableExtra("parcel")```. A cleaner method is to use ```@BundleProperty``` to declare the arguments (see above).
 
 Utilities
 ---------
@@ -552,11 +564,11 @@ toast("Upload started!")
 toastLong("No internet connection")
 
 confirm("Are you sure you want to exit?") [
-    finish
+    finish()
 ]
 ```
 
-ViewUtils make getting widgets from views/activities/fragments/dialogs easier by eliminating the type-casting
+ViewUtils make getting widgets from views/activities/fragments/dialogs easier by eliminating the type-casting (see ```@AndroidActivity, @AndroidFragment, @AndroidDialogFragment, @AndroidViewHolder``` for a better method)
 ```xtend
 import static extension org.xtendroid.utils.ViewUtils.*
 
