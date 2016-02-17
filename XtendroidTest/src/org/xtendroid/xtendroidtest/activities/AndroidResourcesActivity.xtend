@@ -31,19 +31,19 @@ class AndroidResourcesActivity {
     @AndroidResources(type=R.bool)
     val Bools bools
 
-    @AndroidResources(type=R.string, path="build/intermediates/res/merged/debug/values/values.xml")
+    @AndroidResources(type=R.string, path="res/values/values.xml")
     var Strings1 strings1
 
-    @AndroidResources(type=R.integer, path="build/intermediates/res/merged/debug/values/values.xml")
+    @AndroidResources(type=R.integer, path="res/values/values.xml")
     var Integers1 integers1
 
-    @AndroidResources(type=R.color, path="build/intermediates/res/merged/debug/values/values.xml")
+    @AndroidResources(type=R.color, path="res/values/values.xml")
     var Colors1 colors1
 
-    @AndroidResources(type=R.dimen, path="build/intermediates/res/merged/debug/values/values.xml")
+    @AndroidResources(type=R.dimen, path="res/values/values.xml")
     val Dimens1 dimens1
 
-    @AndroidResources(type=R.bool, path="build/intermediates/res/merged/debug/values/values.xml")
+    @AndroidResources(type=R.bool, path="res/values/values.xml")
     val Bools1 bools1
 
 /*
