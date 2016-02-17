@@ -320,7 +320,7 @@ method to inflate and manage your recycled view.
 }
 ```
 
-> Note: You can use the @AndroidViewHolder annotation in Activity and Fragment classes too, for example to load a header layout into a ListView header. You can even reuse the view holder across multiple classes that use the same layout!
+> Note: You can use the ```@AndroidViewHolder``` annotation in ```Activity``` and ```Fragment``` classes too, for example to load a header layout into a ```ListView``` header. You can even reuse the view holder across multiple classes that use the same layout!
 
 Database
 --------
@@ -481,7 +481,7 @@ The new ```@AndroidJsonized``` annotation can make this even easier! Simply past
    "firstName": "John", 
    "lastName": "Smith",
    "age": 32
-}'''')
+}''')
 class User {}
 
 var john = new User(new JSONObject(serverResponse))
