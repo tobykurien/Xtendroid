@@ -15,22 +15,6 @@ class AndroidResourcesActivity {
     /**
      * Tree-shaking during the dex process will remove unnecessary methods/classes
      */
-
-    @AndroidResources(type=R.string)
-    var Strings strings
-
-    @AndroidResources(type=R.integer)
-    var Integers integers
-
-    @AndroidResources(type=R.color)
-    var Colors colors
-
-    @AndroidResources(type=R.dimen)
-    val Dimens dimens
-
-    @AndroidResources(type=R.bool)
-    val Bools bools
-
     @AndroidResources(type=R.string, path="res/values/values.xml")
     var Strings1 strings1
 
