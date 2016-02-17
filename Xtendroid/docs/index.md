@@ -474,6 +474,20 @@ In addition to using it at the class-level, you can also use it at the field-lev
 
 >Note: The ```@JsonProperty``` annotation has been deprecated in favour of ```@AndroidJson```.
 
+The new ```@AndroidJsonized``` annotation can make this even easier! Simply paste in a sample JSON response, and it will automagically create the bean for you, inferring the member types e.g.:
+
+```xtend
+@AndroidJsonized('''{ 
+   "firstName": "John", 
+   "lastName": "Smith",
+   "age": 32
+}'''')
+class User {}
+
+var john = new User(new JSONObject(serverResponse))
+toast(john.firstName + " " + john.lastName + ", age " john.age)
+```
+
 Intents and Bundles
 -------------------
 
