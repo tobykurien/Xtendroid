@@ -1,5 +1,12 @@
 package org.xtendroid.xtendroidtest.test
 
+/**
+ * TODO
+ * - warn for "@attr" : "value", or just strip the non-ascii values
+ * - handle name collisions, by suffixing digits
+ * - make "attr" : null, String by default
+ */
+
 import org.xtendroid.json.AndroidJsonized
 import org.junit.Test
 import static org.junit.Assert.*
