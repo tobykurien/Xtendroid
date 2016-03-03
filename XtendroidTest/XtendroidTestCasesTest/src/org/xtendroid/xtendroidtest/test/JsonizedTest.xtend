@@ -5,6 +5,7 @@ package org.xtendroid.xtendroidtest.test
  * - warn for "@attr" : "value", or just strip the non-ascii values
  * - handle name collisions, by suffixing digits
  * - make "attr" : null, String by default
+ * - "class" : "yes, this is a reserved keyword" will break your shizzle (scan for all the reserved keywords)
  */
 
 import org.xtendroid.json.AndroidJsonized
