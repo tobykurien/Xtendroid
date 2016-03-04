@@ -36,7 +36,7 @@ annotation AndroidJsonized {
 }
 
 class AndroidJsonizedProcessor extends AbstractClassProcessor {
-
+/*
     val reservedKeywords = #[
         'abstract',     'continue',     'for',          'new',          'switch',
         'assert',       'default',      'goto',         'package',      'synchronized',
@@ -49,6 +49,7 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
         'class',        'finally',      'long',         'strictfp',     'volatile',
         'const',        'float',        'native',       'super',        'while'
     ]
+*/
 
     /**
      * Called first. Only register any new types you want to generate here.
@@ -119,12 +120,12 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
         for (entry : entries) {
             val basicType = entry.getComponentType(context)
             val realType = if(entry.isArray) getList(basicType) else basicType
-            val memberName = if (reservedKeywords.iterator.exists[ equals(entry.key) ]) '_' + entry.key else entry.key.replaceAll("[^\\x00-\\x7F]", "")
+            val memberName = '_' + (entry.key.replaceAll("[^\\x00-\\x7F]", "").replaceAll("[^A-Za-z0-9]", "").replaceAll("\\s+",""))
 
             // add JSONObject container for lazy-getting
             if (entry.isJsonObject || entry.isArray)
             {
-                clazz.addField(memberName) [
+                clazz.addField('_' + memberName) [
                     type = realType
                     visibility = Visibility.PROTECTED
                 ]
@@ -137,32 +138,32 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
                 {
                     // populate List
                     body = ['''
-                        if («memberName» == null) {
-                            «memberName» = new «toJavaCode(ArrayList.newTypeReference)»<«basicType.simpleName.toFirstUpper»>();
-                            for (int i=0; i<«memberName».size(); i++) {
-                                «memberName».add((«basicType.simpleName.toFirstUpper») mJsonObject.getJSONArray("«memberName»").get(i));
+                        if (_«memberName» == null) {
+                            _«memberName» = new «toJavaCode(ArrayList.newTypeReference)»<«basicType.simpleName.toFirstUpper»>();
+                            for (int i=0; i<_«memberName».size(); i++) {
+                                _«memberName».add((«basicType.simpleName.toFirstUpper») mJsonObject.getJSONArray("«entry.key»").get(i));
                             }
                         }
-                        return «memberName»;
+                        return _«memberName»;
                     ''']
                 }else if (entry.isJsonObject)
                 {
                     body = ['''
-                        if («memberName» == null) {
-                            «memberName» = new «basicType.simpleName»(mJsonObject.getJSONObject("«memberName»"));
+                        if (_«memberName» == null) {
+                            _«memberName» = new «basicType.simpleName»(mJsonObject.getJSONObject("«entry.key»"));
                         }
-                        return «memberName»;
+                        return _«memberName»;
 				    ''']
                 }else { // is primitive (e.g. String, Number, Boolean)
                     body = ['''
-                        return mJsonObject.get«basicType.simpleName.toFirstUpper»("«memberName»");
+                        return mJsonObject.get«basicType.simpleName.toFirstUpper»("«entry.key»");
                     ''']
                 }
             ]
 
             // chainable
             clazz.addMethod("set" + memberName.toFirstUpper) [
-                addParameter(memberName, realType)
+                addParameter('_' + memberName, realType)
                 returnType = clazz.newTypeReference
                 exceptions = JSONException.newTypeReference
                 if (entry.isArray)
@@ -170,20 +171,20 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
                     // ArrayList<T> === Collection<T>
                     body = ['''
                         mDirty = true;
-                        mJsonObject.put("«memberName»", new «toJavaCode(JSONArray.newTypeReference)»(«memberName»));
+                        mJsonObject.put("«entry.key»", new «toJavaCode(JSONArray.newTypeReference)»(_«memberName»));
                         return this;
                     ''']
                 }else if (entry.isJsonObject)
                 {
                     body = ['''
                         mDirty = true;
-                        mJsonObject.put("«memberName»", «memberName».toJSONObject());
+                        mJsonObject.put("«entry.key»", _«memberName».toJSONObject());
                         return this;
 				    ''']
                 }else {
                     body = ['''
                         mDirty = true;
-                        mJsonObject.put("«memberName»", «memberName»);
+                        mJsonObject.put("«entry.key»", _«memberName»);
                         return this;
                     ''']
                 }
