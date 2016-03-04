@@ -37,6 +37,19 @@ annotation AndroidJsonized {
 
 class AndroidJsonizedProcessor extends AbstractClassProcessor {
 
+    val reservedKeywords = #[
+        'abstract',     'continue',     'for',          'new',          'switch',
+        'assert',       'default',      'goto',         'package',      'synchronized',
+        'boolean',      'do',           'if',           'private',      'this',
+        'break',        'double',       'implements',   'protected',    'throw',
+        'byte',         'else',         'import',       'public',       'throws',
+        'case',         'enum',         'instanceof',   'return',       'transient',
+        'catch',        'extends',      'int',          'short',        'try',
+        'char',         'final',        'interface',    'static',       'void',
+        'class',        'finally',      'long',         'strictfp',     'volatile',
+        'const',        'float',        'native',       'super',        'while'
+    ]
+
     /**
      * Called first. Only register any new types you want to generate here.
      */
@@ -45,16 +58,18 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
         registerClassNamesRecursively(clazz.jsonEntries, context)
     }
 
+    val delayedErrorMessages = #{ '' -> '' }
+
     private def void registerClassNamesRecursively(Iterable<JsonObjectEntry> json, RegisterGlobalsContext context) {
         for (jsonEntry : json) {
             if (jsonEntry.isJsonObject) {
+                try {
                     context.registerClass(jsonEntry.className)
                     registerClassNamesRecursively(jsonEntry.childEntries, context)
-//                }catch (java.lang.IllegalArgumentException e)
-//                {
-                    // TODO figure out how to warn the user of repeated type registers
-                    // for now just ignore it, and assume the generated types are exactly the same
-//                }
+                }catch (java.lang.IllegalArgumentException e)
+                {
+                    delayedErrorMessages.put(jsonEntry.className, String.format("There was a collision between %s and another registered type.\n%s", jsonEntry.key, e.stackTrace))
+                }
             }
         }
     }
@@ -63,6 +78,7 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
      * Called secondly. Modify the types.
      */
     override doTransform(MutableClassDeclaration clazz, extension TransformationContext context) {
+        clazz.addWarning(delayedErrorMessages.get(clazz.simpleName))
         enhanceClassesRecursively(clazz, clazz.jsonEntries, context)
     }
 
@@ -103,7 +119,7 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
         for (entry : entries) {
             val basicType = entry.getComponentType(context)
             val realType = if(entry.isArray) getList(basicType) else basicType
-            val memberName = entry.key
+            val memberName = if (reservedKeywords.iterator.exists[ equals(entry.key) ]) '_' + entry.key else entry.key.replaceAll("[^\\x00-\\x7F]", "")
 
             // add JSONObject container for lazy-getting
             if (entry.isJsonObject || entry.isArray)
@@ -111,16 +127,10 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
                 clazz.addField(memberName) [
                     type = realType
                     visibility = Visibility.PROTECTED
-                    // make it possible to extend, e.g. BigInteger, BigNumber
-                    // TODO add an option to annotation to mark fields as special fields
-                    // reason why not: @AndroidJson already does this.
-                    // generate Date converters, BigInteger/BigNumber etc.
-                    // @AndroidJsonizer(value = "http://...", mapping = # { 'anInteger' -> BigInteger, 'aFloat' -> BigNumber, 'timestamp' -> Date })
-                    // @AndroidJsonizer(value = '{ "anInteger" : 1234, "aFloat" : 12.34 }', mapping = # { 'anInteger' -> BigInteger, 'aFloat' -> BigNumber, 'timestamp' -> Date })
                 ]
             }
 
-            clazz.addMethod("get" + entry.key.toFirstUpper) [
+            clazz.addMethod("get" + memberName.toFirstUpper) [
                 returnType = realType
                 exceptions = JSONException.newTypeReference
                 if (entry.isArray)

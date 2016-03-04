@@ -151,8 +151,13 @@ import org.eclipse.xtend.lib.annotations.Data
                     }else {
                         typeof(long).newTypeReference
                     }
-                }else if (v.isString)
+                }else if (v.isString) {
 					String.newTypeReference
+				}else if (v.isJsonNull)
+				{
+					// TODO addWarning('We cannot determine the type, defaulting to a String type.\nConsider changing the type in the annotation.')
+					String.newTypeReference
+				}
 			}
 			JsonObject: {
 				findClass(className).newTypeReference
