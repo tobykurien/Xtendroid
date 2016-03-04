@@ -2,10 +2,11 @@ package org.xtendroid.xtendroidtest.test
 
 /**
  * TODO
- * - warn for "@attr" : "value", or just strip the non-ascii values
- * - handle name collisions, by suffixing digits
+ * + warn for "@attr attrpart2" : "value", or just strip the non-ascii values
+ * + handle name collisions, by suffixing digits, or by not re-registering the damn thing, the decoration can go on without re-registering
  * - make "attr" : null, String by default
- * - "class" : "yes, this is a reserved keyword" will break your shizzle (scan for all the reserved keywords)
+ * + "class" : "yes, this is a reserved keyword" will break your shizzle (scan for all the reserved keywords), quadratic costs...
+ * - write unit tests!
  */
 
 import org.xtendroid.json.AndroidJsonized
@@ -171,8 +172,45 @@ class MusicReleases {
     }]
    }
   }
-}'
+ }'
 }
+
+// Looky here, there's a null-value
+// "params": null
+/*
+@AndroidJsonized('{
+    "textList": {
+        "messages": [
+            {
+                "messageKey": "MESSAGE_KKAI106_04",
+                "messageText": "Meh, nan anananan booo boo.",
+                "messageType": "WARNING"
+            }
+        ],
+        "texts": [
+            {
+                "id": "mobileAppsConfig_clothingline",
+                "text": "VESTMENTS_DEFAULT",
+		"params": null
+            }
+        ]
+    }
+}')
+class WildernessResponse1 {}
+*/
+
+/*
+@AndroidJsonized('{
+    "texts": [
+        {
+            "id": "mobileAppsConfig_clothingline",
+            "text": "VESTMENTS_DEFAULT",
+            "@_this_will_totally_not_wor _@" : "params"
+        }	
+    ]
+}')
+class WildernessResponse2 {}
+*/
 
 class JsonizedTest {
 
@@ -241,4 +279,10 @@ class JsonizedTest {
 	}
 
 	// TODO do the other tests... like isDirty etc. getJSONObject
+
+	@Test
+	public def testsFromTheWilderness()
+	{
+//		new WildernessResponse1()
+	}
 }
