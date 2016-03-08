@@ -51,9 +51,13 @@ android {
 
     lintOptions {
       abortOnError false
-    }   
-}
+    }
 
-//apply from: 'maven-push.gradle' // TODO revive when the whole thing works again
+    packagingOptions {
+      // from xtendlib >=2.9.2
+      exclude 'META-INF/ECLIPSE_.RSA'
+      exclude 'META-INF/ECLIPSE_.SF'
+    }
+}
 
 
