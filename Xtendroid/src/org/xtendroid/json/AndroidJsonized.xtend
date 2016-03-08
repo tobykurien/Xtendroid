@@ -36,8 +36,8 @@ annotation AndroidJsonized {
 }
 
 class AndroidJsonizedProcessor extends AbstractClassProcessor {
-/*
-    val reservedKeywords = #[
+
+    val reservedKeywords = #{
         'abstract',     'continue',     'for',          'new',          'switch',
         'assert',       'default',      'goto',         'package',      'synchronized',
         'boolean',      'do',           'if',           'private',      'this',
@@ -48,8 +48,7 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
         'char',         'final',        'interface',    'static',       'void',
         'class',        'finally',      'long',         'strictfp',     'volatile',
         'const',        'float',        'native',       'super',        'while'
-    ]
-*/
+    }
 
     /**
      * Called first. Only register any new types you want to generate here.
@@ -131,6 +130,7 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
                 ]
             }
 
+            // Hopefully sets have logarithmic costs, not linear (although the cost in our case is constant)
             clazz.addMethod("get" + memberName.toFirstUpper) [
                 returnType = realType
                 exceptions = JSONException.newTypeReference

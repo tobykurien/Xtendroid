@@ -191,13 +191,16 @@ class MusicReleases {
             {
                 "id": "mobileAppsConfig_clothingline",
                 "text": "VESTMENTS_DEFAULT",
-		"params": null
+				"params": null,
             }
         ]
     }
 }')
 class WildernessResponse1 {}
 */
+
+@AndroidJsonized('{ "class" : "looky here a reserved keyword" }')
+class WildernessResponse_Reserved_Keyword {}
 
 /*
 @AndroidJsonized('{
