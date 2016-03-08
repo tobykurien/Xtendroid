@@ -120,7 +120,7 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
         for (entry : entries) {
             val basicType = entry.getComponentType(context)
             val realType = if(entry.isArray) getList(basicType) else basicType
-            val memberName = '_' + (entry.key.replaceAll("[^\\x00-\\x7F]", "").replaceAll("[^A-Za-z0-9]", "").replaceAll("\\s+",""))
+            val memberName = entry.key.replaceAll("[^\\x00-\\x7F]", "").replaceAll("[^A-Za-z0-9]", "").replaceAll("\\s+","")
 
             // add JSONObject container for lazy-getting
             if (entry.isJsonObject || entry.isArray)
