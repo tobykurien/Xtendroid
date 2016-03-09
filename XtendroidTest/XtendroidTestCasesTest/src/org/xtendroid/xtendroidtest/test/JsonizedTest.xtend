@@ -5,7 +5,7 @@ package org.xtendroid.xtendroidtest.test
  * + warn for "@attr attrpart2" : "value", or just strip the non-ascii values
  * + handle name collisions, by suffixing digits, or by not re-registering the damn thing, the decoration can go on without re-registering
  * - make "attr" : null, String by default
- * + "class" : "yes, this is a reserved keyword" will break your shizzle (scan for all the reserved keywords), quadratic costs...
+ * + "class" : "yes, this is a reserved keyword" will break your shizzle (scan for all the reserved keywords)
  * - write unit tests!
  */
 
@@ -202,18 +202,19 @@ class WildernessResponse1 {}
 @AndroidJsonized('{ "class" : "looky here a reserved keyword" }')
 class WildernessResponse_Reserved_Keyword {}
 
-/*
 @AndroidJsonized('{
     "texts": [
         {
             "id": "mobileAppsConfig_clothingline",
             "text": "VESTMENTS_DEFAULT",
-            "@_this_will_totally_not_wor _@" : "params"
+            "@_this_will_totally_not_wor _@" : "params",
+            "12 34" : "totally starts with a number"
         }	
     ]
 }')
-class WildernessResponse2 {}
-*/
+class WildernessResponse2 {
+	var meh = 'meh'
+}
 
 class JsonizedTest {
 
