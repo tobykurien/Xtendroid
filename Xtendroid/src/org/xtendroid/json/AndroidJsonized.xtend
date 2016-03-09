@@ -18,8 +18,6 @@ import org.json.JSONException
 
 import java.util.ArrayList
 
-// for some reason I can't import from a different package within the same -ing module
-//import static extension de.itemis.jsonized.JsonObjectEntry.*
 import static extension org.xtendroid.json.JsonObjectEntry.*
 
 /**
@@ -131,7 +129,7 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
             }
 
             // Hopefully sets have logarithmic costs, not linear (although the cost in our case is constant)
-            clazz.addMethod("get" + memberName.toFirstUpper) [
+            clazz.addMethod("get" + memberName.toFirstUpper + if (reservedKeywords.contains(memberName)) '_'  else '') [
                 returnType = realType
                 exceptions = JSONException.newTypeReference
                 if (entry.isArray)
@@ -162,7 +160,7 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
             ]
 
             // chainable
-            clazz.addMethod("set" + memberName.toFirstUpper) [
+            clazz.addMethod("set" + memberName.toFirstUpper + if (reservedKeywords.contains(memberName)) '_'  else '') [
                 addParameter('_' + memberName, realType)
                 returnType = clazz.newTypeReference
                 exceptions = JSONException.newTypeReference
