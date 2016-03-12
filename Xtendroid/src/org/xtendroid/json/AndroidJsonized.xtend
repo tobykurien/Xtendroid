@@ -74,10 +74,12 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
 
     /**
      * Called secondly. Modify the types.
+     *
      */
     override doTransform(MutableClassDeclaration clazz, extension TransformationContext context) {
         clazz.addWarning(delayedErrorMessages.get(clazz.simpleName))
         enhanceClassesRecursively(clazz, clazz.jsonEntries, context)
+        clazz.removeAnnotation(clazz.annotations.findFirst[annotationTypeDeclaration == AndroidJsonized.newTypeReference.type])
     }
 
     def void enhanceClassesRecursively(MutableClassDeclaration clazz, Iterable<? extends JsonObjectEntry> entries, extension TransformationContext context) {
