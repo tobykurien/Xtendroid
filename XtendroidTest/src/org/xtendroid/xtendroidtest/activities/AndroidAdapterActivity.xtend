@@ -12,7 +12,8 @@ import org.xtendroid.xtendroidtest.models.User
  */
 @AndroidActivity(R.layout.activity_main) class AndroidAdapterActivity {
 	
-	@OnCreate def init() {	
+	@OnCreate 
+	def init() {	
 		val users = new ArrayList<User>;
 		(1..10).forEach [i|
 			var u = new User

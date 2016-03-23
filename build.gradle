@@ -1,20 +1,19 @@
-buildscript {
-    repositories {
-	jcenter()
-        mavenCentral()
-    }
-
+buildscript {scriptHandler->
+    apply from: 'repositories.gradle', to: scriptHandler
+    apply from: 'dependencies.gradle'
     dependencies {
-	classpath "org.xtend:xtend-android-gradle-plugin:0.4.7"
-        classpath 'com.android.tools.build:gradle:1.2.3'
+        classpath(project.ext.build.xtend_android_gradle)
+        classpath(project.ext.build.xtext_gradle)
     }
 }
 
-subprojects {
+apply plugin: 'org.xtext.xtend'
 
-   repositories {
-      mavenCentral()
-   }
-
+dependencies {
+  compile project(':Xtendroid')
+  compile project(':XtendroidTest')
+  compile project(':Sample1')
+  compile project(':HelloWorld')
+  compile project(':HandlerExample')
+  compile project(':MovieSearchApp')
 }
-

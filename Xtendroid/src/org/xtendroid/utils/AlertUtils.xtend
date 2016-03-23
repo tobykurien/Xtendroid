@@ -26,8 +26,8 @@ class AlertUtils {
    /**
     * Allow runOnUiThread from any Fragment
     */
-   def public static runOnUiThread(Fragment frag, ()=>void uiCode) {
-      val handler = new Handler(frag.activity.mainLooper)
+   def public static runOnUiThread(Fragment fragment, ()=>void uiCode) {
+      val handler = new Handler(fragment.getActivity.getMainLooper)
       handler.post(uiCode)
    }
 

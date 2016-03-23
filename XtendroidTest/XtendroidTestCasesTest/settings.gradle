@@ -1,0 +1,3 @@
+include(':Xtendroid', ':XtendroidTest')
+project(':Xtendroid').projectDir = new File(settingsDir, '../../Xtendroid')
+project(':XtendroidTest').projectDir = new File(settingsDir, '../')

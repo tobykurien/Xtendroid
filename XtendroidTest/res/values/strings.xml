@@ -5,5 +5,19 @@
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello, Xtendroid</string>
     <string name="welcome">Xtendroid API demos and tests</string>
+
+    <string-array name="array_of_strings">
+        <item>one</item>
+        <item>two</item>
+        <item>two</item>
+    </string-array>
+
+    <integer-array name="powers_of_two">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>4</item>
+        <item>8</item>
+    </integer-array>
     
 </resources>

@@ -5,8 +5,8 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="8"
-        android:targetSdkVersion="19" />
+        android:minSdkVersion="11"
+        android:targetSdkVersion="23" />
 
     <application
         android:allowBackup="true"
@@ -45,6 +45,7 @@
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity android:name="org.xtendroid.xtendroidtest.activities.ParcelableActivity" />
         <activity android:name="org.xtendroid.xtendroidtest.activities.BundleActivity" />
+        <activity android:name="org.xtendroid.xtendroidtest.activities.AndroidResourcesActivity" />
     </application>
 
 </manifest>

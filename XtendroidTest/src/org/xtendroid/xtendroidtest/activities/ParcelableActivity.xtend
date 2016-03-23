@@ -1,14 +1,13 @@
 package org.xtendroid.xtendroidtest.activities
 
 import android.content.Intent
-import android.os.Parcelable
 import java.util.Date
 import org.xtendroid.app.AndroidActivity
 import org.xtendroid.app.OnCreate
 import org.xtendroid.parcel.AndroidParcelable
 import org.xtendroid.xtendroidtest.R
 
-import static extension org.xtendroid.utils.AlertUtils.*
+import org.xtendroid.xtendroidtest.activities.ParcelableData
 
 @AndroidActivity(R.layout.activity_parcelable) class ParcelableActivity {
 	//@BundleProperty 
@@ -46,5 +45,8 @@ class ParcelableData {
 	override toString() {
 		'''«age», «createdAt», «likeAButterfly», «likeABee»'''
 	}
+
+	// TODO issue #98, temporary fix
+	new () {}
 }
 	

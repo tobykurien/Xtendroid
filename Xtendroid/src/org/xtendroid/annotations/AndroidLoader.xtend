@@ -16,7 +16,6 @@ import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
 import org.eclipse.xtend.lib.macro.declaration.Visibility
 
 import static extension org.xtendroid.utils.NamingUtils.*
-import org.xtendroid.app.OnCreate
 
 /**
  * 
@@ -50,10 +49,12 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 		// we need at least one loader in the field
 		val mandatoryLoaderTypes = #['android.content.Loader', 'android.support.v4.content.Loader']
 		val loaderFields = clazz.declaredFields.filter[f|
-			!f.type.inferred && f.initializer != null && (
+			!f.type.inferred /*&& f.initializer != null*/ && (
 			android.content.Loader.newTypeReference.isAssignableFrom(f.type) ||
 				Loader.newTypeReference.isAssignableFrom(f.type)
 		)]
+		// we also accept fields that are uninitialized, because this will result
+		// in broken first compilation that require a second build to complete
 		
 		if (loaderFields.size == 0) {
 			clazz.declaredFields.filter[f|f.type.inferred].forEach[f|
@@ -84,8 +85,8 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 
 		// generate ID tags with random numbers for each Loader
 		val className = clazz.simpleName // this was added to decrease the chance of collisions (but there are no guarantees)
-		val randomInitialInt = loaderFields.map[f|className + f.simpleName].join().bytes.fold(0 as int,
-			[_1, _2|_1 as int + _2 as int])
+		val randomInitialInt = loaderFields.map[f|className + f.simpleName].join().bytes.fold(0,
+			[_1, _2|_1 + _2])
 
 		for (var i = 0; i < loaderFields.length; i++) {
 			val int integer = i + randomInitialInt * (i + 1)
@@ -210,7 +211,7 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 		]
 		
 		val onCreateLoaderMethodBody = loaderFieldNames.map[n|
-							String.format("if (%s == LOADER_ID) return get%sLoader();", n.loaderIdFromName,
+							String.format("if (%s == LOADER_ID) return get%s();", n.loaderIdFromName,
 								n.toJavaIdentifier.toFirstUpper)].join("\n")
 
 		// if multiple Loaders then no generic param
@@ -258,18 +259,19 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 
 		// add getters for Loaders (NOTE: workaround/hack, because I don't know how to evaluate initializer exprs)
 		loaderFields.forEach [ f |
-			clazz.addMethod("get" + f.simpleName.toJavaIdentifier.toFirstUpper + "Loader") [
+			clazz.addMethod("get" + f.simpleName.toJavaIdentifier.toFirstUpper) [
 				visibility = Visibility.PUBLIC
-				body = f.initializer
+				if (f.initializer != null) {
+					body =  f.initializer
+				}else
+				{
+				    body = ['''
+						return «f.simpleName»;
+					''']
+				}
 				returnType = f.type
+				primarySourceElement = f.primarySourceElement
 			]
 		]
-
-		// remove useless fields
-		clazz.declaredFields.filter[f|
-			!f.type.inferred && f.initializer == null && (
-				android.content.Loader.newTypeReference.isAssignableFrom(f.type) ||
-				Loader.newTypeReference.isAssignableFrom(f.type)
-			)].forEach[remove]
 	}
 }

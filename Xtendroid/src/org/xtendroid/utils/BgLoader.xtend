@@ -2,6 +2,7 @@ package org.xtendroid.utils
 
 import android.support.v4.content.AsyncTaskLoader
 import android.content.Context
+import android.app.Activity
 
 /**
  * 
@@ -19,6 +20,28 @@ class BgSupportLoader<R> extends AsyncTaskLoader<R> {
 	var ()=>R bgFunction
 	var (R)=>void disposeFunction
 	protected var R result
+
+	/**
+	 * Convenient sugaring for initializing BgSupportLoaders
+	 * on fields with base type android.content.Loader<D>
+	 *
+	 * usage: <ReturnType>supportLoader(activity, [ "do something on the AsyncTask" ])[ "Cleanup"]
+	 */
+	public static def<T> BgSupportLoader<T> supportLoader(Activity context, ()=>T bg, (T)=>void dispose)
+	{
+		return new BgSupportLoader<T>(context, bg, dispose)
+	}
+
+	/**
+	 * Convenient sugaring for initializing BgSupportLoaders
+	 * on fields with base type android.content.Loader<D>
+	 *
+	 * usage: <ReturnType>supportLoader(activity)[ "do something on the AsyncTask" ]
+	 */
+	public static def<T> BgSupportLoader<T> supportLoader(Activity context, ()=>T bg)
+	{
+		return new BgSupportLoader<T>(context, bg)
+	}
 
 	new(Context context) {
 		super(context)
@@ -109,6 +132,28 @@ class BgLoader<R> extends android.content.AsyncTaskLoader<R> {
 	var ()=>R bgFunction
 	var (R)=>void disposeFunction
 	protected var R result
+
+	/**
+	 * Convenient sugaring for initializing BgSupportLoaders
+ 	 * on fields with base type android.content.Loader<D>
+ 	 *
+ 	 * usage: <ReturnType>loader(activity, [ "do something on the AsyncTask" ])[ "Cleanup"]
+ 	 */
+	public static def<T> BgLoader<T> loader(Activity context, ()=>T bg, (T)=>void dispose)
+	{
+		return new BgLoader<T>(context, bg, dispose)
+	}
+
+	/**
+	 * Convenient sugaring for initializing BgSupportLoaders
+ 	 * on fields with base type android.content.Loader<D>
+ 	 *
+     * usage: <ReturnType>loader(activity)[ "do something on the AsyncTask" ]
+ 	 */
+	public static def<T> BgLoader<T> loader(Activity context, ()=>T bg)
+	{
+		return new BgLoader<T>(context, bg)
+	}
 
 	new(Context context) {
 		super(context)
