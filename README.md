@@ -1,9 +1,20 @@
 Xtendroid
 =========
 
-Xtendroid is an Android library that combines the power of [Xtend][] with some utility classes and annotations for productive Android development. Xtendroid helps to reduce/eliminate boilerplate code that Android is known for, while providing full IDE support. This is achieved by using Xtend's [extension methods][xtend-doc] and [active annotations][] (edit-time code generators), which expand out to Java code during editing/compilation.
+Xtendroid is a DSL (domain-specific language) for Android that is implemented 
+using the [Xtend][] language, which features [extension methods][xtend-doc] and 
+[active annotations][] (edit-time code generators) that expand out to Java 
+code during editing or compilation. *Active annotations* make Xtend more suitable 
+for DSL creation than languages like Kotlin or Groovy. Xtendroid supports Eclipse 
+and IntelliJ/Android Studio.
 
-Xtendroid can replace dependency injection frameworks like RoboGuice, Dagger, and Android Annotations, with lazy-loading getters that are [automatically generated][injection] for widgets in your layouts. With Xtend's lambda support and functional-style programming constructs, it reduces/eliminates the need for libraries like RetroLambda and RxJava. With it's [database support][database], Xtendroid also removes the need for ORM libraries.
+Xtendroid can replace dependency injection frameworks like RoboGuice, Dagger, 
+and Android Annotations, with lazy-loading getters that are 
+[automatically generated][injection] for widgets in your layouts. With Xtend's 
+lambda support and functional-style programming constructs, it 
+reduces/eliminates the need for libraries like RetroLambda and RxJava. With 
+it's [database support][database], Xtendroid also removes the need for ORM 
+libraries.
 
 **Anonymous inner classes**
 
@@ -26,7 +37,7 @@ myButton.onClickListener = [
 ]
 ```
 
-**Redundant Type Information**
+**Type Inference**
 
 Android code:
 ```java
@@ -48,7 +59,7 @@ var results = #[
 
 **Lambdas and multi-threading**
 
-Blink a button 3 times (equivalent Java code is too verbose to include here):
+Blink a button 3 times (equivalent Android code is too verbose to include here):
 ```xtend
 import static extension org.xtendroid.utils.AsyncBuilder.*
 
@@ -63,10 +74,123 @@ async [
 ].start()
 ```
 
+**Android boilerplate removal**
+
+Android:
+```java
+public class Student implements Parcelable {
+        private String id;
+        private String name;
+        private String grade;
+
+        // Constructor
+        public Student(String id, String name, String grade){
+            this.id = id;
+            this.name = name;
+            this.grade = grade;
+       }
+
+       // Getter and setter methods
+       // ... ommitted for brevity!
+       
+       // Parcelling part
+       public Student(Parcel in){
+           String[] data = new String[3];
+
+           in.readStringArray(data);
+           this.id = data[0];
+           this.name = data[1];
+           this.grade = data[2];
+       }
+
+       @Оverride
+       public int describeContents(){
+           return 0;
+       }
+
+       @Override
+       public void writeToParcel(Parcel dest, int flags) {
+           dest.writeStringArray(new String[] {this.id,
+                                               this.name,
+                                               this.grade});
+       }
+       public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+           public Student createFromParcel(Parcel in) {
+               return new Student(in); 
+           }
+
+           public Student[] newArray(int size) {
+               return new Student[size];
+           }
+       };
+   }
+```
+
+Xtendroid:
+```xtend
+// @Accessorts creates getters/setters, @AndroidParcelable makes it parcelable!
+@Accessors @AndroidParcelable class Student {
+    String id
+    String name
+    String grade
+}
+```
+
+**Functional programming style**
+
+```xtend
+    @Accessors class User {
+        String username
+        long salary
+        int age
+    }
+
+    var List<User> users = getAllUsers() // from somewhere...
+    var result = users
+            .filter[ age >= 40 ]
+            .maxBy [ salary ]
+            
+    toast('''Top over 40 is «result.username» earning «result.salary»''')
+```
+
+
+**Builder pattern**
+```xtend
+// Builder class to create UI widgets
+class UiBuilder {
+   
+   def static LinearLayout linearLayout(Context it, (LinearLayout)=>void initializer) {
+      new LinearLayout(it) => initializer
+   }
+   
+   def static Button button(Context it, (Button)=>void initializer) {
+      new Button(it) => initializer
+   }
+   
+} 
+
+// Now let's use it!
+import static extension org.xtendroid.utils.AlertUtils.*
+import static extension UiBuilder.*
+
+contentView = linearLayout [
+   gravity = Gravity.CENTER
+   addView( button [
+      text = "Say Hello!"
+      onClickListener = [ 
+         toast("Hello Android from Xtend!")
+      ]
+   ])
+]
+
+```
+
 Documentation
 -------------
 
-Xtendroid removes boilerplate code from things like activities and fragments, background processing, shared preferences, adapters (and ViewHolder pattern), database handling, JSON handling, Parcelables, Bundle arguments, and more. Combining these, you get concise and expressive code.
+Xtendroid removes boilerplate code from things like activities and fragments, 
+background processing, shared preferences, adapters (and ViewHolder pattern), 
+database handling, JSON handling, Parcelables, Bundle arguments, and more. 
 
 View the full reference documentation for Xtendroid [here][doc].
 
@@ -156,57 +280,6 @@ Declare the activity in your ```AndroidManifest.xml``` file, add the internet pe
 This and other examples are in the [examples folder][examples]. The [Xtendroid Test app][] is like Android's API Demos app, and showcases the various features of Xtendroid.
 
 For an example of a live project that uses this library, see the Webapps project: https://github.com/tobykurien/webapps
-
-How it works
-------------
-
-If you display toasts often, you know that typing out ```Toast.makeText(msg, Toast.LENGTH_SHORT).show();``` is a pain, and it's not easy to add it to a base class, since Activities (and Fragments) may extend multiple base classes (like ListActivity, FragmentActivity, etc.). Here's the easy way using Xtendroid:
-
-```xtend
-import static extension org.xtendroid.utils.AlertUtils.*  // mix-in our alert utils
-
-// elsewhere
-toast("My short message")
-toastLong("This message displays for longer")
-```
-
-Where is the reference to the ```Context``` object? It is implicit, thanks to Xtend:
-
-```xtend
-// this:
-AlertUtils.toast(context, "My message")
-
-// becomes this via the static import:
-toast(context, "My message")
-
-// which is equivalent to (extension method):
-context.toast("My message")
-
-// which, in an Activity is the same as:
-this.toast("My message")
-
-// But "this" is implicit, so we can shorten it to:
-toast("My message")
-```
-
-The above magic, as well as the mix-in style ability of the ```import static extension``` of Xtend, is used to great effect in Xtendroid.
-
-In addition, Xtendroid implements several [Active Annotations][] which remove most of the boilerplate-code that's associated with Android development. Here is an example of one of the most powerful Xtendroid annotations, ```@AndroidActivity```:
-
-```xtend
-@AndroidActivity(R.layout.my_activity) class MyActivity {
-
-	@OnCreate
-	def init(Bundle savedInstanceState) {
-		myTextView.text = "some text"
-	}
-
-}
-```
-
-```@AndroidActivity``` automatically extends the ```Activity``` class, loads the layout into the activity, parses the specified layout file, and creates getters/setters for each of the views contained there-in, and checks for the existence of all ```onClick``` methods, at **edit-time**! You will immediately get code-completion and outline for your layout widgets! Any method annotated with ```@OnCreate``` is called at runtime once the views are ready, although as with everything in Xtendroid, you are free to implement the ```onCreate()``` method yourself.
-
-Note that the Active Annotations run at edit-time and simply generate the usual Java code for you, so there is no runtime performance impact. View this video of how this works and how well it integrates with the Eclipse IDE: http://vimeo.com/77024959
 
 Getting Started
 ===============
