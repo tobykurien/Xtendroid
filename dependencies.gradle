@@ -1,7 +1,7 @@
 ext {
     compileSdkVersion = 23
     minSdkVersion = 15
-    buildToolsVersion = '23.0.2'
+    buildToolsVersion = '24.0.0 rc2'
 
     android_gradle_ver = '2.0.+'
     xtend_android_gradle_ver = '1.0.+'
@@ -15,8 +15,8 @@ ext {
         xtext_gradle : "org.xtext:xtext-gradle-plugin:${xtext_gradle_ver}"
     ]
 
-    xtend_lib_ver = '2.9.+'
-    android_sdk_support_ver = '23.1.+'
+    xtend_lib_ver = '2.9.2'
+    android_sdk_support_ver = '23.1.1'
 
     lib = [
         xtend : "org.eclipse.xtend:org.eclipse.xtend.lib:${xtend_lib_ver}",
