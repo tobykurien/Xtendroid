@@ -299,7 +299,7 @@ Some Xtend Gradle plugin gotchas:
 [examples]: /examples
 [Xtendroid Test app]: /XtendroidTest
 [xtendapp]: https://github.com/tobykurien/XtendApp
-[android_studio]: https://github.com/tobykurien/Xtendroid/wiki/HowTo-setup-Android-Studio-%28aka-Intellij%29-support
+[android_studio]: https://github.com/tobykurien/Xtendroid/wiki/HowTo-setup-Android-Studio-%28also-Intellij%29-support
 [eclipse_aar_gradle]: https://github.com/ksoichiro/gradle-eclipse-aar-plugin
 [Groovy]: http://groovy-lang.org
 [android-groovy-support]: https://github.com/tobykurien/android-groovy-support 
