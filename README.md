@@ -235,7 +235,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.0.0-beta5'
+        classpath 'com.android.tools.build:gradle:2.1.0-alpha3'
         classpath 'org.xtext:xtext-android-gradle-plugin:1.0.3'
     }
 }
