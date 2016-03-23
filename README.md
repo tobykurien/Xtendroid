@@ -16,7 +16,7 @@ reduces/eliminates the need for libraries like RetroLambda and RxJava. With
 it's [database support][database], Xtendroid also removes the need for ORM 
 libraries.
 
-**Anonymous inner classes**
+**Anonymous inner classes (lambdas)**
 
 Android code:
 ```java
@@ -57,7 +57,7 @@ var results = #[
 ]
 ```
 
-**Lambdas and multi-threading**
+**Multi-threading**
 
 Blink a button 3 times (equivalent Android code is too verbose to include here):
 ```xtend
@@ -71,6 +71,13 @@ async [
         runOnUiThread [ myButton.pressed = false ]
         Thread.sleep(250)
     }
+    
+    return true
+].then [result|
+    // This is the onPostExecute() method, runs on UI thread
+    if (result) {
+        toast("Done!")
+    }
 ].start()
 ```
 
@@ -79,51 +86,48 @@ async [
 Android:
 ```java
 public class Student implements Parcelable {
-        private String id;
-        private String name;
-        private String grade;
+    private String id;
+    private String name;
+    private String grade;
 
-        // Constructor
-        public Student(String id, String name, String grade){
-            this.id = id;
-            this.name = name;
-            this.grade = grade;
-       }
+    // Constructor
+    public Student(){
+    }
 
-       // Getter and setter methods
-       // ... ommitted for brevity!
-       
-       // Parcelling part
-       public Student(Parcel in){
-           String[] data = new String[3];
+    // Getter and setter methods
+    // ... ommitted for brevity!
+    
+    // Parcelling part
+    public Student(Parcel in){
+        String[] data = new String[3];
 
-           in.readStringArray(data);
-           this.id = data[0];
-           this.name = data[1];
-           this.grade = data[2];
-       }
+        in.readStringArray(data);
+        this.id = data[0];
+        this.name = data[1];
+        this.grade = data[2];
+    }
 
-       @Оverride
-       public int describeContents(){
-           return 0;
-       }
+    @Оverride
+    public int describeContents(){
+        return 0;
+    }
 
-       @Override
-       public void writeToParcel(Parcel dest, int flags) {
-           dest.writeStringArray(new String[] {this.id,
-                                               this.name,
-                                               this.grade});
-       }
-       public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
-           public Student createFromParcel(Parcel in) {
-               return new Student(in); 
-           }
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeStringArray(new String[] {this.id,
+                                            this.name,
+                                            this.grade});
+    }
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        public Student createFromParcel(Parcel in) {
+            return new Student(in); 
+        }
 
-           public Student[] newArray(int size) {
-               return new Student[size];
-           }
-       };
-   }
+        public Student[] newArray(int size) {
+            return new Student[size];
+        }
+    };
+}
 ```
 
 Xtendroid:
@@ -139,18 +143,18 @@ Xtendroid:
 **Functional programming style**
 
 ```xtend
-    @Accessors class User {
-        String username
-        long salary
-        int age
-    }
+@Accessors class User {
+    String username
+    long salary
+    int age
+}
 
-    var List<User> users = getAllUsers() // from somewhere...
-    var result = users
-            .filter[ age >= 40 ]
-            .maxBy [ salary ]
-            
-    toast('''Top over 40 is «result.username» earning «result.salary»''')
+var List<User> users = getAllUsers() // from somewhere...
+var result = users
+        .filter[ age >= 40 ]
+        .maxBy[ salary ]
+        
+toast('''Top over 40 is «result.username» earning «result.salary»''')
 ```
 
 
@@ -178,11 +182,28 @@ contentView = linearLayout [
    addView( button [
       text = "Say Hello!"
       onClickListener = [ 
-         toast("Hello Android from Xtend!")
+         toast("Hello Android from Xtendroid!")
       ]
    ])
 ]
 
+```
+
+**Utilities**
+
+```xtend
+import static extension org.xtendroid.utils.AlertUtils.*
+import static extension org.xtendroid.utils.TimeUtils.*
+
+var Date yesterday = 24.hours.ago
+var Date tomorrow = 24.hours.fromNow
+var Date futureDate = now + 48.days + 20.hours + 2.seconds
+if (futureDate - now < 24.hours) {
+    confirm("Less than a day to go! Do it now?") [
+        // user wants to do it now
+        doIt()
+    ] 
+}
 ```
 
 Documentation
