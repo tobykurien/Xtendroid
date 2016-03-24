@@ -92,8 +92,12 @@ async [
     if (result) {
         toast("Done!")
     }
+].onError [error|
+    toast("Oops! " + error.message)
 ].start()
 ```
+
+> Note: sneaky throws, smoother error handling. See [documentation][doc] for the many other benefits to using the AsyncBuilder.
 
 **Android boilerplate removal**
 
@@ -313,7 +317,7 @@ Declare the activity in your ```AndroidManifest.xml``` file, add the internet pe
 
 This and other examples are in the [examples folder][examples]. The [Xtendroid Test app][] is like Android's API Demos app, and showcases the various features of Xtendroid.
 
-For an example of a live project that uses this library, see the Webapps project: https://github.com/tobykurien/webapps
+The wiki has a [list of some projects that make use of Xtendroid][apps list], including the open source [WebApps app][webapps]. 
 
 Getting Started
 ===============
@@ -409,3 +413,5 @@ Some Xtend Gradle plugin gotchas:
 [eclipse_aar_gradle]: https://github.com/ksoichiro/gradle-eclipse-aar-plugin
 [Groovy]: http://groovy-lang.org
 [android-groovy-support]: https://github.com/tobykurien/android-groovy-support 
+[webapps]: https://github.com/tobykurien/webapps
+[apps list]: https://github.com/tobykurien/Xtendroid/wiki/List-of-projects-using-Xtendroid
