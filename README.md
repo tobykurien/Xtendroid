@@ -2,20 +2,13 @@ Xtendroid
 =========
 
 Xtendroid is a DSL (domain-specific language) for Android that is implemented 
-using the [Xtend][] transpiler, which features [extension methods][xtend-doc] and 
+using the [Xtend][] transpiler, which features [extension methods][] and 
 [active annotations][] (edit-time code generators) that expand out to Java 
 code during editing or compilation. *Active annotations*, in particular,  make 
-Xtend more suitable for DSL creation than languages like Kotlin or Groovy. 
-Xtendroid supports both Eclipse and IntelliJ/Android Studio, including code 
-completion, debugging, and so on.
+Xtend more suitable for DSL creation than languages like Kotlin or Groovy (e.g. see [`@AndroidActivity`][injection]). Xtendroid supports both Eclipse and IntelliJ/Android Studio, including code completion, debugging, and so on.
 
 Xtendroid can replace dependency injection frameworks like RoboGuice, Dagger, 
-and Android Annotations, with lazy-loading getters that are 
-[automatically generated][injection] for widgets in your layouts. With Xtend's 
-lambda support and functional-style programming constructs, it 
-reduces/eliminates the need for libraries like RetroLambda and RxJava. With 
-it's [database support][database], Xtendroid also removes the need for ORM 
-libraries.
+and Android Annotations, with lazy-loading getters that are [automatically generated][injection] for widgets in your layouts. With Xtend's lambda support and functional-style programming constructs, it reduces/eliminates the need for libraries like RetroLambda and RxJava. With it's [database support][database], Xtendroid also removes the need for ORM libraries.
 
 Features by example
 ===================
@@ -228,7 +221,7 @@ if (futureDate - now < 24.hours) {
 }
 ```
 
-> Note: you can easily create your own [extension methods][xtend-doc] for your project. 
+> Note: you can easily create your own [extension methods][] for your project. 
 
 Documentation
 -------------
@@ -408,8 +401,9 @@ Some Xtend Gradle plugin gotchas:
 
 
 [Xtend]: http://xtend-lang.org
-[xtend-doc]: http://www.eclipse.org/xtend/documentation.html
-[Active Annotations]: http://www.eclipse.org/xtend/documentation.html#activeAnnotation
+[xtend-doc]: http://www.eclipse.org/xtend/documentation/
+[extension methods]: http://www.eclipse.org/xtend/documentation/202_xtend_classes_members.html#extension-methods
+[Active Annotations]: http://www.eclipse.org/xtend/documentation/204_activeannotations.html
 [doc]: /Xtendroid/docs/index.md
 [injection]: /Xtendroid/docs/index.md#activities-and-fragments
 [database]: /Xtendroid/docs/index.md#database
