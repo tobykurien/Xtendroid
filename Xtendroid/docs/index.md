@@ -37,11 +37,11 @@ You can bind all the view widgets in an Activity layout file to the code automat
 
 ```
 
-Here, you specify the layout resource using the ```@AndroidActivity``` annotation, and Xtendroid will automatically parse the layout file and create getters for all the controls within the layout. This will be immediately accessible in the IDE (you will see the controls in your outline view and code-complete list). It will also auto-generate the ```onCreate()``` method if it doesn't exist, extend from ```Activity``` class, and load the layout into the Activity. Finally, it will look for any methods with the ```@OnCreate``` annotation, and call them within the ```onCreate()``` method once the controls are ready to be accessed. 
+Here, you specify the layout resource using the ```@AndroidActivity``` annotation, and Xtendroid will automatically parse the layout file and create getters for all the widgets within the layout. This will be immediately accessible in the IDE (you will see the widgets in your outline view and code-complete list). It will also auto-generate the ```onCreate()``` method if it doesn't exist, extend from ```Activity``` class, and load the layout into the Activity. Finally, it will look for any methods with the ```@OnCreate``` annotation, and call them within the ```onCreate()``` method once the widgets are ready to be accessed. 
 
-This annotation ensures that all referenced widgets exist, and all ```android:onClick``` method references in the layout exist in the activity, and if not, marks the activity with an error. Thus, you get compile-time checking of your widgets matching up in code and layout!
+This annotation ensures that all referenced widgets exist, and all ```android:onClick``` method references in the layout exist in the activity, and if not, marks the activity with an error. Thus, you get *compile-time checking* of your widgets matching up in code and layout!
 
-You can do something similar in a fragment using the ```@AndroidFragment``` annotation, but beware that in a fragment, the layout is loaded in the ```onCreateView()``` method and the controls are only ready to be accessed in ```onViewCreated()``` or ```onActivityCreated()``` methods. If you simply use the ```@OnCreate``` annotation on your method that instantiates the fragment, this will all be taken care of for you:
+You can do something similar in a fragment using the ```@AndroidFragment``` annotation, but beware that in a fragment, the layout is loaded in the ```onCreateView()``` method and the widgets are only ready to be accessed in ```onViewCreated()``` or ```onActivityCreated()``` methods. If you simply use the ```@OnCreate``` annotation on your method that instantiates the fragment, this will all be taken care of for you:
 
 ```xtend
 @AndroidFragment(R.layout.my_fragment) class MyFragment {
