@@ -37,7 +37,9 @@ You can bind all the view widgets in an Activity layout file to the code automat
 
 ```
 
-Here, you specify the layout resource using the ```@AndroidActivity``` annotation, and Xtendroid will automatically parse the layout file and create getters for all the controls within the layout. This will be immediately accessible in the IDE (you will see the controls in your outline view and code-complete list). It will also auto-generate the ```onCreate()``` method if it doesn't exist, extend from ```Activity``` class, and load the layout into the Activity. Finally, it will look for any methods with the ```@OnCreate``` annotation, and call them within the ```onCreate()``` method once the controls are ready to be accessed. This annotation also ensures that all ```android:onClick``` method references in the layout exist in the activity, and if not, marks the activity with an error.
+Here, you specify the layout resource using the ```@AndroidActivity``` annotation, and Xtendroid will automatically parse the layout file and create getters for all the controls within the layout. This will be immediately accessible in the IDE (you will see the controls in your outline view and code-complete list). It will also auto-generate the ```onCreate()``` method if it doesn't exist, extend from ```Activity``` class, and load the layout into the Activity. Finally, it will look for any methods with the ```@OnCreate``` annotation, and call them within the ```onCreate()``` method once the controls are ready to be accessed. 
+
+This annotation ensures that all referenced widgets exist, and all ```android:onClick``` method references in the layout exist in the activity, and if not, marks the activity with an error. Thus, you get compile-time checking of your widgets matching up in code and layout!
 
 You can do something similar in a fragment using the ```@AndroidFragment``` annotation, but beware that in a fragment, the layout is loaded in the ```onCreateView()``` method and the controls are only ready to be accessed in ```onViewCreated()``` or ```onActivityCreated()``` methods. If you simply use the ```@OnCreate``` annotation on your method that instantiates the fragment, this will all be taken care of for you:
 
@@ -52,6 +54,23 @@ You can do something similar in a fragment using the ```@AndroidFragment``` anno
 }
 
 ```
+
+> Note: the code for the above fragment and the activity before it are almost identical, making it easy to switch an Activity to Fragment and vice-versa. Similarily, it is easy to switch a Fragment into a DialogFragment (see ```@AndroidDialogFragment``` below).
+
+The ```@AndroidView``` annotation is a simple way to access your views inside an activity or fragment, without using the above class-level annotations (but at the cost of having to explicitly declare each widget), e.g.
+
+```xtend
+class MyActivity extends Activity {
+   @AndroidView TextView myTextView  // maps to R.id.my_text_view
+
+   override onCreate(Bundle savedInstanceState) {
+      setContentView(R.layout.my_fragment)
+      myTextView.text = "Hello, world!"
+   }
+}
+```
+
+> Note: See the ```@AndroidViewHolder``` annotation for loading layouts dynamically, in place of calling ```LayoutInflater```
 
 Dialogs
 -------
@@ -89,18 +108,6 @@ When using ```@AndroidDialogFrament```, note the following:
 - ```getView()``` will always return null, otherwise the AlertDialog does not display its title or buttons
 - ```getContentView()``` will return the view inside the dialog
 
-The ```@AndroidView``` annotation is a simple way to access your views inside an activity or fragment, without using the above class-level annotations, e.g.
-
-```xtend
-class MyActivity extends Activity {
-   @AndroidView TextView myTextView  // maps to R.id.my_text_view
-
-   override onCreate(Bundle savedInstanceState) {
-      setContentView(R.layout.my_fragment)
-      myTextView.text = "Hello, world!"
-   }
-}
-```
 
 Background tasks using AsyncTask
 --------------------------------
@@ -220,7 +227,7 @@ import static extension Settings.*
 
 // elsewhere in activity or fragment
 if (settings.enabled) {
-   settings.authToken = "new auth token" // How cool is this?
+   settings.authToken = "new auth token" // this will persist the shared preference!
 }
 ```
 
@@ -291,10 +298,7 @@ The list will now display the data. If you need to add some presentation logic, 
 View Holder
 ------------
 
-You can now easily implement the [view holder pattern][viewholder] by using the ```@AndroidViewHolder``` 
-annotation to create the view holder class. This class will automatically load all the widgets inside 
-the specified layout and create lazy getters/setters for them. It also provides the convenient ```getOrCreate()``` 
-method to inflate and manage your recycled view. 
+You can now easily implement the [view holder pattern][viewholder] by using the ```@AndroidViewHolder``` annotation to create the view holder class. This class will automatically load all the widgets inside the specified layout and create lazy getters/setters for them. It also provides the convenient ```getOrCreate()``` method to inflate and manage your recycled view. 
 
 ```xtend
 // Create an Adapter for a list of users
@@ -320,7 +324,7 @@ method to inflate and manage your recycled view.
 }
 ```
 
-> Note: You can use the ```@AndroidViewHolder``` annotation in ```Activity``` and ```Fragment``` classes too, for example to load a header layout into a ```ListView``` header. You can even reuse the view holder across multiple classes that use the same layout!
+> Note: You can use the ```@AndroidViewHolder``` annotation in ```Activity``` and ```Fragment``` classes too, for example to load a header layout into a ```ListView``` header (i.e. in place of using ```LayoutInflater```). You can even reuse the view holder across multiple classes that use the same layout!
 
 Database
 --------
@@ -536,7 +540,7 @@ You can also attach the ```@BundleProperty``` annotation to any ```Parcelable```
 Parcelables
 -----------
 
-Currently, the `@AndroidParcelable` is a type-level (read: class) annotation that ensures that all the member fields will be serialized using  the android ```Parcel``` way of serializing stuff. All you need to do is just slap the annotation on top of the bean. Here's an example:
+The ```@AndroidParcelable``` annotation ensures that all the member fields of a class can be serialized using the android ```Parcel``` way of serializing stuff. All you need to do is just slap the annotation on top of a bean. Here's an example:
 
 ```xtend
 @AndroidParcelable class ParcelableData {
@@ -565,7 +569,7 @@ intent2.putExtra("parcel", p)
 startActivity(intent2)
 ```
 
-The receiving Fragment or Activity can retrieve the data using ```Intent.getParcelableExtra("parcel")```. A cleaner method is to use ```@BundleProperty``` to declare the arguments (see above).
+The receiving Fragment or Activity can retrieve the data using ```Intent.getParcelableExtra("parcel")```. A cleaner method for Fragments is to use ```@BundleProperty``` to declare the parcelable as an argument (see above).
 
 Utilities
 ---------
