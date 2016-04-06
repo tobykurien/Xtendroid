@@ -14,7 +14,6 @@ repositories {
 apply plugin: 'com.android.library'
 apply plugin: "org.xtext.android.xtend"
 apply from: '../dependencies.gradle'
-//apply from: './maven-push.gradle'
 
 dependencies {
     compile 'com.google.code.gson:gson:2.3.1' // required by @AndroidJsonizer
@@ -61,4 +60,10 @@ android {
     }
 }
 
+// either pass it as ./gradlew -PGROUP=... or use gradle.properties
+// along with the other parameters
+if (project.hasProperty('GROUP'))
+{
+    apply from: './maven-push.gradle'
+}
 
