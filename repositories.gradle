@@ -1,4 +1,6 @@
 repositories {
     jcenter()
     mavenCentral()
+    mavenLocal()
+    maven { url System.getenv('ANDROID_HOME') + "/extras/android/m2repository" }
 }
