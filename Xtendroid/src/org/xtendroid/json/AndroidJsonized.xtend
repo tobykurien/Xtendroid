@@ -130,6 +130,39 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
                 ]
             }
 
+            clazz.addMethod("opt" + memberName.toFirstUpper + if (reservedKeywords.contains(memberName)) '_'  else '') [
+                returnType = realType
+                if (entry.isArray)
+                {
+                    // populate List
+                    body = ['''
+                        if (_«memberName» == null) {
+                            «toJavaCode(JSONArray.newTypeReference)» arr = mJsonObject.optJSONArray("«entry.key»");
+                            if(arr == null) return null;
+                            _«memberName» = new «toJavaCode(ArrayList.newTypeReference)»<«basicType.simpleName.toFirstUpper»>();
+                            for (int i=0; i<_«memberName».size(); i++) {
+                                _«memberName».add((«basicType.simpleName.toFirstUpper») arr.opt(i));
+                            }
+                        }
+                        return _«memberName»;
+                    ''']
+                }else if (entry.isJsonObject)
+                {
+                    body = ['''
+                        if (_«memberName» == null) {
+                            if (mJsonObject.optJSONObject("«entry.key»") == null) return null;
+                            _«memberName» = new «basicType.simpleName»(mJsonObject.optJSONObject("«entry.key»"));
+                        }
+                        return _«memberName»;
+				    ''']
+                }else { // is primitive (e.g. String, Number, Boolean)
+                    body = ['''
+                        return mJsonObject.opt«basicType.simpleName.toFirstUpper»("«entry.key»");
+                    ''']
+                }
+            ]
+
+
             // Hopefully sets have logarithmic costs, not linear (although the cost in our case is constant)
             clazz.addMethod("get" + memberName.toFirstUpper + if (reservedKeywords.contains(memberName)) '_'  else '') [
                 returnType = realType

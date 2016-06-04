@@ -175,29 +175,13 @@ class MusicReleases {
  }'
 }
 
-// Looky here, there's a null-value
-// "params": null
-/*
 @AndroidJsonized('{
-    "textList": {
-        "messages": [
-            {
-                "messageKey": "MESSAGE_KKAI106_04",
-                "messageText": "Meh, nan anananan booo boo.",
-                "messageType": "WARNING"
-            }
-        ],
-        "texts": [
-            {
-                "id": "mobileAppsConfig_clothingline",
-                "text": "VESTMENTS_DEFAULT",
-				"params": null,
-            }
-        ]
-    }
+	"i" : 1,
+	"b" : true,
+	"s" : "string",
+	"array" : [ 0, 1, 2 ]
 }')
 class WildernessResponse1 {}
-*/
 
 @AndroidJsonized('{ "class" : "looky here a reserved keyword" }')
 class WildernessResponse_Reserved_Keyword {}
@@ -287,6 +271,15 @@ class JsonizedTest {
 	@Test
 	public def testsFromTheWilderness()
 	{
-//		new WildernessResponse1()
+		val res0 = new WildernessResponse1(new JSONObject("{\"i\":null, \"b\":null, \"s\":null, \"array\":null}"))
+		assertNull(res0.optI)
+		assertNull(res0.optB)
+		assertNull(res0.optS)
+		assertNull(res0.optArray)
+		val res1 = new WildernessResponse1(new JSONObject("{\"i\":0, \"b\":true, \"s\":\"string\", \"array\":[0,1,2]}"))
+		assertEquals(res1.optI, 0)
+		assertTrue(res1.optB)
+		assertEquals(res1.optS, "string")
+		assertNotNull(res1.optArray)
 	}
 }
