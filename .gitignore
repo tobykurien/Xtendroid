@@ -26,4 +26,3 @@ gradle.properties
 ./out
 .DS_Store
 .idea
-*.iml
