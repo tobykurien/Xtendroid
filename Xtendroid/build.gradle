@@ -14,7 +14,7 @@ repositories {
 apply plugin: 'com.android.library'
 apply plugin: "org.xtext.android.xtend"
 apply from: '../dependencies.gradle'
-apply from: './maven-push.gradle'
+//apply from: './maven-push.gradle'
 
 dependencies {
     compile 'com.google.code.gson:gson:2.3.1' // required by @AndroidJsonizer
