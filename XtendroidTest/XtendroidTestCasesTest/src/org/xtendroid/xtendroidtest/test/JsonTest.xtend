@@ -80,10 +80,11 @@ class DateTypes {
 	var Long llt = null
 	var boolean bt = false
 	var Boolean bbt = false
+	var long doesNotExistInJson = 1l
 }
 
 class JsonTest extends AndroidTestCase {
-	def testJson() {
+	def void testJson() {
 		var jsonRaw = '''
 			{
 				"responseData": 
@@ -153,6 +154,7 @@ class JsonTest extends AndroidTestCase {
 		assertEquals(response.itisareservedkeyword, 1234)
 		assertEquals(response.lt, 2345)
 		assertTrue(response.bt)
+		assertEquals(response.doesNotExistInJson, 1l)
 
 		val arraysOfPrimitives = response.responseData.arraysOfPrimitives.get(0)
 		assertEquals(arraysOfPrimitives.ddta.get(0), 0.01)
