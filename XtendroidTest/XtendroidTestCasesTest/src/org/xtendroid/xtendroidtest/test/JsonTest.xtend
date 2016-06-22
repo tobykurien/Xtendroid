@@ -6,6 +6,8 @@ import java.util.Date
 import java.util.List
 import org.json.JSONObject
 import org.xtendroid.json.AndroidJson
+import org.junit.Test
+import static org.junit.Assert.*
 
 /**
  * 
@@ -82,7 +84,8 @@ class DateTypes {
 	var Boolean bbt = false
 }
 
-class JsonTest extends AndroidTestCase {
+class JsonTest {
+	@Test
 	def testJson() {
 		var jsonRaw = '''
 			{
@@ -149,7 +152,7 @@ class JsonTest extends AndroidTestCase {
 		assertNull(response.ddt) //assertEquals(response.ddt, 0.01)
 		assertEquals(0.0, response.dt) //assertEquals(response.dt, 0.01)
 		assertEquals(0, response.iit)
-		
+
 		assertEquals(response.itisareservedkeyword, 1234)
 		assertEquals(response.lt, 2345)
 		assertTrue(response.bt)
@@ -164,7 +167,7 @@ class JsonTest extends AndroidTestCase {
 		val listsOfPrimitives = response.responseData.listsOfPrimitives.get(0)
 		assertEquals(listsOfPrimitives.ddtl.head, 0.01)
 		assertEquals(listsOfPrimitives.ddtl.drop(1).head, 0.02)
-		assertEquals(listsOfPrimitives.iitl.head, 1234)
+		assertEquals(Integer.valueOf(listsOfPrimitives.iitl.head), 1234)
 		assertEquals(listsOfPrimitives.lltl.head, 2345)
 		assertEquals(listsOfPrimitives.bbtl.head, true)
 
@@ -177,5 +180,42 @@ class JsonTest extends AndroidTestCase {
 		val format2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
 		assertEquals(zuluFormat.scalar.time, format2.parse("2011-11-11T12:34:56.789Z").time)
 		assertEquals(zuluFormat.array.get(0).time, format2.parse("2011-11-11T12:34:56.789Z").time)
+	}
+}
+
+@AndroidJson class Defaults {
+	var int a = 0
+	var String b = "string"
+	var double c = 0.1234
+	var String x
+	var String y
+	var String z
+}
+
+class TestDefaultAndroidJsonValues {
+	/**
+		x,y,z normal correct values
+		a -> null
+		b -> missing in action
+		c -> wrong type
+	*/
+	@Test
+	def test_default_values() {
+		val input = '''
+		{
+		    "x" : "x"
+		    , "y" : "y"
+		    , "z" : "z"
+		    , "a" : null
+		    , "c" : 0.0
+		}
+		'''
+		val d = new Defaults(new JSONObject(input))
+		assertEquals("x", d.x)
+		assertEquals("y", d.y)
+		assertEquals("z", d.z)
+        assertEquals(0, d.a)
+        assertEquals("string", d.b)
+        assertEquals(0.1234, d.c)
 	}
 }
