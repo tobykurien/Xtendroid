@@ -1,6 +1,5 @@
 package org.xtendroid.xtendroidtest.test
 
-import android.test.AndroidTestCase
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.List
@@ -190,6 +189,8 @@ class JsonTest {
 	var String x
 	var String y
 	var String z
+    var List<Integer> listOfInts    = #[ 0, 1, 2 ]
+    var List<String>  listOfStrings = #[ "a", "b", "c" ]
 }
 
 class TestDefaultAndroidJsonValues {
@@ -208,6 +209,7 @@ class TestDefaultAndroidJsonValues {
 		    , "z" : "z"
 		    , "a" : null
 		    , "c" : 0.0
+		    , "listOfInts" : null
 		}
 		'''
 		val d = new Defaults(new JSONObject(input))
@@ -217,5 +219,7 @@ class TestDefaultAndroidJsonValues {
         assertEquals(0, d.a)
         assertEquals("string", d.b)
         assertEquals(0.1234, d.c)
+        assertArrayEquals(#[ 0, 1, 2 ].toArray, d.listOfInts.toArray)
+        assertArrayEquals(#[ "a", "b", "c" ].toArray, d.listOfStrings.toArray)
 	}
 }
