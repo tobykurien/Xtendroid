@@ -37,7 +37,7 @@ class UseGeneratedCtor
 class TestBundlePropertyFragment extends Fragment
 {
    @BundleProperty
-   String meh
+   String meh = "meh"
 
    @BundleProperty
    Parcelable addMyOwnBlankCtor
@@ -155,12 +155,13 @@ class ParcelableAndBundlePropertyTest extends AndroidTestCase {
    def testAutoCreateBundleAndPutStuff()
    {
       val fragment = new TestBundlePropertyFragment
-      fragment.putMeh("Meh")
+      fragment.putMeh("baah")
       fragment.putBeh(new Bundle)
       assertTrue("This fragment will not crash", fragment.arguments != null)
 
       val activity = new TestBundlePropertyActivity
-      activity.putMeh("Meh")
+      activity.putMeh("baah")
+      assertTrue("Value of meh not set correctly", "baah".equals(activity.meh)
       assertTrue("This activity will not crash", !activity.meh.isEmpty) // chainable by design
 
       /*

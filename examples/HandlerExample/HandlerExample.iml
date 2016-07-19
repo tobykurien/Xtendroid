@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module external.linked.project.id=":HandlerExample" external.linked.project.path="$MODULE_DIR$" external.root.project.path="$MODULE_DIR$/../.." external.system.id="GRADLE" external.system.module.group="xtendroid" external.system.module.version="unspecified" type="JAVA_MODULE" version="4">
+<module external.linked.project.id=":HandlerExample" external.linked.project.path="$MODULE_DIR$" external.root.project.path="$USER_HOME$/Secure/android/Xtendroid" external.system.id="GRADLE" external.system.module.group="Xtendroid" external.system.module.version="unspecified" type="JAVA_MODULE" version="4">
   <component name="FacetManager">
     <facet type="android-gradle" name="Android-Gradle">
       <configuration>
@@ -76,10 +76,43 @@
       <sourceFolder url="file://$MODULE_DIR$/src/androidTest/java" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/androidTest/jni" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/androidTest/rs" isTestSource="true" />
+      <excludeFolder url="file://$MODULE_DIR$/build/apk" />
+      <excludeFolder url="file://$MODULE_DIR$/build/assets" />
+      <excludeFolder url="file://$MODULE_DIR$/build/classes" />
+      <excludeFolder url="file://$MODULE_DIR$/build/dependency-cache" />
+      <excludeFolder url="file://$MODULE_DIR$/build/dex" />
+      <excludeFolder url="file://$MODULE_DIR$/build/incremental" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/assets" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/blame" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/classes" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/dependency-cache" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.1.1/jars" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support/support-v4/23.1.1/jars" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/incremental" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/manifests" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/pre-dexed" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/res" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/rs" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/sourceFolderJavaResources" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/symbols" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/transforms" />
+      <excludeFolder url="file://$MODULE_DIR$/build/java" />
+      <excludeFolder url="file://$MODULE_DIR$/build/javaResources" />
+      <excludeFolder url="file://$MODULE_DIR$/build/libs" />
+      <excludeFolder url="file://$MODULE_DIR$/build/lint-results-release-fatal.html" />
+      <excludeFolder url="file://$MODULE_DIR$/build/lint-results-release-fatal.xml" />
+      <excludeFolder url="file://$MODULE_DIR$/build/lint-results-release-fatal_files" />
+      <excludeFolder url="file://$MODULE_DIR$/build/manifests" />
+      <excludeFolder url="file://$MODULE_DIR$/build/ndk" />
       <excludeFolder url="file://$MODULE_DIR$/build/outputs" />
+      <excludeFolder url="file://$MODULE_DIR$/build/pre-dexed" />
+      <excludeFolder url="file://$MODULE_DIR$/build/res" />
+      <excludeFolder url="file://$MODULE_DIR$/build/rs" />
+      <excludeFolder url="file://$MODULE_DIR$/build/source" />
+      <excludeFolder url="file://$MODULE_DIR$/build/symbols" />
       <excludeFolder url="file://$MODULE_DIR$/build/tmp" />
+      <excludeFolder url="file://$MODULE_DIR$/build/xtend-gen" />
+      <excludeFolder url="file://$MODULE_DIR$/build/xtend-temp" />
     </content>
     <orderEntry type="jdk" jdkName="Android API 23 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
@@ -91,6 +124,6 @@
     <orderEntry type="library" exported="" name="appcompat-v7-23.1.1" level="project" />
     <orderEntry type="library" exported="" name="org.eclipse.xtext.xbase.lib-2.9.2" level="project" />
     <orderEntry type="library" exported="" name="guava-14.0.1" level="project" />
-    <orderEntry type="module" module-name="Xtendroid" exported="" />
+    <orderEntry type="module" module-name="Xtendroid-Xtendroid" exported="" />
   </component>
 </module>
