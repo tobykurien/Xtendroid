@@ -161,7 +161,7 @@ class ParcelableAndBundlePropertyTest extends AndroidTestCase {
 
       val activity = new TestBundlePropertyActivity
       activity.putMeh("baah")
-      assertTrue("Value of meh not set correctly", "baah".equals(activity.meh)
+      assertTrue("Value of meh not set correctly", "baah".equals(activity.meh))
       assertTrue("This activity will not crash", !activity.meh.isEmpty) // chainable by design
 
       /*
