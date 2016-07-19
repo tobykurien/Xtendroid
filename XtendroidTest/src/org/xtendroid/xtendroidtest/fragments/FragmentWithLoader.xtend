@@ -1,6 +1,7 @@
 package org.xtendroid.xtendroidtest.fragments
 
 import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentActivity
 import android.support.v4.app.LoaderManager.LoaderCallbacks
 import android.support.v4.content.Loader
 import org.xtendroid.annotations.AndroidFragment
@@ -8,7 +9,6 @@ import org.xtendroid.annotations.AndroidLoader
 import org.xtendroid.app.OnCreate
 import org.xtendroid.xtendroidtest.R
 import static extension org.xtendroid.utils.BgSupportLoader.*
-import android.app.Activity
 
 @AndroidLoader
 @AndroidFragment (R.layout.fragment_test) 
@@ -18,7 +18,7 @@ class FragmentWithLoader extends Fragment implements LoaderCallbacks<String> {
 	@OnCreate
 	def init() {
 		fragText.text = "Fragment loading value..."
-		superFantasticLoader = <String>supportLoader(activity as Activity) [
+		superFantasticLoader = <String>supportLoader(activity as FragmentActivity) [
 			Thread.sleep(5000)
 			"Return value from loader"
 		]

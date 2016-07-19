@@ -11,8 +11,8 @@ repositories {
     jcenter()
 }
 
+apply plugin: 'org.xtext.android.xtend'
 apply plugin: 'com.android.library'
-apply plugin: "org.xtext.android.xtend"
 apply from: '../dependencies.gradle'
 //apply from: './maven-push.gradle'
 
@@ -46,7 +46,7 @@ android {
     buildTypes {
       release {
         minifyEnabled false
-        proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-project.txt'
       }
     }
 
