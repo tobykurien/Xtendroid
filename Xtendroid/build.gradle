@@ -53,13 +53,6 @@ android {
     lintOptions {
       abortOnError false
     }
-
-    packagingOptions {
-      // from xtendlib >=2.9.2
-      exclude 'LICENCE.txt'
-      exclude 'META-INF/ECLIPSE_.RSA'
-      exclude 'META-INF/ECLIPSE_.SF'
-    }
 }
 
 // either pass it as ./gradlew -PGROUP=... or use gradle.properties

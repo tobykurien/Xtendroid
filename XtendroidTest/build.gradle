@@ -83,10 +83,4 @@ android {
       abortOnError false
     }
   }
-
-  packagingOptions {
-    // from xtendlib >=2.9.2
-    exclude 'META-INF/ECLIPSE_.RSA'
-    exclude 'META-INF/ECLIPSE_.SF'
-  }
 }
