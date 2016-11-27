@@ -7,6 +7,7 @@ import org.json.JSONObject
 import org.xtendroid.json.AndroidJson
 import org.junit.Test
 import static org.junit.Assert.*
+import android.test.AndroidTestCase
 
 /**
  * 
