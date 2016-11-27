@@ -150,7 +150,7 @@ class JsonTest extends AndroidTestCase {
 
 		// these fields should have been left alone
 		assertNull(response.ddt) //assertEquals(response.ddt, 0.01)
-		assertEquals(0.0, response.dt) //assertEquals(response.dt, 0.01)
+		assertEquals(0.0, response.dt, 0.0) //assertEquals(response.dt, 0.01)
 		assertEquals(0, response.iit)
 
 		assertEquals(response.itisareservedkeyword, 1234)
@@ -159,15 +159,15 @@ class JsonTest extends AndroidTestCase {
 		assertEquals(response.doesNotExistInJson, 1l)
 
 		val arraysOfPrimitives = response.responseData.arraysOfPrimitives.get(0)
-		assertEquals(arraysOfPrimitives.ddta.get(0), 0.01)
-		assertEquals(arraysOfPrimitives.ddta.get(1), 0.02)
+		assertEquals(arraysOfPrimitives.ddta.get(0), 0.01, 0.0)
+		assertEquals(arraysOfPrimitives.ddta.get(1), 0.02, 0.0)
 		assertEquals(arraysOfPrimitives.lta.get(0), 2345)
 		assertEquals(arraysOfPrimitives.ita.get(0), 1234)
 		assertEquals(arraysOfPrimitives.bbta.get(0), true)
 
 		val listsOfPrimitives = response.responseData.listsOfPrimitives.get(0)
-		assertEquals(listsOfPrimitives.ddtl.head, 0.01)
-		assertEquals(listsOfPrimitives.ddtl.drop(1).head, 0.02)
+		assertEquals(listsOfPrimitives.ddtl.head, 0.01, 0.0)
+		assertEquals(listsOfPrimitives.ddtl.drop(1).head, 0.02, 0.0)
 		assertEquals(Integer.valueOf(listsOfPrimitives.iitl.head), 1234)
 		assertEquals(listsOfPrimitives.lltl.head, 2345)
 		assertEquals(listsOfPrimitives.bbtl.head, true)

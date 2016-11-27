@@ -36,7 +36,8 @@ class AndroidPreferenceAnnotation extends ActivityInstrumentationTestCase2<Setti
 			// check current state
 			assertEquals(false, enabled.checked)
 			assertEquals(false, url.enabled)
-			assertEquals(null, url.text)
+			//assertEquals(null, url.text)
+			assertTrue(url.text == null || url.text.trim.length == 0)
 
 			// fiddle with values
 			enabled.setChecked(true)
