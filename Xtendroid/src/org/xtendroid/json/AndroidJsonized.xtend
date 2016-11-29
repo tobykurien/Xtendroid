@@ -167,14 +167,15 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
             clazz.addMethod("get" + memberName.toFirstUpper + if (reservedKeywords.contains(memberName)) '_'  else '') [
                 returnType = realType
                 exceptions = JSONException.newTypeReference
-                if (entry.isArray)
-                {
+                if (entry.isArray) {
+                    
                     // populate List
                     body = ['''
                         if (_«memberName» == null) {
                             _«memberName» = new «toJavaCode(ArrayList.newTypeReference)»<«basicType.simpleName.toFirstUpper»>();
-                            for (int i=0; i<_«memberName».size(); i++) {
-                                _«memberName».add((«basicType.simpleName.toFirstUpper») mJsonObject.getJSONArray("«entry.key»").get(i));
+                            JSONArray vals = mJsonObject.getJSONArray("«entry.key»");
+                            for (int i=0; i < vals.length(); i++) {
+                                _«memberName».add((«basicType.simpleName.toFirstUpper») vals.get(i)); 
                             }
                         }
                         return _«memberName»;
