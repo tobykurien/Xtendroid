@@ -1,5 +1,5 @@
 ext {
-    compileSdkVersion = 23
+    compileSdkVersion = 25
     minSdkVersion = 15
     buildToolsVersion = '23.0.3'
 
@@ -8,7 +8,7 @@ ext {
     //xtend_gradle_ver = '0.4.+'
     xtext_gradle_ver = '1.0.3'
 
-    xtend_lib_ver = '2.9.1'
+    xtend_lib_ver = '2.9.2'
     android_sdk_support_ver = '23.2.1'
 
     build = [
