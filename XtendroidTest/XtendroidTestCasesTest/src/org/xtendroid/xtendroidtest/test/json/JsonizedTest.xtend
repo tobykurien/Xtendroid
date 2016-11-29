@@ -226,7 +226,7 @@ class JsonizedTest {
 	{
 		assertFalse(new ManyBooleansParent(new JSONObject('{ "manyBooleans" : [ true, false, true, false ] }')).getManyBooleans.get(3))
 	}
-
+	
 	@Test
 	public def testIntegerVectorJson()
 	{

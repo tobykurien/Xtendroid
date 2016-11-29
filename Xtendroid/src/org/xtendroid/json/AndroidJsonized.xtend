@@ -183,20 +183,35 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
             clazz.addMethod("get" + memberName.toFirstUpper + if (reservedKeywords.contains(memberName)) '_'  else '') [
                 returnType = realType
                 exceptions = JSONException.newTypeReference
-                if (entry.isArray)
-                {
+                if (entry.isArray) {
                     // populate List
-                    body = ['''
-                        if («_memberName» == null) {
-                            «_memberName» = new «toJavaCode(ArrayList.newTypeReference)»<«basicType.simpleName.toFirstUpper»>();
-                            for (int i=0; i<«_memberName».size(); i++) {
-                                «_memberName».add((«basicType.simpleName.toFirstUpper») mJsonObject.getJSONArray("«entry.key»").get(i));
+                    body = if (basicType.isPrimitive ||
+                                basicType.isWrapper || 
+                                basicType.isAssignableFrom(String.newTypeReference)) {
+                        ['''
+                            if («_memberName» == null) {
+                                «_memberName» = new «toJavaCode(ArrayList.newTypeReference)»<«basicType.simpleName.toFirstUpper»>();
+                                JSONArray vals = mJsonObject.getJSONArray("«entry.key»");
+                                for (int i=0; i < vals.length(); i++) {
+                                    «_memberName».add((«basicType.simpleName.toFirstUpper») vals.get(i));
+                                }
                             }
-                        }
-                        return «_memberName»;
-                    ''']
-                }else if (entry.isJsonObject)
-                {
+                            return «_memberName»;
+                            ''']
+                    } else {
+                        // TODO - massive assumption here that if not primitive -> must be @AndroidJson object
+                        ['''
+                            if («_memberName» == null) {
+                                «_memberName» = new «toJavaCode(ArrayList.newTypeReference)»<«basicType.simpleName.toFirstUpper»>();
+                                JSONArray vals = mJsonObject.getJSONArray("«entry.key»");
+                                for (int i=0; i < vals.length(); i++) {
+                                    «_memberName».add(new «basicType.simpleName.toFirstUpper»(vals.getJSONObject(i)));
+                                }
+                            }
+                            return «_memberName»;
+                        ''']
+                     }
+                }else if (entry.isJsonObject) {
                     body = ['''
                         if («_memberName» == null) {
                             «_memberName» = new «basicType.simpleName»(mJsonObject.getJSONObject("«entry.key»"));

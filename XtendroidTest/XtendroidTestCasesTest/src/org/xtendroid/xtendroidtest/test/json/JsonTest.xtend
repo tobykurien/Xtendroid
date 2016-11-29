@@ -150,7 +150,7 @@ class JsonTest extends AndroidTestCase {
 
 		// these fields should have been left alone
 		assertNull(response.ddt) //assertEquals(response.ddt, 0.01)
-		assertEquals(0.0, response.dt) //assertEquals(response.dt, 0.01)
+		assertEquals(0.0, response.dt, 0.0) //assertEquals(response.dt, 0.01)
 		assertEquals(0, response.iit)
 
 		assertEquals(response.itisareservedkeyword, 1234)
@@ -159,15 +159,15 @@ class JsonTest extends AndroidTestCase {
 		assertEquals(response.doesNotExistInJson, 1l)
 
 		val arraysOfPrimitives = response.responseData.arraysOfPrimitives.get(0)
-		assertEquals(arraysOfPrimitives.ddta.get(0), 0.01)
-		assertEquals(arraysOfPrimitives.ddta.get(1), 0.02)
+		assertEquals(arraysOfPrimitives.ddta.get(0), 0.01, 0.0)
+		assertEquals(arraysOfPrimitives.ddta.get(1), 0.02, 0.0)
 		assertEquals(arraysOfPrimitives.lta.get(0), 2345)
 		assertEquals(arraysOfPrimitives.ita.get(0), 1234)
 		assertEquals(arraysOfPrimitives.bbta.get(0), true)
 
 		val listsOfPrimitives = response.responseData.listsOfPrimitives.get(0)
-		assertEquals(listsOfPrimitives.ddtl.head, 0.01)
-		assertEquals(listsOfPrimitives.ddtl.drop(1).head, 0.02)
+		assertEquals(listsOfPrimitives.ddtl.head, 0.01, 0.0)
+		assertEquals(listsOfPrimitives.ddtl.drop(1).head, 0.02, 0.0)
 		assertEquals(Integer.valueOf(listsOfPrimitives.iitl.head), 1234)
 		assertEquals(listsOfPrimitives.lltl.head, 2345)
 		assertEquals(listsOfPrimitives.bbtl.head, true)
@@ -184,7 +184,7 @@ class JsonTest extends AndroidTestCase {
 	}
 }
 
-@AndroidJson class Defaults {
+@AndroidJson class DefaultsYo {
 	var int a = 0
 	var String b = "string"
 	var double c = 0.1234
@@ -202,6 +202,7 @@ class TestDefaultAndroidJsonValues {
 		b -> missing in action
 		c -> wrong type
 	*/
+	
 	@Test
 	def test_default_values() {
 		val input = '''
@@ -214,14 +215,14 @@ class TestDefaultAndroidJsonValues {
 		    , "listOfInts" : null
 		}
 		'''
-		val d = new Defaults(new JSONObject(input))
+		val d = new DefaultsYo(new JSONObject(input))
 		assertEquals("x", d.x)
 		assertEquals("y", d.y)
 		assertEquals("z", d.z)
-        assertEquals(0, d.a)
-        assertEquals("string", d.b)
-        assertEquals(0.1234, d.c)
-        assertArrayEquals(#[ 0, 1, 2 ].toArray, d.listOfInts.toArray)
-        assertArrayEquals(#[ "a", "b", "c" ].toArray, d.listOfStrings.toArray)
+		assertEquals(0, d.a)
+		assertEquals("string", d.b)
+		assertEquals(0.1234, d.c)
+		assertArrayEquals(#[ 0, 1, 2 ].toArray, d.listOfInts.toArray)
+		assertArrayEquals(#[ "a", "b", "c" ].toArray, d.listOfStrings.toArray)
 	}
 }
