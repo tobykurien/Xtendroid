@@ -19,6 +19,8 @@ import org.json.JSONException
 import java.util.ArrayList
 
 import static extension org.xtendroid.json.JsonObjectEntry.*
+import static extension org.xtendroid.parcel.ParcelableProcessor.*
+import android.os.Parcel
 
 /**
  * Structure by example.
@@ -33,9 +35,17 @@ annotation AndroidJsonized {
     String value
 }
 
+@Active(AndroidJsonizedParcelableProcessor)
+annotation AndroidJsonizedParcelable {
+    /**
+     * value could be a url or a valid json object, e.g. '{"a" : "string", "b" : true, "c" : 48}'
+     * then Parcelable types will be generated
+     */
+}
+
 class AndroidJsonizedProcessor extends AbstractClassProcessor {
 
-    val reservedKeywords = #{
+    protected val reservedKeywords = #{
         'abstract',     'continue',     'for',          'new',          'switch',
         'assert',       'default',      'goto',         'package',      'synchronized',
         'boolean',      'do',           'if',           'private',      'this',
@@ -56,7 +66,8 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
         registerClassNamesRecursively(clazz.jsonEntries, context)
     }
 
-    val delayedErrorMessages = #{ '' -> '' }
+    // TODO determine why???
+    protected val delayedErrorMessages = #{ '' -> '' }
 
     private def void registerClassNamesRecursively(Iterable<JsonObjectEntry> json, RegisterGlobalsContext context) {
         for (jsonEntry : json) {
@@ -77,12 +88,14 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
      *
      */
     override doTransform(MutableClassDeclaration clazz, extension TransformationContext context) {
+        // TODO determine why???
         clazz.addWarning(delayedErrorMessages.get(clazz.simpleName))
+
         enhanceClassesRecursively(clazz, clazz.jsonEntries, context)
         clazz.removeAnnotation(clazz.annotations.findFirst[annotationTypeDeclaration == AndroidJsonized.newTypeReference.type])
     }
 
-    def void enhanceClassesRecursively(MutableClassDeclaration clazz, Iterable<? extends JsonObjectEntry> entries, extension TransformationContext context) {
+    protected static def addJsonPlaceholderAndDirtyFlag(MutableClassDeclaration clazz, extension TransformationContext context) {
         clazz.addConstructor [
             addParameter('jsonObject', JSONObject.newTypeReference)
             body = '''
@@ -114,6 +127,10 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
                 return mDirty;
             '''
         ]
+    }
+
+    protected def void enhanceClassesRecursively(MutableClassDeclaration clazz, Iterable<? extends JsonObjectEntry> entries, extension TransformationContext context) {
+        clazz.addJsonPlaceholderAndDirtyFlag(context)
 
         // add accessors for the entries
         for (entry : entries) {
@@ -121,7 +138,7 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
             val realType = if(entry.isArray) getList(basicType) else basicType
             val memberName = entry.key.replaceAll("[^\\x00-\\x7F]", "").replaceAll("[^A-Za-z0-9]", "").replaceAll("\\s+","")
 
-            // add JSONObject container for lazy-getting
+            // add object field for lazy-loading JSON field
             if (entry.isJsonObject || entry.isArray)
             {
                 clazz.addField('_' + memberName) [
@@ -138,7 +155,7 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
                     body = ['''
                         if (_«memberName» == null) {
                             «toJavaCode(JSONArray.newTypeReference)» arr = mJsonObject.optJSONArray("«entry.key»");
-                            if(arr == null) return null;
+                            if(arr == null) { return null; }
                             _«memberName» = new «toJavaCode(ArrayList.newTypeReference)»<«basicType.simpleName.toFirstUpper»>();
                             for (int i=0; i<_«memberName».size(); i++) {
                                 _«memberName».add((«basicType.simpleName.toFirstUpper») arr.opt(i));
@@ -226,5 +243,65 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
             if (entry.isJsonObject)
                 enhanceClassesRecursively(findClass(entry.className), entry.childEntries, context)
         }
+    }
+}
+
+
+class AndroidJsonizedParcelableProcessor extends AndroidJsonizedProcessor {
+    override doTransform(MutableClassDeclaration clazz, extension TransformationContext context) {
+        // TODO determine why???
+        clazz.addWarning(delayedErrorMessages.get(clazz.simpleName))
+
+        enhanceClassesRecursively(clazz, clazz.jsonEntries, context)
+        enhanceClassesRecursivelyAsParcelable(clazz, clazz.jsonEntries, context)
+        clazz.removeAnnotation(clazz.annotations.findFirst[annotationTypeDeclaration == AndroidJsonizedParcelable.newTypeReference.type])
+    }
+
+    def enhanceClassesRecursivelyAsParcelable(MutableClassDeclaration clazz, Iterable<? extends JsonObjectEntry> entries, extension TransformationContext context) {
+
+        // TODO @AndroidJsonizedParcelable simply reuse
+        clazz.addImplementsParcelable(context)
+
+        // TODO @AndroidJsonizedParcelable simply reuse
+        clazz.addMethodDescribeContents(context)
+
+        // TODO @AndroidJsonizedParcelable: write equivalent function, that lists the fields, then adds expressions
+        clazz.addMethod("writeToParcel")  [
+            returnType = void.newTypeReference
+            addParameter('out', Parcel.newTypeReference)
+            addParameter('flags', int.newTypeReference)
+            addAnnotation(Override.newAnnotationReference)
+            /*
+            body = [ '''
+				«fields.filter[f|!f.static].map[f | f.mapTypeToWriteMethodBody ].join»
+				«IF hasJsonBeanDataField»
+				if («AndroidJsonProcessor.jsonObjectFieldName» != null)
+					out.writeString(«AndroidJsonProcessor.jsonObjectFieldName».toString);
+				«ENDIF»
+			''']
+			*/
+        ]
+
+        // TODO @AndroidJsonizedParcelable simply reuse
+        clazz.addParcelableCreatorObject(context)
+
+        // TODO @AndroidJsonizedParcelable simply reuse
+        clazz.addParcelableCtor(context)
+
+        // TODO @AndroidJsonizedParcelable: write equivalent function, that lists the fields, then adds expressions
+        clazz.addMethod('readFromParcel') [
+            addParameter('in', Parcel.newTypeReference)
+            /*
+            body = ['''
+				«fields.filter[!static].map[f | mapTypeToReadMethodBody(context, f) ].join()»
+				«IF hasJsonBeanDataField»
+				final String jsonStringHolder = in.readString();
+				if (!«toJavaCode(TextUtils.newTypeReference)».isEmpty(jsonStringHolder))
+					this.«AndroidJsonProcessor.jsonObjectFieldName» = new JSONObject(jsonStringHolder);
+				«ENDIF»
+			''']
+			*/
+            returnType = void.newTypeReference
+        ]
     }
 }

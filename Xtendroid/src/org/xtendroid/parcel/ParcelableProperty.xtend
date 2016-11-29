@@ -88,9 +88,12 @@ class ParcelableProcessor extends AbstractClassProcessor
 	/**
 	 * 
 	 * Marshalling code generator for common types
+	 * Mapping types to expressions for the writeToParcel method
 	 * 
 	 */
-	def mapTypeToWriteMethodBody(MutableFieldDeclaration f) '''
+	// TODO check if FieldDeclaration can be used instead of MutableFieldDeclaration
+	// for the @AndroidJsonizedParcelable method
+	public static def mapTypeToWriteMethodBody(MutableFieldDeclaration f) '''
 		«IF supportedPrimitiveScalarType.containsKey(f.type.name)»
 			out.write«supportedPrimitiveScalarType.get(f.type.name)»(this.«f.simpleName»);
 		«ELSEIF supportedPrimitiveArrayType.keySet.exists[ k | k.endsWith(f.type.name)]»
@@ -141,9 +144,10 @@ class ParcelableProcessor extends AbstractClassProcessor
 	/**
 	 * 
 	 * Demarshalling code for common types
+	 * Mapping types to expressions for the readFromParcel method
 	 * 
 	 */
-	def mapTypeToReadMethodBody(extension CompilationContext compContext, extension TransformationContext context, MutableFieldDeclaration f) '''
+	public static def mapTypeToReadMethodBody(extension CompilationContext compContext, extension TransformationContext context, MutableFieldDeclaration f) '''
 		«IF supportedPrimitiveScalarType.containsKey(f.type.name)»
 			this.«f.simpleName» = in.read«supportedPrimitiveScalarType.get(f.type.name)»();
 		«ELSEIF supportedPrimitiveArrayType.containsKey(f.type.name)»
@@ -199,26 +203,19 @@ class ParcelableProcessor extends AbstractClassProcessor
 			this.«f.simpleName» = («f.type.name») CREATOR.createFromParcel(in);
 		«ENDIF»
 	'''
-	
-	override doTransform(MutableClassDeclaration clazz, extension TransformationContext context) {
+
+	public static def addImplementsParcelable(MutableClassDeclaration clazz, extension TransformationContext context) {
 		if (!clazz.implementedInterfaces.exists[i | "android.os.Parcelable".endsWith(i.name) ])
 		{
-		   var List<? extends MutableInterfaceDeclaration> implemented = clazz.declaredInterfaces.toList
-		   val implTypes = new ArrayList<TypeReference>
-		   implemented.forEach[t| implTypes.add(t as TypeReference) ]
-		   implTypes.add(Parcelable.newTypeReference)
-		   clazz.setImplementedInterfaces(implTypes)
+			var List<? extends MutableInterfaceDeclaration> implemented = clazz.declaredInterfaces.toList
+			val implTypes = new ArrayList<TypeReference>
+			implemented.forEach[t| implTypes.add(t as TypeReference) ]
+			implTypes.add(Parcelable.newTypeReference)
+			clazz.setImplementedInterfaces(implTypes)
 		}
-		
-		val fields = clazz.declaredFields
-		for (f : fields)
-		{
-			if (unsupportedAbstractTypesAndSuggestedTypes.keySet.contains(f.type.name))
-			{
-				f.addError (String.format("%s has the type %s, it may not be used with @AndroidParcelable. Use %s instead.", f.simpleName, f.type.name, ParcelableProcessor.unsupportedAbstractTypesAndSuggestedTypes.get(f.type.name)))
-			}
-		}
-		
+	}
+
+	public static def addMethodDescribeContents(MutableClassDeclaration clazz, extension TransformationContext context) {
 		clazz.addMethod("describeContents")  [
 			returnType = int.newTypeReference
 			addAnnotation(Override.newAnnotationReference)
@@ -226,41 +223,9 @@ class ParcelableProcessor extends AbstractClassProcessor
 				return 0;
 			'''
 		]
+	}
 
-		val hasJsonBeanDataField = fields.exists[f|f.simpleName.equals(AndroidJsonProcessor.jsonObjectFieldName)] ||
-			fields.exists[f|f.annotations.exists[AndroidJson.newAnnotationReference.equals]] ||
-			clazz.annotations.exists[AndroidJson.newAnnotationReference.equals]
-			
-		// TODO determine why the annotation scan isn't working
-		// so I don't need to manually add the `JSONObject _jsonObj` field.
-//		clazz.addWarning(String.format("%b;%b;%b|||%b;%b;%b|||%b|||%b;%b;%b||%s",
-//			fields.exists[simpleName.equals(AndroidJsonProcessor.jsonObjectFieldName)],
-//			fields.exists[annotations.exists[AndroidJson.newAnnotationReference.equals]],
-//			clazz.annotations.exists[AndroidJson.newAnnotationReference.equals],
-//			fields.exists[f|f.simpleName.equals(AndroidJsonProcessor.jsonObjectFieldName)],
-//			fields.exists[f|f.annotations.exists[a|AndroidJson.newAnnotationReference.equals(a)]],
-//			clazz.annotations.exists[a | AndroidJson.newAnnotationReference.equals(a)],
-//			clazz.annotations.exists[a | JsonProperty.newAnnotationReference.equals(a)],
-//			clazz.annotations.exists[a | JsonProperty.newAnnotationReference == a],
-//			clazz.annotations.exists[a | AndroidJson.newAnnotationReference == a],
-//			fields.exists[f|f.annotations.exists[a|AndroidJson.newAnnotationReference == a]],
-//			fields.map[annotations.map[a|a.annotationTypeDeclaration.simpleName].join('')].join('')
-//		))
-		
-		clazz.addMethod("writeToParcel")  [
-			returnType = void.newTypeReference
-			addParameter('out', Parcel.newTypeReference)
-			addParameter('flags', int.newTypeReference)
-			addAnnotation(Override.newAnnotationReference)
-			body = [ '''
-				«fields.filter[f|!f.static].map[f | f.mapTypeToWriteMethodBody ].join()»
-				«IF hasJsonBeanDataField»
-				if («AndroidJsonProcessor.jsonObjectFieldName» != null)
-					out.writeString(«AndroidJsonProcessor.jsonObjectFieldName».toString());
-				«ENDIF»
-			''']
-		]
-		
+	public static def addParcelableCreatorObject(MutableClassDeclaration clazz, extension TransformationContext context) {
 		val parcelableCreatorTypeName = Creator.newTypeReference.simpleName
 		clazz.addField("CREATOR") [
 			static = true
@@ -271,15 +236,17 @@ class ParcelableProcessor extends AbstractClassProcessor
 				new «parcelableCreatorTypeName»<«clazz.simpleName»>() {
 					public «clazz.simpleName» createFromParcel(final Parcel in) {
 						return new «clazz.simpleName»(in);
-					} 
-					
+					}
+
 					public «clazz.simpleName»[] newArray(final int size) {
 						return new «clazz.simpleName»[size];
 					}
 				}''']
 		]
+	}
 
-//		clazz.declaredConstructors.forEach[ /*body === null &&*/ clazz.addWarning(String.format('%s: %b', simpleName, parameters.empty)) ] // debug
+	public static def addParcelableCtor(MutableClassDeclaration clazz, extension TransformationContext context) {
+		// clazz.declaredConstructors.forEach[ /*body === null &&*/ clazz.addWarning(String.format('%s: %b', simpleName, parameters.empty)) ] // debug
 		val isEmptyCtorProvidedByUser = clazz.declaredConstructors.exists[ /*body === null &&*/ parameters.empty ]
 		if (!isEmptyCtorProvidedByUser)
 		{
@@ -291,31 +258,94 @@ class ParcelableProcessor extends AbstractClassProcessor
 				''']
 			]
 		}
+	}
 
-		val exceptionsTypeRef = if (fields.exists[type.name.startsWith("org.json.JSON")])  #[ JSONException.newTypeReference() ] else #[]
+	override doTransform(MutableClassDeclaration clazz, extension TransformationContext context) {
+
+		// TODO @AndroidJsonizedParcelable simply reuse
+		clazz.addImplementsParcelable(context)
+
+		// Not applicable to @AndroidJsonized
+		val fields = clazz.declaredFields
+		for (f : fields)
+			{
+				if (unsupportedAbstractTypesAndSuggestedTypes.keySet.contains(f.type.name))
+					{
+						f.addError (String.format("%s has the type %s, it may not be used with @AndroidParcelable. Use %s instead.", f.simpleName, f.type.name, ParcelableProcessor.unsupportedAbstractTypesAndSuggestedTypes.get(f.type.name)))
+					}
+			}
+
+		// TODO @AndroidJsonizedParcelable simply reuse
+		clazz.addMethodDescribeContents(context)
+
+		// Not applicable to @AndroidJsonized
+		val hasJsonBeanDataField = fields.exists[f|f.simpleName.equals(AndroidJsonProcessor.jsonObjectFieldName)] ||
+				fields.exists[f|f.annotations.exists[AndroidJson.newAnnotationReference.equals]] ||
+				clazz.annotations.exists[AndroidJson.newAnnotationReference.equals]
+
+		// TODO determine why the annotation scan isn't working
+		// so I don't need to manually add the `JSONObject _jsonObj` field.
+		//		clazz.addWarning(String.format("%b;%b;%b|||%b;%b;%b|||%b|||%b;%b;%b||%s",
+		//			fields.exists[simpleName.equals(AndroidJsonProcessor.jsonObjectFieldName)],
+		//			fields.exists[annotations.exists[AndroidJson.newAnnotationReference.equals]],
+		//			clazz.annotations.exists[AndroidJson.newAnnotationReference.equals],
+		//			fields.exists[f|f.simpleName.equals(AndroidJsonProcessor.jsonObjectFieldName)],
+		//			fields.exists[f|f.annotations.exists[a|AndroidJson.newAnnotationReference.equals(a)]],
+		//			clazz.annotations.exists[a | AndroidJson.newAnnotationReference.equals(a)],
+		//			clazz.annotations.exists[a | JsonProperty.newAnnotationReference.equals(a)],
+		//			clazz.annotations.exists[a | JsonProperty.newAnnotationReference == a],
+		//			clazz.annotations.exists[a | AndroidJson.newAnnotationReference == a],
+		//			fields.exists[f|f.annotations.exists[a|AndroidJson.newAnnotationReference == a]],
+		//			fields.map[annotations.map[a|a.annotationTypeDeclaration.simpleName].join('')].join('')
+		//		))
+
+		// TODO @AndroidJsonizedParcelable: write equivalent function, that lists the fields, then adds expressions
+		clazz.addMethod("writeToParcel")  [
+			returnType = void.newTypeReference
+			addParameter('out', Parcel.newTypeReference)
+			addParameter('flags', int.newTypeReference)
+			addAnnotation(Override.newAnnotationReference)
+			/**
+			 * In case @AndroidJson or @JsonProperty was combined with this active annotation
+			 * make the lazy-loading json object source Parcelable
+			 */
+			body = [ '''
+				«fields.filter[f|!f.static].map[f | f.mapTypeToWriteMethodBody ].join»
+				«IF hasJsonBeanDataField»
+				if («AndroidJsonProcessor.jsonObjectFieldName» != null)
+					out.writeString(«AndroidJsonProcessor.jsonObjectFieldName».toString());
+				«ENDIF»
+			''']
+		]
+
+		// TODO @AndroidJsonizedParcelable simply reuse
+		clazz.addParcelableCreatorObject(context)
+
+		// TODO @AndroidJsonizedParcelable simply reuse
+		clazz.addParcelableCtor(context)
+
+		// Not applicable to @AndroidJsonized
+		// if a field is a JSON type field, then prepare for bad JSON values
+		val exceptionsTypeRef = if (fields.exists[type.name.startsWith("org.json.JSON")]) #[ JSONException.newTypeReference() ] else #[]
 		clazz.addConstructor[
 			addParameter('in', Parcel.newTypeReference)
 			body = ['''
 				«IF exceptionsTypeRef.empty»
 					readFromParcel(in);
 				«ELSE»
-					try
-					{
+					try {
 						readFromParcel(in);
-					}catch(JSONException e)
-					{
-						// TODO do error handling
-						/*
-						if (BuildConfig.DEBUG)
-						{
-							Log.e("«clazz.simpleName»", e.getLocalizedMessage());
-						}
-						*/
+					}catch(JSONException e) {
+					    // convert checked to unchecked exception
+					    // because we can't guarantee that the JSON object
+					    // will be correctly parsed in runtime
+					    throw new «toJavaCode(RuntimeException.newTypeReference)»(e);
 					}
 				«ENDIF»
 			''']
 		]
-		
+
+		// Not applicable to @AndroidJsonized
 		// if the raw JSON container is explicitly declared
 		// it needs to be declared in this @AndroidParcelable context or expect data loss during (de)marshalling
 		if (hasJsonBeanDataField)
@@ -327,7 +357,8 @@ class ParcelableProcessor extends AbstractClassProcessor
 				''']
 			]
 		}
-		
+
+		// TODO @AndroidJsonizedParcelable: write equivalent function, that lists the fields, then adds expressions
 		clazz.addMethod('readFromParcel') [
 		   fields.forEach[markAsRead]
 			addParameter('in', Parcel.newTypeReference)
@@ -340,7 +371,7 @@ class ParcelableProcessor extends AbstractClassProcessor
 				«ENDIF»
 			''']
 			exceptions = exceptionsTypeRef
-			returnType = void.newTypeReference				
+			returnType = void.newTypeReference
 		]
 	}
 }
