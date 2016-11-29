@@ -269,8 +269,6 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
  */
 class AndroidJsonizedParcelableProcessor extends AndroidJsonizedProcessor {
 
-    // TODO determine doRegisterGlobals and registerClassNamesRecursively are called
-
     override doTransform(MutableClassDeclaration clazz, extension TransformationContext context) {
         clazz.addWarning(delayedErrorMessages.get(clazz.simpleName))
         clazz.enhanceClassesRecursively(clazz.jsonEntries, context)
@@ -283,71 +281,6 @@ class AndroidJsonizedParcelableProcessor extends AndroidJsonizedProcessor {
             if (basicType.simpleName.toLowerCase.contains(name)) { return true }
         }
         false
-    }
-
-    protected static val primitiveArrayTypes = #{
-        'long' -> 'LongArray'
-        , 'double' -> 'DoubleArray'
-        , 'String' -> 'StringArray'
-    }
-
-    static def String mapReadParcelableExpression(JsonObjectEntry entry, extension TransformationContext context, extension CompilationContext compilationContext, extension MutableClassDeclaration clazz) {
-        val basicType = entry.getComponentType(context)
-        val realType = if(entry.isArray) getList(basicType) else basicType // context.getList(basicType)
-        val memberName = entry.key.scrubName
-        val _memberName = '_' + memberName
-
-        if (entry.isArray) {
-            return if (basicType.isTypeOf("bool")) {
-                '''
-                «toJavaCode(SparseBooleanArray.newTypeReference)» «_memberName»SparseBoolean = in.readSparseBooleanArray();
-                if («_memberName»SparseBoolean != null) {
-                    «_memberName» = new ArrayList<Boolean>(«_memberName»SparseBoolean.size());
-                    for (int i = 0; i < «_memberName»SparseBoolean.size(); i++) {
-                        «_memberName».add(«_memberName»SparseBoolean.valueAt(i));
-                    }
-                }
-                '''
-            }else if (basicType.isTypeOf("string", "long", "double")) {
-                '''
-                    // debug: «toJavaCode(basicType)»
-                    // debug: «toJavaCode(realType)»
-                    «_memberName» = in.create«supportedPrimitiveArrayType.get(basicType.simpleName + '[]')»();'''
-            } else {
-                '''
-                    // debug: «toJavaCode(basicType)»
-                    // debug: «toJavaCode(realType)»
-                    «_memberName» = in.createTypedArrayList(«toJavaCode(basicType)».CREATOR);
-                '''
-            } // else TODO the thing is a JSONObject in a JSONArray [ {}, {}, ... ]
-        }else if (entry.isJsonObject) {
-            // TODO determine we are using the correct CREATOR object
-            // TODO remove debug line
-            return '''
-                // debug: «toJavaCode(basicType)»
-                // debug: «toJavaCode(realType)»
-                «_memberName» = («toJavaCode(basicType)») «toJavaCode(basicType)».CREATOR.createFromParcel(in);
-            '''
-        }
-
-        return if (!basicType.isTypeOf("bool")) {
-            // TODO string
-            // TODO integer (convert to long)
-            // TODO double  (convert to double)
-            // TODO remove debug line
-            '''
-                // debug: «toJavaCode(basicType)»
-                «_memberName» = in.read«supportedPrimitiveScalarType.get(basicType.simpleName)»();
-            '''
-        }else /* if boolean */ {
-            '''«_memberName» = in.readInt() > 0;''' // 0 == false
-        }
-    }
-
-    static def String mapWriteParcelableExpression(JsonObjectEntry entry, extension TransformationContext context, extension CompilationContext compilationContext) {
-        '''
-
-        '''
     }
 
     def enhanceClassesRecursivelyAsParcelable(extension MutableClassDeclaration clazz, Iterable<? extends JsonObjectEntry> entries, extension TransformationContext context) {
@@ -370,9 +303,10 @@ class AndroidJsonizedParcelableProcessor extends AndroidJsonizedProcessor {
             addParameter('out', Parcel.newTypeReference)
             addParameter('flags', int.newTypeReference)
             addAnnotation(Override.newAnnotationReference)
-            // cc == CompilationContext
-            body = ['''out.writeString(mJsonObject.toString());'''] // simple Parcelable version just Parcels the original JSONObject
-            //body = [ cc | entries.map[entry | entry.mapWriteParcelableExpression(context, cc) ].join("\n") ] // TODO finish complicated version
+            body = ['''
+                out.writeString(mJsonObject.toString());
+                out.writeInt(mDirty ? 1 : 0);
+            '''] // simple Parcelable version just Parcels the original JSONObject
         ]
 
         clazz.addParcelableCreatorObject(context)
@@ -380,13 +314,13 @@ class AndroidJsonizedParcelableProcessor extends AndroidJsonizedProcessor {
         addMethod('readFromParcel') [
             addParameter('in', Parcel.newTypeReference)
             body = ['''
+                mDirty = in.readInt() > 0;
                 try {
                     mJsonObject = new «toJavaCode(JSONObject.newTypeReference)»(in.readString());
                 } catch («toJavaCode(JSONException.newTypeReference)» e) {
                     throw new «toJavaCode(RuntimeException.newTypeReference)»(e);
                 }
             ''']
-            //body = [ cc | entries.map[entry | entry.mapReadParcelableExpression(context, cc, clazz) ].join("\n") ] // TODO finish complicated version
             returnType = void.newTypeReference
         ]
 
