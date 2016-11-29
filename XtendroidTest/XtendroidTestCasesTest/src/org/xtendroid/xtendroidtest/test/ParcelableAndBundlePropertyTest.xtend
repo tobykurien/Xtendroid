@@ -38,7 +38,7 @@ class UseGeneratedCtor
 class TestBundlePropertyFragment extends Fragment
 {
    @BundleProperty
-   String meh = "meh"
+   String meh = "One two"
 
    @BundleProperty
    Parcelable addMyOwnBlankCtor
@@ -59,7 +59,7 @@ class TestBundlePropertyFragment extends Fragment
 class TestBundlePropertyActivity extends Activity
 {
    @BundleProperty
-   String meh
+   String meh = "One two"
 
    @BundleProperty
    Parcelable addMyOwnBlankCtor
@@ -156,11 +156,13 @@ class ParcelableAndBundlePropertyTest extends AndroidTestCase {
    def testAutoCreateBundleAndPutStuff()
    {
       val fragment = new TestBundlePropertyFragment
+      assertEquals("Bundle default value not set", fragment.meh, "One two")
       fragment.putMeh("baah")
       fragment.putBeh(new Bundle)
       assertTrue("This fragment will not crash", fragment.arguments != null)
+      assertEquals("Bundle value not set", fragment.meh, "baah")
 
-      /* TODO the below stuff doesn't work since the activity has not Intent 
+      /* TODO the below stuff doesn't work since the activity has no Intent 
       var handler = new Handler(context.getMainLooper)
       handler.post [
          val activity = new TestBundlePropertyActivity
