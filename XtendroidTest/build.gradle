@@ -82,5 +82,10 @@ android {
     lintOptions {
       abortOnError false
     }
+    packagingOptions {
+      exclude 'LICENSE.txt'
+      exclude 'META-INF/ECLIPSE_.SF'
+      exclude 'META-INF/ECLIPSE_.RSA'
+    }  
   }
 }
