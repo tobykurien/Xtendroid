@@ -245,7 +245,7 @@ class ParcelableProcessor extends AbstractClassProcessor
 		]
 	}
 
-	public static def addParcelableCtor(MutableClassDeclaration clazz, extension TransformationContext context) {
+	public static def addEmptyCtor(MutableClassDeclaration clazz, extension TransformationContext context) {
 		// clazz.declaredConstructors.forEach[ /*body === null &&*/ clazz.addWarning(String.format('%s: %b', simpleName, parameters.empty)) ] // debug
 		val isEmptyCtorProvidedByUser = clazz.declaredConstructors.exists[ /*body === null &&*/ parameters.empty ]
 		if (!isEmptyCtorProvidedByUser)
@@ -322,7 +322,7 @@ class ParcelableProcessor extends AbstractClassProcessor
 		clazz.addParcelableCreatorObject(context)
 
 		// TODO @AndroidJsonizedParcelable simply reuse
-		clazz.addParcelableCtor(context)
+		clazz.addEmptyCtor(context)
 
 		// Not applicable to @AndroidJsonized
 		// if a field is a JSON type field, then prepare for bad JSON values
