@@ -191,8 +191,8 @@ class JsonTest extends AndroidTestCase {
 	var String x
 	var String y
 	var String z
-    	//var List<Integer> listOfInts    = #[ 0, 1, 2 ]
-    	//var List<String>  listOfStrings = #[ "a", "b", "c" ]
+    var List<Integer> listOfInts    = #[ 0, 1, 2 ]
+    var List<String>  listOfStrings = #[ "a", "b", "c" ]
 }
 
 class TestDefaultAndroidJsonValues {
@@ -222,7 +222,7 @@ class TestDefaultAndroidJsonValues {
 		assertEquals(0, d.a)
 		assertEquals("string", d.b)
 		assertEquals(0.1234, d.c)
-		//assertArrayEquals(#[ 0, 1, 2 ].toArray, d.listOfInts.toArray)
-		//assertArrayEquals(#[ "a", "b", "c" ].toArray, d.listOfStrings.toArray)
+		assertArrayEquals(#[ 0, 1, 2 ].toArray, d.listOfInts.toArray)
+		assertArrayEquals(#[ "a", "b", "c" ].toArray, d.listOfStrings.toArray)
 	}
 }

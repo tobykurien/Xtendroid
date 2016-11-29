@@ -144,7 +144,7 @@ class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDec
 
 				// parse the value if it hasn't already been, then return the stored result
 				body = ['''
-					«IF field.initializer != null»if («jsonObjectFieldName».isNull("«jsonKey»")) return «fieldInitializer»;«ENDIF»
+					«IF field.initializer != null»if («jsonObjectFieldName».isNull("«jsonKey»")) return «field.simpleName»;«ENDIF»
 					if (!«field.simpleName»Loaded) {
 						«field.simpleName» = «jsonObjectFieldName».get«supportedTypes.get(field.type.name)»("«jsonKey»");
 						«field.simpleName»Loaded = true;
@@ -157,7 +157,7 @@ class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDec
 				// array of Dates
 				if (field.type.array) {
 					body = '''
-						«IF field.initializer != null»if («jsonObjectFieldName».isNull("«jsonKey»")) return «fieldInitializer»;«ENDIF»
+						«IF field.initializer != null»if («jsonObjectFieldName».isNull("«jsonKey»")) return «field.simpleName»;«ENDIF»
 						if (!«field.simpleName»Loaded) {
 							final «JSONArray.newTypeReference» «field.simpleName»JsonArray = «jsonObjectFieldName».getJSONArray("«jsonKey»");
 							this.«field.simpleName» = new «Date.newTypeReference»[«field.simpleName»JsonArray.length()];
@@ -172,7 +172,7 @@ class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDec
 				} else // single Date
 				{
 					body = '''
-						«IF field.initializer != null»if («jsonObjectFieldName».isNull("«jsonKey»")) return «fieldInitializer»;«ENDIF»
+						«IF field.initializer != null»if («jsonObjectFieldName».isNull("«jsonKey»")) return «field.simpleName»;«ENDIF»
 						if (!«field.simpleName»Loaded) {
 							«field.simpleName» = «ConcurrentDateFormatHashMap.newTypeReference.name».convertStringToDate("«dateFormat»", «jsonObjectFieldName».getString("«jsonKey»"));
 							«field.simpleName»Loaded = true;
@@ -185,7 +185,7 @@ class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDec
 				if (supportedTypes.containsKey(baseType.name)) { // array of scalar primitives
 					body = [
 						'''
-							«IF field.initializer != null»if («jsonObjectFieldName».isNull("«jsonKey»")) return «fieldInitializer»;
+							«IF field.initializer != null»if («jsonObjectFieldName».isNull("«jsonKey»")) return «field.simpleName»;
 							«ELSE»if («jsonObjectFieldName».isNull("«jsonKey»")) return null;
 							«ENDIF»
 							if (!«field.simpleName»Loaded) {
@@ -203,7 +203,7 @@ class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDec
 				} else { // array of a custom type like itself, i.e. the type also has a ctor that accepts a JSONObject
 					body = [
 						'''
-							«IF field.initializer != null»if («jsonObjectFieldName».isNull("«jsonKey»")) return «fieldInitializer»;
+							«IF field.initializer != null»if («jsonObjectFieldName».isNull("«jsonKey»")) return «field.simpleName»;
 							«ELSE»if («jsonObjectFieldName».isNull("«jsonKey»")) return null;
 							«ENDIF»
 							if (!«field.simpleName»Loaded) {
@@ -226,7 +226,7 @@ class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDec
 					val baseTypeName = field.type.actualTypeArguments.head.name
 					body = [
 						'''
-							«IF field.initializer != null»if («jsonObjectFieldName».isNull("«jsonKey»")) return «fieldInitializer»;
+							«IF field.initializer != null»if («jsonObjectFieldName».isNull("«jsonKey»")) return «field.simpleName»;
 							«ELSE»if («jsonObjectFieldName».isNull("«jsonKey»")) return null;
 							«ENDIF»
 							if (!«field.simpleName»Loaded) {
@@ -246,7 +246,7 @@ class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDec
 					val baseTypeName = field.type.actualTypeArguments.map[name].join
 					body = [
 						'''
-							«IF field.initializer != null»if («jsonObjectFieldName».isNull("«jsonKey»")) return «fieldInitializer»;«ENDIF»
+							«IF field.initializer != null»if («jsonObjectFieldName».isNull("«jsonKey»")) return «field.simpleName»;«ENDIF»
 							«««The implementer should return her own default for aggregate primitives»»»
 							if (!«field.simpleName»Loaded) {
 								final «JSONArray.findTypeGlobally.qualifiedName» «field.simpleName»JsonArray = «jsonObjectFieldName».getJSONArray("«jsonKey»");
@@ -267,7 +267,7 @@ class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDec
 					val baseTypeName = field.type.actualTypeArguments.head.name
 					body = [
 						'''
-							«IF field.initializer != null»if («jsonObjectFieldName».isNull("«jsonKey»")) return «fieldInitializer»;
+							«IF field.initializer != null»if («jsonObjectFieldName».isNull("«jsonKey»")) return «field.simpleName»;
 							«ELSE»if («jsonObjectFieldName».isNull("«jsonKey»")) return null;
 							«ENDIF»
 							if (!«field.simpleName»Loaded) {
@@ -288,7 +288,7 @@ class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDec
 				// TODO if it's single POJO that has a single ctor with a single JSONObject parameter, create it
 				body = [
 					'''
-						«IF field.initializer != null»if («jsonObjectFieldName».isNull("«jsonKey»")) return «fieldInitializer»;
+						«IF field.initializer != null»if («jsonObjectFieldName».isNull("«jsonKey»")) return «field.simpleName»;
 						«ELSE»if («jsonObjectFieldName».isNull("«jsonKey»")) return null;
 						«ENDIF»
 						if (!«field.simpleName»Loaded) {
