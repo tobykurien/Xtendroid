@@ -1,4 +1,4 @@
-package org.xtendroid.xtendroidtest.test
+package org.xtendroid.xtendroidtest.test.json
 
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -7,6 +7,7 @@ import org.json.JSONObject
 import org.xtendroid.json.AndroidJson
 import org.junit.Test
 import static org.junit.Assert.*
+import android.test.AndroidTestCase
 
 /**
  * 

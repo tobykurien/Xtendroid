@@ -1,4 +1,4 @@
-package org.xtendroid.xtendroidtest.test
+package org.xtendroid.xtendroidtest.test.parcelable
 
 import android.test.AndroidTestCase
 import java.util.Date

@@ -189,6 +189,7 @@ class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDec
 							«ELSE»if («jsonObjectFieldName».isNull("«jsonKey»")) return null;
 							«ENDIF»
 							if (!«field.simpleName»Loaded) {
+							    ««« TODO determine if JSONArray.newTypeReference is beter, then refactor »»»
 								final «JSONArray.findTypeGlobally.qualifiedName» «field.simpleName»JsonArray = «jsonObjectFieldName».getJSONArray("«jsonKey»");
 								this.«field.simpleName» = new «baseType»[«field.simpleName»JsonArray.length()];
 								for (int i=0; i<«field.simpleName»JsonArray.length(); i++)
@@ -207,6 +208,7 @@ class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDec
 							«ELSE»if («jsonObjectFieldName».isNull("«jsonKey»")) return null;
 							«ENDIF»
 							if (!«field.simpleName»Loaded) {
+							    ««« TODO determine if JSONArray.newTypeReference is beter, then refactor »»»
 								final «JSONArray.findTypeGlobally.qualifiedName» «field.simpleName»JsonArray = «jsonObjectFieldName».getJSONArray("«jsonKey»");
 								this.«field.simpleName» = new «baseType»[«field.simpleName»JsonArray.length()];
 								for (int i=0; i<«field.simpleName»JsonArray.length(); i++)
@@ -230,6 +232,7 @@ class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDec
 							«ELSE»if («jsonObjectFieldName».isNull("«jsonKey»")) return null;
 							«ENDIF»
 							if (!«field.simpleName»Loaded) {
+							    ««« TODO determine if JSONArray.newTypeReference is beter, then refactor »»»
 								final «JSONArray.findTypeGlobally.qualifiedName» «field.simpleName»JsonArray = «jsonObjectFieldName».getJSONArray("«jsonKey»");
 								this.«field.simpleName» = new java.util.ArrayList<«baseTypeName»>();
 								for (int i=0; i<«field.simpleName»JsonArray.length(); i++)
@@ -249,6 +252,7 @@ class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDec
 							«IF field.initializer != null»if («jsonObjectFieldName».isNull("«jsonKey»")) return «fieldInitializer»;«ENDIF»
 							«««The implementer should return her own default for aggregate primitives»»»
 							if (!«field.simpleName»Loaded) {
+							    ««« TODO determine if JSONArray.newTypeReference is beter, then refactor »»»
 								final «JSONArray.findTypeGlobally.qualifiedName» «field.simpleName»JsonArray = «jsonObjectFieldName».getJSONArray("«jsonKey»");
 								this.«field.simpleName» = new java.util.ArrayList<«baseTypeName»>();
 								for (int i=0; i<«field.simpleName»JsonArray.length(); i++)
@@ -271,6 +275,7 @@ class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDec
 							«ELSE»if («jsonObjectFieldName».isNull("«jsonKey»")) return null;
 							«ENDIF»
 							if (!«field.simpleName»Loaded) {
+							    ««« TODO determine if JSONArray.newTypeReference is beter, then refactor »»»
 								final «JSONArray.findTypeGlobally.qualifiedName» «field.simpleName»JsonArray = «jsonObjectFieldName».getJSONArray("«jsonKey»");
 								this.«field.simpleName» = new java.util.ArrayList<«baseTypeName»>();
 								for (int i=0; i<«field.simpleName»JsonArray.length(); i++)

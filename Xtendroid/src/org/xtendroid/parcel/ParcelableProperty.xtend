@@ -47,7 +47,7 @@ annotation AndroidParcelable {}
 
 class ParcelableProcessor extends AbstractClassProcessor
 {
-	val static supportedPrimitiveScalarType= #{
+	public val static supportedPrimitiveScalarType= #{
 		'java.lang.String' -> 'String'
 		, 'byte' -> 'Byte' // writeByte, readByte
 		, 'double' -> 'Double'
@@ -58,7 +58,7 @@ class ParcelableProcessor extends AbstractClassProcessor
 		, 'android.util.SparseBooleanArray' -> 'SparseBooleanArray'
 	}
 	
-	val static supportedPrimitiveArrayType = #{
+	public val static supportedPrimitiveArrayType = #{
 		'java.lang.String[]' -> 'StringArray'
 		, 'boolean[]' -> 'BooleanArray'
 		, 'byte[]' -> 'ByteArray'
@@ -70,7 +70,7 @@ class ParcelableProcessor extends AbstractClassProcessor
 		, 'char[]' -> 'CharArray'
 	}
 	
-	val static unsupportedAbstractTypesAndSuggestedTypes = #{
+	public val static unsupportedAbstractTypesAndSuggestedTypes = #{
 		'java.lang.Byte' -> 'byte'
 		, 'java.lang.Double' -> 'double'
 		, 'java.lang.Float' -> 'float'
