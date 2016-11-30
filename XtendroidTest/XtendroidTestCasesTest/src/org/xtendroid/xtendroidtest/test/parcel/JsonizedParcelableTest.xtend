@@ -1,18 +1,19 @@
-package org.xtendroid.xtendroidtest.test.parcelable
+package org.xtendroid.xtendroidtest.test.parcel
 
 /**
  * TODO
- * + warn for "@attr attrpart2" : "value", or just strip the non-ascii values
- * + handle name collisions, by suffixing digits, or by not re-registering the damn thing, the decoration can go on without re-registering
  * - make "attr" : null, String by default
- * + "class" : "yes, this is a reserved keyword" will break your shizzle (scan for all the reserved keywords)
- * - write unit tests!
  */
 
 import org.xtendroid.json.AndroidJsonizedParcelable
 import org.junit.Test
 import static org.junit.Assert.*
 import org.json.JSONObject
+import android.os.Parcel
+import android.test.AndroidTestRunner
+import android.support.test.runner.AndroidJUnit4
+import org.junit.runner.RunWith
+import android.test.suitebuilder.annotation.SmallTest
 
 /**
  * We generate getters/setters/models, depending on the JSON model
@@ -200,7 +201,9 @@ class WildernessResponse2 {
 	var meh = 'meh'
 }
 
-class JsonizedTest {
+@RunWith(AndroidJUnit4)
+@SmallTest
+class JsonizedParcelableTest {
 
 	@Test
 	public def testScalarJson() {
@@ -222,48 +225,70 @@ class JsonizedTest {
 	}
 
 	@Test
+	def testManyParcelables() {
+		testParcelable(new ABooleanJz(new JSONObject('{ "aBoolean" : false }')))
+		testParcelable(new ALongJz(new JSONObject('{ "anInteger" : 803 }')))
+		testParcelable(new ADoubleJz(new JSONObject('{ "aFloat" : 803.008 }')))
+		testParcelable(new AStringJz(new JSONObject('{ "aString" : "meh string" }')))
+		testParcelable(new AHeterogenousObject(new JSONObject('{ "bString" : "abcd" }')))
+		testParcelable(new ATypeWithAStringParent(new JSONObject('{ "anObjectWithAStringFirstJz" : { "aString" : "bla" } }')))
+		testParcelable(new ATypeWithDeepNesting(new JSONObject('{
+			"aDeepNesting0Jz" : {
+				"aDeepNesting1Jz" : {
+					"aDeepNesting2Jz" : {
+						"aDeepNesting3Jz" : { "anInteger" : 4321 }
+					}
+				}
+			}
+		}')))
+	}
+
+	@Test
 	public def testBooleanVectorJson()
 	{
-		assertFalse(new ManyBooleansParent(new JSONObject('{ "manyBooleans" : [ true, false, true, false ] }')).getManyBooleans.get(3))
+		val stuff = new ManyBooleansParent(new JSONObject('{ "manyBooleans" : [ true, false, true, false ] }'))
+		assertFalse(stuff.getManyBooleans.get(3))
+		testParcelable(stuff)
 	}
 
 	@Test
 	public def testIntegerVectorJson()
 	{
-		assertTrue (new ManyIntegersParent(new JSONObject('{ "manyIntegers" : [ 0, 1, 2, 3, 4 ] }')).getManyIntegers.get(3) == 3)
+		val stuff = new ManyIntegersParent(new JSONObject('{ "manyIntegers" : [ 0, 1, 2, 3, 4 ] }'))
+		assertTrue (stuff.getManyIntegers.get(3) == 3)
+		testParcelable(stuff)
 	}
 
 	@Test
 	public def testFloatVectorJson()
 	{
-		assertTrue (new ManyFloatsParent(new JSONObject('{ "manyFloats" : [ 0.0, 1.0, 2.0, 3, 4.0 ] }')).getManyFloats.get(3) == 3.0f) // float === double?
-
+		val stuff = new ManyFloatsParent(new JSONObject('{ "manyFloats" : [ 0.0, 1.0, 2.0, 3, 4.0 ] }'))
+		assertTrue (stuff.getManyFloats.get(3) == 3.0f) // float === double?
+		testParcelable(stuff)
 	}
 
 	@Test
 	public def testStringVectorJson()
 	{
-		assertTrue (new ManyStringsParent(new JSONObject('{ "manyStrings" : [ "0", "1", "2", "3" ] }')).getManyStrings.get(3) .equals ("3"))
-
+		val stuff = new ManyStringsParent(new JSONObject('{ "manyStrings" : [ "0", "1", "2", "3" ] }'))
+		assertTrue (stuff.getManyStrings.get(3).equals("3"))
+		testParcelable(stuff)
 	}
 
 	@Test
 	public def testObjectVectorJson()
 	{
-		assertTrue (new ManyObjectsWithStringsParent(new JSONObject('{ "manyObjectsWithStringsFirst" : [ { "aString" : "string" } ] }')).getManyObjectsWithStringsFirst.get(0).getAString.equals("string"))
-	}
-
-//	@Test // TODO fix the http call
-	public def testChuckNorrisHttpJson()
-	{
-		var randomQuote = '{ "type": "success", "value": { "id": 417, "joke": "meh", "categories": [] } }'
-		//assertTrue(new ChuckNorrisApi(new JSONObject(randomQuote)).getValue.getJoke.equals("meh"))
+		val stuff = new ManyObjectsWithStringsParent(new JSONObject('{ "manyObjectsWithStringsFirst" : [ { "aString" : "string" } ] }'))
+		assertTrue (stuff.getManyObjectsWithStringsFirst.get(0).getAString.equals("string"))
+		testParcelable(stuff)
 	}
 
 	@Test
 	public def testTheOriginalExampleAtJsonizer()
 	{
-		assertTrue(new MusicReleases(new JSONObject(MusicReleases.input)).getQuery.getResults.getRelease.get(0).getUPC.equals("602527291567"))
+		val musicReleases = new MusicReleases(new JSONObject(MusicReleases.input))
+		assertTrue(musicReleases.getQuery.getResults.getRelease.get(0).getUPC.equals("602527291567"))
+		testParcelable(musicReleases)
 	}
 
 	// TODO do the other tests... like isDirty etc. getJSONObject
@@ -281,5 +306,32 @@ class JsonizedTest {
 		assertTrue(res1.optB)
 		assertEquals(res1.optS, "string")
 		assertNotNull(res1.optArray)
+
+		testParcelable(res0)
+		testParcelable(res1)
+	}
+
+	static def<T> void testParcelable(T parcelable) {
+
+		// Obtain a Parcel object and write the parcelable object to it
+		// parcelable.writeToParcel(parcel, 0)
+		val parcel = Parcel.obtain
+		val Class[] params = #[ Parcel, Integer.TYPE ]
+		val method = parcelable.class.getDeclaredMethod("writeToParcel", params)
+		method.invoke(parcelable, parcel, 0)
+
+		// After you're done with writing, you need to reset the parcel for reading
+		parcel.setDataPosition(0)
+
+		// Reconstruct object from parcel and asserts:
+		// val createdFromParcel = T.CREATOR.createFromParcel(parcel)
+		val field = parcelable.class.getDeclaredField("CREATOR")
+		field.setAccessible(true)
+		val value = field.get(parcelable);
+		val createFromParcelMethod = value.class.getDeclaredMethod("createFromParcel", #[ Parcel ])
+
+		val createdFromParcel = createFromParcelMethod.invoke(value, parcel)
+
+		assertEquals(parcelable, createdFromParcel)
 	}
 }
