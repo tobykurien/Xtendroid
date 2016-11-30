@@ -221,7 +221,7 @@ class TestDefaultAndroidJsonValues {
 		assertEquals("z", d.z)
 		assertEquals(0, d.a)
 		assertEquals("string", d.b)
-		assertEquals(0.1234, d.c)
+		assertEquals(0.1234, d.c, 0.1234)
 		assertArrayEquals(#[ 0, 1, 2 ].toArray, d.listOfInts.toArray)
 		assertArrayEquals(#[ "a", "b", "c" ].toArray, d.listOfStrings.toArray)
 	}
