@@ -330,8 +330,10 @@ class AndroidJsonizedParcelableProcessor extends AndroidJsonizedProcessor {
             addParameter('flags', int.newTypeReference)
             addAnnotation(Override.newAnnotationReference)
             body = ['''
-                out.writeString(mJsonObject.toString());
-                out.writeInt(mDirty ? 1 : 0);
+                if (mJsonObject != null) {
+                    out.writeString(mJsonObject.toString());
+                    out.writeInt(mDirty ? 1 : 0);
+                }
             '''] // simple Parcelable version just Parcels the original JSONObject
         ]
 
@@ -340,14 +342,24 @@ class AndroidJsonizedParcelableProcessor extends AndroidJsonizedProcessor {
         addMethod('readFromParcel') [
             addParameter('in', Parcel.newTypeReference)
             body = ['''
-                mDirty = in.readInt() > 0;
                 try {
                     mJsonObject = new «toJavaCode(JSONObject.newTypeReference)»(in.readString());
+                    mDirty = in.readInt() > 0;
                 } catch («toJavaCode(JSONException.newTypeReference)» e) {
                     throw new «toJavaCode(RuntimeException.newTypeReference)»(e);
                 }
             ''']
             returnType = void.newTypeReference
+        ]
+
+        addMethod('toString') [
+            returnType = String.newTypeReference
+            body = ['''
+                if (mJsonObject != null) {
+                    return mJsonObject.toString();
+                }
+                return null;
+            ''']
         ]
 
         for (entry : entries) {
