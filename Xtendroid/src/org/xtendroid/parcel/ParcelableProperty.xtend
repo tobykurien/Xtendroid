@@ -38,12 +38,6 @@ annotation AndroidParcelable {}
  * Compatible with @Property and @JSONProperty
  * 
  */
- 
- /**
-  * 
-  * Future work: Parcelable enum types
-  * 
-  */
 
 class ParcelableProcessor extends AbstractClassProcessor
 {
@@ -262,10 +256,8 @@ class ParcelableProcessor extends AbstractClassProcessor
 
 	override doTransform(MutableClassDeclaration clazz, extension TransformationContext context) {
 
-		// TODO @AndroidJsonizedParcelable simply reuse
 		clazz.addImplementsParcelable(context)
 
-		// Not applicable to @AndroidJsonized
 		val fields = clazz.declaredFields
 		for (f : fields)
 			{
@@ -275,10 +267,8 @@ class ParcelableProcessor extends AbstractClassProcessor
 					}
 			}
 
-		// TODO @AndroidJsonizedParcelable simply reuse
 		clazz.addMethodDescribeContents(context)
 
-		// Not applicable to @AndroidJsonized
 		val hasJsonBeanDataField = fields.exists[f|f.simpleName.equals(AndroidJsonProcessor.jsonObjectFieldName)] ||
 				fields.exists[f|f.annotations.exists[AndroidJson.newAnnotationReference.equals]] ||
 				clazz.annotations.exists[AndroidJson.newAnnotationReference.equals]
@@ -299,7 +289,6 @@ class ParcelableProcessor extends AbstractClassProcessor
 		//			fields.map[annotations.map[a|a.annotationTypeDeclaration.simpleName].join('')].join('')
 		//		))
 
-		// TODO @AndroidJsonizedParcelable: write equivalent function, that lists the fields, then adds expressions
 		clazz.addMethod("writeToParcel")  [
 			returnType = void.newTypeReference
 			addParameter('out', Parcel.newTypeReference)
@@ -318,10 +307,8 @@ class ParcelableProcessor extends AbstractClassProcessor
 			''']
 		]
 
-		// TODO @AndroidJsonizedParcelable simply reuse
 		clazz.addParcelableCreatorObject(context)
 
-		// TODO @AndroidJsonizedParcelable simply reuse
 		clazz.addEmptyCtor(context)
 
 		// Not applicable to @AndroidJsonized
@@ -358,7 +345,6 @@ class ParcelableProcessor extends AbstractClassProcessor
 			]
 		}
 
-		// TODO @AndroidJsonizedParcelable: write equivalent function, that lists the fields, then adds expressions
 		clazz.addMethod('readFromParcel') [
 		   fields.forEach[markAsRead]
 			addParameter('in', Parcel.newTypeReference)
