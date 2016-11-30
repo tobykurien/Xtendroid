@@ -340,6 +340,8 @@ class JsonizedParcelableTest {
 
 		val createdFromParcel = createFromParcelMethod.invoke(value, parcel)
 
+		assertNotNull(parcelable.toString)
+		assertNotNull(createdFromParcel.toString)
 		assertEquals(parcelable.toString, createdFromParcel.toString)
 	}
 }
