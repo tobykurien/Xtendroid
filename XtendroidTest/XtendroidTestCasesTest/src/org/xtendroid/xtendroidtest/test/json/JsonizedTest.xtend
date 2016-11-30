@@ -230,14 +230,14 @@ class JsonizedTest {
 	@Test
 	public def testIntegerVectorJson()
 	{
-		assertTrue (new ManyIntegersParent(new JSONObject('{ "manyIntegers" : [ 0, 1, 2, 3, 4 ] }')).getManyIntegers.get(3) == 3)
+		assertTrue (new ManyIntegersParent(new JSONObject('{ "manyIntegers" : [ 0, 1, 2, 3, 4 ] }')).getManyIntegers.get(3).equals(Long.valueOf(3)))
 	}
 
 	@Test
 	public def testFloatVectorJson()
 	{
-		assertTrue (new ManyFloatsParent(new JSONObject('{ "manyFloats" : [ 0.0, 1.0, 2.0, 3, 4.0 ] }')).getManyFloats.get(3) == 3.0f) // float === double?
-
+		assertEquals (new ManyFloatsParent(new JSONObject('{ "manyFloats" : [ 0.0, 1.0, 2.0, 3, 4.0 ] }')).getManyFloats.get(3), Double.valueOf(3))
+		assertTrue (new ManyFloatsParent(new JSONObject('{ "manyFloats" : [ 0.0, 1.0, 2.0, 3.0, 4.0 ] }')).getManyFloats.get(3) == 3.0f)
 	}
 
 	@Test
@@ -272,10 +272,15 @@ class JsonizedTest {
 	public def testsFromTheWilderness()
 	{
 		val res0 = new WildernessResponse1(new JSONObject('{"i":null, "b":null, "s":null, "array":null}'))
-		assertNull(res0.optI)
-		assertNull(res0.optB)
-		assertNull(res0.optS)
-		assertNull(res0.optArray)
+		assertEquals(res0.optI(0L), 0L)
+		assertEquals(res0.optB(true), true)
+		assertNull(res0.optArray(null))
+		assertNotEquals(String.format("value: %s", res0.optS('string')), res0.optS('string'), 'string') // wtf? "s":null resolves as a valid null
+
+		// missing value for attr 's'
+		val res2 = new WildernessResponse1(new JSONObject('{"i":null, "b":null, array":null}'))
+		assertEquals(String.format("value: %s", res2.optS('string')), res2.optS('string'), 'string')
+
 		val res1 = new WildernessResponse1(new JSONObject('{"i":0, "b":true, "s":"string", "array":[0,1,2]}'))
 		assertEquals(res1.optI, 0)
 		assertTrue(res1.optB)

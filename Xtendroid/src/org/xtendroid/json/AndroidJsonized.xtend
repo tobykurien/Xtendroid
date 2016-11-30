@@ -11,7 +11,6 @@ import org.eclipse.xtend.lib.macro.TransformationContext
 import org.eclipse.xtend.lib.macro.declaration.ClassDeclaration
 import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
 import org.eclipse.xtend.lib.macro.declaration.Visibility
-import org.eclipse.xtend.lib.macro.declaration.CompilationStrategy.CompilationContext;
 
 import org.json.JSONObject
 import org.json.JSONArray
@@ -23,7 +22,7 @@ import static extension org.xtendroid.json.JsonObjectEntry.*
 import static extension org.xtendroid.parcel.ParcelableProcessor.*
 import android.os.Parcel
 import org.eclipse.xtend.lib.macro.declaration.TypeReference
-import android.util.SparseBooleanArray
+import org.eclipse.xtend.lib.macro.declaration.CompilationStrategy
 
 /**
  * Structure by example.
@@ -140,6 +139,56 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
         return basicType.isPrimitive || basicType.isWrapper || basicType.isAssignableFrom(String.newTypeReference)
     }
 
+    protected static def CompilationStrategy getterBody(JsonObjectEntry entry, extension TransformationContext context, boolean addDefaultParameter) {
+        val basicType = entry.getComponentType(context)
+        val realType = if(entry.isArray) getList(basicType) else basicType
+        val memberName = entry.key.scrubName
+        val _memberName = '_' + memberName
+        val jsonArrayTypeReference = JSONArray.newTypeReference
+        val arrayListTypeReference = ArrayList.newTypeReference
+
+        if (entry.isArray)
+        {
+            // populate List
+            return ['''
+                        if («_memberName» == null || mDirty) {
+                            «toJavaCode(jsonArrayTypeReference)» arr = mJsonObject.optJSONArray("«entry.key»");
+                            «IF addDefaultParameter»if (arr == null) { return defaultValue; }«ELSE»if (arr == null) { return null; }«ENDIF»
+                            «_memberName» = new «toJavaCode(arrayListTypeReference)»<«basicType.simpleName.toFirstUpper»>();
+                            for (int i=0; i<«_memberName».size(); i++) {
+                                «IF basicType.isNotJSONObject(context)»
+                                    «_memberName».add(arr.opt«basicType.simpleName.toFirstUpper»(i));
+                                «ELSE»
+                                    «_memberName».add(new «basicType.simpleName.toFirstUpper»(arr.optJSONObject(i)));
+                                «ENDIF»
+                            }
+                        }
+                        return «_memberName»;
+                    ''']
+        }else if (entry.isJsonObject)
+        {
+            return ['''
+                        if («_memberName» == null || mDirty) {
+                            if (mJsonObject.optJSONObject("«entry.key»") == null) {
+                                «IF addDefaultParameter»
+                                    return defaultValue;
+                                «ELSE»
+                                    return null;
+                                «ENDIF»
+                            }
+                            «_memberName» = new «basicType.simpleName»(mJsonObject.optJSONObject("«entry.key»"));
+                        }
+                        return «_memberName»;
+				    ''']
+        }else { // is primitive (e.g. String, Number, Boolean)
+            return ['''
+                        «_memberName» = mJsonObject.opt«basicType.simpleName.toFirstUpper»("«entry.key»"«IF addDefaultParameter», defaultValue«ELSE»«ENDIF»);
+                        return «_memberName»;
+            ''']
+        }
+
+    }
+
     protected def void enhanceClassesRecursively(MutableClassDeclaration clazz, Iterable<? extends JsonObjectEntry> entries, extension TransformationContext context) {
         clazz.addJsonPlaceholderAndDirtyFlag(context)
 
@@ -156,41 +205,18 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
                 visibility = Visibility.PROTECTED
             ]
 
-            clazz.addMethod("opt" + memberName.toFirstUpper + if (reservedKeywords.contains(memberName)) '_'  else '') [
+            val optMethodName = "opt" + memberName.toFirstUpper + if (reservedKeywords.contains(memberName)) '_'  else ''
+
+            clazz.addMethod(optMethodName) [
                 returnType = realType
-                if (entry.isArray)
-                {
-                    // populate List
-                    body = ['''
-                        if («_memberName» == null) {
-                            «toJavaCode(JSONArray.newTypeReference)» arr = mJsonObject.optJSONArray("«entry.key»");
-                            if(arr == null) { return null; }
-                            «_memberName» = new «toJavaCode(ArrayList.newTypeReference)»<«basicType.simpleName.toFirstUpper»>();
-                            for (int i=0; i<«_memberName».size(); i++) {
-                                «IF basicType.isNotJSONObject(context)»
-                                    «_memberName».add((«basicType.simpleName.toFirstUpper») arr.opt(i));
-                                «ELSE»
-                                    «_memberName».add(new «basicType.simpleName.toFirstUpper»(arr.optJSONObject(i)));
-                                «ENDIF»
-                            }
-                        }
-                        return «_memberName»;
-                    ''']
-                }else if (entry.isJsonObject)
-                {
-                    body = ['''
-                        if («_memberName» == null) {
-                            if (mJsonObject.optJSONObject("«entry.key»") == null) { return null; }
-                            «_memberName» = new «basicType.simpleName»(mJsonObject.optJSONObject("«entry.key»"));
-                        }
-                        return «_memberName»;
-				    ''']
-                }else { // is primitive (e.g. String, Number, Boolean)
-                    body = ['''
-                        «_memberName» = mJsonObject.opt«basicType.simpleName.toFirstUpper»("«entry.key»");
-                        return «_memberName»;
-                    ''']
-                }
+                body = entry.getterBody(context, false)
+            ]
+
+            clazz.addMethod(optMethodName) [
+                returnType = realType
+                addParameter("defaultValue", realType)
+                // small price for DRY
+                body = entry.getterBody(context, true)
             ]
 
             // Hopefully sets have logarithmic costs, not linear (although the cost in our case is constant)
@@ -200,12 +226,12 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
                 if (entry.isArray) {
                     // populate List
                     body = ['''
-                            if («_memberName» == null) {
+                            if («_memberName» == null || mDirty) {
                                 «_memberName» = new «toJavaCode(ArrayList.newTypeReference)»<«basicType.simpleName.toFirstUpper»>();
                                 JSONArray vals = mJsonObject.getJSONArray("«entry.key»");
                                 for (int i=0; i < vals.length(); i++) {
                                     «IF basicType.isNotJSONObject(context)»
-                                        «_memberName».add((«basicType.simpleName.toFirstUpper») vals.get(i));
+                                        «_memberName».add(vals.get«basicType.simpleName.toFirstUpper»(i));
                                     «ELSE»
                                         «_memberName».add(new «basicType.simpleName.toFirstUpper»(vals.getJSONObject(i)));
                                     «ENDIF»
@@ -215,7 +241,7 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
                             ''']
                 }else if (entry.isJsonObject) {
                     body = ['''
-                        if («_memberName» == null) {
+                        if («_memberName» == null || mDirty) {
                             «_memberName» = new «basicType.simpleName»(mJsonObject.getJSONObject("«entry.key»"));
                         }
                         return «_memberName»;
