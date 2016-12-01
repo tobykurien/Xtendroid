@@ -329,7 +329,7 @@ class JsonizedParcelableTest {
 		method.invoke(parcelable, parcel, 0)
 
 		// After you're done with writing, you need to reset the parcel for reading
-		parcel.setDataPosition(0)
+		parcel.dataPosition = 0
 
 		// Reconstruct object from parcel and asserts:
 		// val createdFromParcel = T.CREATOR.createFromParcel(parcel)

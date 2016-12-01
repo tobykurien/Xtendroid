@@ -13,6 +13,7 @@ import org.xtendroid.json.AndroidJsonized
 import org.junit.Test
 import static org.junit.Assert.*
 import org.json.JSONObject
+import org.json.JSONException
 
 /**
  * We generate getters/setters/models, depending on the JSON model
@@ -226,34 +227,34 @@ class JsonizedTest {
 	{
 		assertFalse(new ManyBooleansParent(new JSONObject('{ "manyBooleans" : [ true, false, true, false ] }')).getManyBooleans.get(3))
 	}
-	
+
 	@Test
 	public def testIntegerVectorJson()
 	{
-		assertTrue (new ManyIntegersParent(new JSONObject('{ "manyIntegers" : [ 0, 1, 2, 3, 4 ] }')).getManyIntegers.get(3).equals(Long.valueOf(3)))
+		assertTrue(new ManyIntegersParent(new JSONObject('{ "manyIntegers" : [ 0, 1, 2, 3, 4 ] }')).getManyIntegers.get(3).equals(Long.valueOf(3)))
 	}
 
 	@Test
 	public def testFloatVectorJson()
 	{
-		assertEquals (new ManyFloatsParent(new JSONObject('{ "manyFloats" : [ 0.0, 1.0, 2.0, 3, 4.0 ] }')).getManyFloats.get(3), Double.valueOf(3))
-		assertTrue (new ManyFloatsParent(new JSONObject('{ "manyFloats" : [ 0.0, 1.0, 2.0, 3.0, 4.0 ] }')).getManyFloats.get(3) == 3.0f)
+		assertEquals(new ManyFloatsParent(new JSONObject('{ "manyFloats" : [ 0.0, 1.0, 2.0, 3, 4.0 ] }')).getManyFloats.get(3), Double.valueOf(3))
+		assertTrue(new ManyFloatsParent(new JSONObject('{ "manyFloats" : [ 0.0, 1.0, 2.0, 3.0, 4.0 ] }')).getManyFloats.get(3) == 3.0f)
 	}
 
 	@Test
 	public def testStringVectorJson()
 	{
-		assertTrue (new ManyStringsParent(new JSONObject('{ "manyStrings" : [ "0", "1", "2", "3" ] }')).getManyStrings.get(3) .equals ("3"))
+		assertTrue(new ManyStringsParent(new JSONObject('{ "manyStrings" : [ "0", "1", "2", "3" ] }')).getManyStrings.get(3) .equals("3"))
 
 	}
 
 	@Test
 	public def testObjectVectorJson()
 	{
-		assertTrue (new ManyObjectsWithStringsParent(new JSONObject('{ "manyObjectsWithStringsFirst" : [ { "aString" : "string" } ] }')).getManyObjectsWithStringsFirst.get(0).getAString.equals("string"))
+		assertTrue(new ManyObjectsWithStringsParent(new JSONObject('{ "manyObjectsWithStringsFirst" : [ { "aString" : "string" } ] }')).getManyObjectsWithStringsFirst.get(0).getAString.equals("string"))
 	}
 
-//	@Test // TODO fix the http call
+	//	@Test // TODO fix the http call
 	public def testChuckNorrisHttpJson()
 	{
 		var randomQuote = '{ "type": "success", "value": { "id": 417, "joke": "meh", "categories": [] } }'
@@ -287,4 +288,53 @@ class JsonizedTest {
 		assertEquals(res1.optS, "string")
 		assertNotNull(res1.optArray)
 	}
+
+	@Test
+	public def test_ProvideWrongTypes_primitive_array() {
+		val boolz = new ABooleanJz(new JSONObject('{ "aBoolean" : [] }'))
+		val longz = new ALongJz(new JSONObject('{ "anInteger" : [] }'))
+		val doublz = new ADoubleJz(new JSONObject('{ "aFloat" : [] }'))
+		val stringz = new AStringJz (new JSONObject('{ "aString" : [] }'))
+
+		try {
+			assertFalse("get", boolz.getABoolean)
+			fail
+		}catch(JSONException e) {
+			// intentionally empty
+		}
+		assertFalse("opt", boolz.optABoolean)
+		assertTrue(boolz.optABoolean(true))
+
+		try {
+			assertEquals(longz.anInteger, 0)
+			fail
+		}catch(JSONException e) {
+			// intentionally empty
+		}
+		assertEquals(longz.optAnInteger, 0)
+		assertEquals(longz.optAnInteger(-1), -1)
+
+		try {
+			assertEquals(doublz.getAFloat, 0, 0)
+			fail
+		}catch(JSONException e) {
+			// intentionally empty
+		}
+		//assertEquals(doublz.optAFloat, 0, 0)
+		assertEquals(doublz.optAFloat(-0.0f), -0.0f, 0)
+
+		try {
+			assertEquals(stringz.getAString, '[]')
+		}catch(JSONException e) {
+			fail
+		}
+		assertNotNull(stringz.optAString)
+		assertNotEquals(stringz.optAString('meh'), 'meh') // wtf?
+		assertEquals(stringz.optAString('meh'), '[meh]') // wtf?
+	}
+
+	@Test
+	public def test_ProvideWrongTypes_compound_primitive() {
+ 		assertTrue(true) // TODO
+ 	}
 }
