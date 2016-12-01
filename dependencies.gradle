@@ -3,18 +3,18 @@ ext {
     minSdkVersion = 15
     buildToolsVersion = '23.0.3'
 
-    android_gradle_ver = '2.1.0'
-    xtend_android_gradle_ver = '1.0.3'
-    //xtend_gradle_ver = '0.4.+'
-    xtext_gradle_ver = '1.0.3'
+    android_gradle_ver = '2.2.0'
+    xtend_android_gradle_ver = '1.0.9'
+    //xtext_gradle_ver = '1.0.3' // works!
+    xtext_gradle_ver = '1.0.9'
 
-    xtend_lib_ver = '2.9.2'
+    //xtend_lib_ver = '2.9.2' // works!
+    xtend_lib_ver = '2.10.0'
     android_sdk_support_ver = '23.2.1'
 
     build = [
         android_gradle : "com.android.tools.build:gradle:${android_gradle_ver}",
         xtend_android_gradle : "org.xtext:xtext-android-gradle-plugin:${xtend_android_gradle_ver}",
-        //xtend_gradle : "org.xtend:xtend-gradle-plugin:${xtend_gradle_ver}", // will be deprecated
         xtext_gradle : "org.xtext:xtext-gradle-plugin:${xtext_gradle_ver}"
     ]
 
