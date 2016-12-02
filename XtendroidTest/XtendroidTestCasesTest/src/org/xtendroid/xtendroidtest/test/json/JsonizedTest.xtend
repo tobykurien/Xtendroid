@@ -330,7 +330,7 @@ class JsonizedTest {
 		}
 		assertNotNull(stringz.optAString)
 		assertNotEquals(stringz.optAString('meh'), 'meh') // wtf?
-		assertEquals(stringz.optAString('meh'), '[meh]') // wtf?
+		assertEquals(String.format("actual value %s", stringz.optAString('meh')), stringz.optAString('meh'), '[]') // wtf? Totally ignored my default, because '[]' is a totally valid literal value
 	}
 
 	@Test
