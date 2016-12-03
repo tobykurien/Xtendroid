@@ -3,11 +3,11 @@ ext {
     minSdkVersion = 15
     buildToolsVersion = '23.0.3'
 
-    android_gradle_ver = '2.2.0'
+    android_gradle_ver = '2.2.2'
 
-    xtext_plugin_version = '1.0.3' // local build: 'test'
-    xtend_android_gradle_ver = xtext_plugin_version // '1.0.9'
-    xtext_gradle_ver = xtext_plugin_version // '1.0.9'
+    xtext_plugin_version = '1.0.13' // local build: 'test'
+    xtend_android_gradle_ver = xtext_plugin_version
+    xtext_gradle_ver = xtext_plugin_version
 
     xtend_lib_ver = '2.10.0'
     android_sdk_support_ver = '23.2.1'
