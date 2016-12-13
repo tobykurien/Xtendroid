@@ -151,39 +151,47 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
         {
             // populate List
             return ['''
-                        if («_memberName» == null || mDirty) {
-                            «toJavaCode(jsonArrayTypeReference)» arr = mJsonObject.optJSONArray("«entry.key»");
-                            «IF addDefaultParameter»if (arr == null) { return defaultValue; }«ELSE»if (arr == null) { return null; }«ENDIF»
-                            «_memberName» = new «toJavaCode(arrayListTypeReference)»<«basicType.simpleName.toFirstUpper»>();
-                            for (int i=0; i<«_memberName».size(); i++) {
-                                «IF basicType.isNotJSONObject(context)»
-                                    «_memberName».add(arr.opt«basicType.simpleName.toFirstUpper»(i));
-                                «ELSE»
-                                    «_memberName».add(new «basicType.simpleName.toFirstUpper»(arr.optJSONObject(i)));
-                                «ENDIF»
-                            }
-                        }
-                        return «_memberName»;
+                if («_memberName» == null) {
+                    «_memberName» = new «toJavaCode(arrayListTypeReference)»<«basicType.simpleName.toFirstUpper»>();
+                }
+
+                if («_memberName».isEmpty() || mDirty) {
+                    «toJavaCode(jsonArrayTypeReference)» arr = mJsonObject.optJSONArray("«entry.key»");
+                    «IF addDefaultParameter»if (arr == null) { return defaultValue; }«ELSE»if (arr == null) { return null; }«ENDIF»
+
+                    if (!«_memberName».isEmpty()) {
+                        «_memberName».clear();
+                    }
+
+                    for (int i=0; i<arr.size(); i++) {
+                        «IF basicType.isNotJSONObject(context)»
+                            «_memberName».add(arr.opt«basicType.simpleName.toFirstUpper»(i));
+                        «ELSE»
+                            «_memberName».add(new «basicType.simpleName.toFirstUpper»(arr.optJSONObject(i)));
+                        «ENDIF»
+                    }
+                }
+                return «_memberName»;
                     ''']
         }else if (entry.isJsonObject)
         {
             return ['''
-                        if («_memberName» == null || mDirty) {
-                            if (mJsonObject.optJSONObject("«entry.key»") == null) {
-                                «IF addDefaultParameter»
-                                    return defaultValue;
-                                «ELSE»
-                                    return null;
-                                «ENDIF»
-                            }
-                            «_memberName» = new «basicType.simpleName»(mJsonObject.optJSONObject("«entry.key»"));
-                        }
-                        return «_memberName»;
+                if («_memberName» == null || mDirty) {
+                    if (mJsonObject.isNull("«entry.key»")) {
+                        «IF addDefaultParameter»
+                            return defaultValue;
+                        «ELSE»
+                            return null;
+                        «ENDIF»
+                    }
+                    «_memberName» = new «basicType.simpleName»(mJsonObject.optJSONObject("«entry.key»"));
+                }
+                return «_memberName»;
 				    ''']
         }else { // is primitive (e.g. String, Number, Boolean)
             return ['''
-                        «_memberName» = mJsonObject.opt«basicType.simpleName.toFirstUpper»("«entry.key»"«IF addDefaultParameter», defaultValue«ELSE»«ENDIF»);
-                        return «_memberName»;
+                «_memberName» = mJsonObject.opt«basicType.simpleName.toFirstUpper»("«entry.key»"«IF addDefaultParameter», defaultValue«ELSE»«ENDIF»);
+                return «_memberName»;
             ''']
         }
 
@@ -191,6 +199,8 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
 
     protected def void enhanceClassesRecursively(MutableClassDeclaration clazz, Iterable<? extends JsonObjectEntry> entries, extension TransformationContext context) {
         clazz.addJsonPlaceholderAndDirtyFlag(context)
+
+        val arrayListTypeReference = ArrayList.newTypeReference
 
         // add accessors for the entries
         for (entry : entries) {
@@ -226,18 +236,26 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
                 if (entry.isArray) {
                     // populate List
                     body = ['''
-                            if («_memberName» == null || mDirty) {
-                                «_memberName» = new «toJavaCode(ArrayList.newTypeReference)»<«basicType.simpleName.toFirstUpper»>();
-                                JSONArray vals = mJsonObject.getJSONArray("«entry.key»");
-                                for (int i=0; i < vals.length(); i++) {
-                                    «IF basicType.isNotJSONObject(context)»
-                                        «_memberName».add(vals.get«basicType.simpleName.toFirstUpper»(i));
-                                    «ELSE»
-                                        «_memberName».add(new «basicType.simpleName.toFirstUpper»(vals.getJSONObject(i)));
-                                    «ENDIF»
-                                }
+                        if («_memberName» == null) {
+                            «_memberName» = new «toJavaCode(arrayListTypeReference)»<«basicType.simpleName.toFirstUpper»>();
+                        }
+
+                        if («_memberName».isEmpty() || mDirty) {
+                            JSONArray vals = mJsonObject.getJSONArray("«entry.key»");
+
+                            if (!«_memberName».isEmpty()) {
+                                «_memberName».clear();
                             }
-                            return «_memberName»;
+
+                            for (int i=0; i < vals.length(); i++) {
+                                «IF basicType.isNotJSONObject(context)»
+                                    «_memberName».add(vals.get«basicType.simpleName.toFirstUpper»(i));
+                                «ELSE»
+                                    «_memberName».add(new «basicType.simpleName.toFirstUpper»(vals.getJSONObject(i)));
+                                «ENDIF»
+                            }
+                        }
+                        return «_memberName»;
                             ''']
                 }else if (entry.isJsonObject) {
                     body = ['''

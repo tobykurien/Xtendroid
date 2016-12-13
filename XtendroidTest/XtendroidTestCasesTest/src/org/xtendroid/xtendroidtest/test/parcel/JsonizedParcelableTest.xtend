@@ -11,7 +11,6 @@ import static org.junit.Assert.*
 import org.json.JSONObject
 import android.os.Parcel
 import android.os.Parcelable
-import android.test.AndroidTestRunner
 import android.support.test.runner.AndroidJUnit4
 import org.junit.runner.RunWith
 import android.test.suitebuilder.annotation.SmallTest
