@@ -13,7 +13,6 @@ import android.os.Parcel
 import android.os.Parcelable
 import android.support.test.runner.AndroidJUnit4
 import org.junit.runner.RunWith
-import android.test.suitebuilder.annotation.SmallTest
 
 /**
  * We generate getters/setters/models, depending on the JSON model
@@ -202,7 +201,6 @@ class WildernessResponse2 {
 }
 
 @RunWith(AndroidJUnit4)
-@SmallTest
 class JsonizedParcelableTest {
 
 	@Test
