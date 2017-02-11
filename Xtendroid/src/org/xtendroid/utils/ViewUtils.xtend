@@ -1,7 +1,7 @@
 package org.xtendroid.utils
 
-import android.app.Activity
 import android.app.Dialog
+import android.support.v4.app.FragmentActivity
 import android.support.v4.app.Fragment
 import android.view.View
 import android.widget.Button
@@ -9,6 +9,7 @@ import android.widget.ListView
 import android.widget.Spinner
 import android.widget.TextView
 import java.util.WeakHashMap
+import android.app.Activity
 
 /**
  * Convenience methods to simplify code using findViewById(). These should be imported as static extensions.
@@ -27,7 +28,7 @@ class ViewUtils {
 
    def static <T extends View> T getView(Fragment f, int resId) {
       if (cache.get(resId) == null) {
-        cache.put(resId, f.activity?.findViewById(resId) as T)
+        cache.put(resId, (f.activity as FragmentActivity)?.findViewById(resId) as T)
       }
       
       cache.get(resId) as T 
