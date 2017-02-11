@@ -171,12 +171,6 @@ class AdapterizeProcessor extends AbstractClassProcessor {
         var countMethodName = "getCount"
         if (clazz.extendedClass.name.startsWith("android.support.v7.widget.RecyclerView$Adapter")) {
             countMethodName = "getItemCount"
-
-            // also add the onCreateViewHolder() method
-            clazz.addMethod("onCrt")
-            "    override MyViewHolder onCreateViewHolder(ViewGroup viewGroup, int position) {
-        return MyViewHolder.getOrCreate(context, null, viewGroup)
-    }"
         }
 
         clazz.addMethod(countMethodName) [
