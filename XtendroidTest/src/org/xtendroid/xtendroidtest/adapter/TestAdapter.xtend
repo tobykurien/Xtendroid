@@ -16,6 +16,6 @@ import org.xtendroid.xtendroidtest.models.User
 class MyViewGroup extends LinearLayout {
 	def showWithData(User user) {
 		userName.text = user.firstName + " " + user.lastName
-	   userAge.text = user.age
+	   	age.text = user.age
 	}
 }

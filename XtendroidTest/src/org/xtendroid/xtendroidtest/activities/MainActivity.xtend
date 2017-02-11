@@ -18,6 +18,7 @@ import org.xtendroid.adapter.BeanAdapter
 		new Demo('@AndroidFragment', FragmentActivity),
 		new Demo('@AndroidDialogFragment', DialogFragmentActivity),
 		new Demo('@AndroidDatabase', DbTestActivity),
+		new Demo('BeanAdapter', BeanAdapterActivity),
 		new Demo('@AndroidAdapter', AndroidAdapterActivity),
 		new Demo('@AndroidPreference', SettingsActivity),
 		new Demo('@AndroidLoader', LoaderActivity),

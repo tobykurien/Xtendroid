@@ -24,6 +24,9 @@
             </intent-filter>
         </activity>
         <activity
+            android:name="org.xtendroid.xtendroidtest.activities.BeanAdapterActivity"
+            android:theme="@style/Theme.AppCompat"/>
+        <activity
             android:name="org.xtendroid.xtendroidtest.activities.BgTaskActivity"/>
         <activity
             android:name="org.xtendroid.xtendroidtest.activities.DbTestActivity"

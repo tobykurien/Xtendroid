@@ -18,6 +18,7 @@ import org.xtendroid.xtendroidtest.models.User
    @AndroidViewHolder(R.layout.list_row_user) static class ViewHolder {
    }
 
+   // this is optional but by default id = position
    override getItemId(int position) {
       getItem(position).id
    }
@@ -27,7 +28,7 @@ import org.xtendroid.xtendroidtest.models.User
       
       var item = getItem(position)
       vh.userName.text = item.firstName + " " + item.lastName
-      vh.userAge.text = String.valueOf(item.age)
+      vh.age.text = String.valueOf(item.age)
       
       vh.getView()     
    }

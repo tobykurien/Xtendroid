@@ -105,8 +105,8 @@ class AlertUtils {
     *       will cause an app crash on rotation
     */
    def public static confirm(Context context, String message, ()=>void confirmed) {
-   	confirm(context, message, confirmed, null)
-	}
+      confirm(context, message, confirmed, null)
+   }
    
    /**
     * Show a dialog box with Ok/Cancel to confirm an action.

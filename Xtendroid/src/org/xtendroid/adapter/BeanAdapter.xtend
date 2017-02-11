@@ -73,7 +73,16 @@ class BeanAdapter<T> extends BaseAdapter {
                case TextView: (res as TextView).setText(String.valueOf(method.invoke(i)))
                case EditText: (res as EditText).setText(String.valueOf(method.invoke(i)))
                case ImageView: (res as ImageView).setImageBitmap(method.invoke(i) as Bitmap)
-               default: Log.e("base_adapter", "View type not yet supported: " + res.class)
+
+               // AppCompat versions of the above
+               case res.class.name.equals("android.support.v7.widget.AppCompatTextView"):
+                  (res as TextView).setText(String.valueOf(method.invoke(i)))
+               case res.class.name.equals("android.support.v7.widget.AppCompatEditText"):
+                  (res as EditText).setText(String.valueOf(method.invoke(i)))
+               case res.class.name.equals("android.support.v7.widget.AppCompatImageView"):
+                  (res as ImageView).setImageBitmap(method.invoke(i) as Bitmap)
+
+               default: Log.e("BeanAdapter", "View type not yet supported: " + res.class)
             }
          }
       ]

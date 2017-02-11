@@ -26,7 +26,7 @@ class FragmentProcessor extends AbstractClassProcessor {
    override doTransform(MutableClassDeclaration clazz, extension TransformationContext context) {
 
       // add #findViewById just like the Activity
-      var exists = clazz.declaredMethods.exists[m|m.simpleName == "findViewById"]
+      var exists = clazz.declaredMethods.exists[simpleName.equals("findViewById")]
       if (!exists)
          clazz.addMethod("findViewById") [
             visibility = Visibility::PUBLIC
@@ -40,7 +40,7 @@ class FragmentProcessor extends AbstractClassProcessor {
          ]
 
       // add ctor, orientation changes cause crashes without it
-      if (!clazz.declaredConstructors.exists[ctor|ctor.parameters.empty]) {
+      if (!clazz.declaredConstructors.exists[parameters.empty]) {
          clazz.addConstructor [
             visibility = Visibility::PUBLIC
             body = [

@@ -308,7 +308,13 @@ You can now easily implement the [view holder pattern][viewholder] by using the 
    // Define our view holder and it's layout
    @AndroidViewHolder(R.layout.list_row_user) static class ViewHolder {
    }
-      
+
+   // We can optionally override getItemId() to specify the id of each item
+   // By default the id = position
+   override getItemId(int position) {
+      getItem(position).id
+   }
+
    override getView(int position, View convertView, ViewGroup parent) {
       // get a view holder for current row
       var vh = ViewHolder.getOrCreate(context, convertView, parent)
