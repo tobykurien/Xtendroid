@@ -167,7 +167,19 @@ class AdapterizeProcessor extends AbstractClassProcessor {
             ]
         }
 
-        clazz.addMethod("getCount") [
+        // Add getCount()/getItemCount() for BaseAdapter/RecyclerView
+        var countMethodName = "getCount"
+        if (clazz.extendedClass.name.startsWith("android.support.v7.widget.RecyclerView$Adapter")) {
+            countMethodName = "getItemCount"
+
+            // also add the onCreateViewHolder() method
+            clazz.addMethod("onCrt")
+            "    override MyViewHolder onCreateViewHolder(ViewGroup viewGroup, int position) {
+        return MyViewHolder.getOrCreate(context, null, viewGroup)
+    }"
+        }
+
+        clazz.addMethod(countMethodName) [
             addAnnotation(Override.newAnnotationReference)
             body = [
                 '''
@@ -186,7 +198,9 @@ class AdapterizeProcessor extends AbstractClassProcessor {
 
         clazz.addMethod("getItem") [
             addParameter("position", int.newTypeReference)
-            addAnnotation(Override.newAnnotationReference)
+            if (clazz.isAssignableFrom(BaseAdapter.newTypeReference.type)) {
+                addAnnotation(Override.newAnnotationReference)
+            }
             body = [
                 '''
                     «IF dataContainerField.type.array»

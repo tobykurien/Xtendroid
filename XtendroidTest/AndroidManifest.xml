@@ -24,6 +24,8 @@
             </intent-filter>
         </activity>
         <activity
+            android:name="org.xtendroid.xtendroidtest.activities.RecyclerViewActivity"/>
+        <activity
             android:name="org.xtendroid.xtendroidtest.activities.BeanAdapterActivity"
             android:theme="@style/Theme.AppCompat"/>
         <activity

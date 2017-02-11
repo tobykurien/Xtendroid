@@ -330,6 +330,30 @@ You can now easily implement the [view holder pattern][viewholder] by using the 
 }
 ```
 
+Both ```@AndroidAdapter``` and ```@AndroidViewHolder``` can also be used to implement ```RecyclerView``` adapters:
+
+```xtend
+// Viewholder
+@AndroidViewHolder(R.layout.list_row_user) class MyViewHolder
+    extends RecyclerView.ViewHolder {
+}
+
+// Complete example of RecyclerView Adapter!
+@AndroidAdapter class RVAdapter extends RecyclerView.Adapter<MyViewHolder> {
+    List<User> users
+
+    override void onBindViewHolder(MyViewHolder vh, int position) {
+        var item = getItem(position)
+        vh.userName.text = item.firstName + " " + item.lastName
+        vh.age.text = String.valueOf(item.age)
+    }
+
+    override MyViewHolder onCreateViewHolder(ViewGroup viewGroup, int position) {
+        return MyViewHolder.getOrCreate(context, null, viewGroup)
+    }
+}
+```
+
 > Note: You can use the ```@AndroidViewHolder``` annotation in ```Activity``` and ```Fragment``` classes too, for example to load a header layout into a ```ListView``` header (i.e. in place of using ```LayoutInflater```). You can even reuse the view holder across multiple classes that use the same layout!
 
 Database

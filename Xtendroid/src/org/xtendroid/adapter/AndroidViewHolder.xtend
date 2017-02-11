@@ -41,16 +41,28 @@ class AndroidViewHolderProcessor extends AbstractClassProcessor {
 
       clazz.addField("view") [f|
          f.type = View.newTypeReference
-      ]  
-       
-      // create constructor
-		clazz.addConstructor [
-			addParameter("view", View.newTypeReference)
-			body = [
-				'''
-				  this.view = view;
-				''']
       ]
+
+      if (clazz.extendedClass.name.equals("android.support.v7.widget.RecyclerView$ViewHolder")) {
+          // create constructor for RecyclerView.ViewHolder
+          clazz.addConstructor [
+              addParameter("view", View.newTypeReference)
+              body = [
+                  '''
+                    super(view);
+                    this.view = view;
+                  ''']
+          ]
+      } else {
+          // create constructor
+          clazz.addConstructor [
+              addParameter("view", View.newTypeReference)
+              body = [
+                  '''
+                    this.view = view;
+                  ''']
+          ]
+      }
 
       // add #findViewById just like in an Activity
       var exists = clazz.declaredMethods.exists[m|m.simpleName == "findViewById"]
