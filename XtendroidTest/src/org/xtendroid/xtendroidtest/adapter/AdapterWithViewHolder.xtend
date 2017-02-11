@@ -17,6 +17,10 @@ import org.xtendroid.xtendroidtest.models.User
    // Viewholder
    @AndroidViewHolder(R.layout.list_row_user) static class ViewHolder {
    }
+
+   override getItemId(int position) {
+      getItem(position).id
+   }
       
    override getView(int position, View convertView, ViewGroup parent) {
       var vh = ViewHolder.getOrCreate(context, convertView, parent)
