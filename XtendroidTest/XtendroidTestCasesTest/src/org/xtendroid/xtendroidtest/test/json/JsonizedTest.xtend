@@ -1,4 +1,4 @@
-package org.xtendroid.xtendroidtest.test
+package org.xtendroid.xtendroidtest.test.json
 
 /**
  * TODO
@@ -13,6 +13,7 @@ import org.xtendroid.json.AndroidJsonized
 import org.junit.Test
 import static org.junit.Assert.*
 import org.json.JSONObject
+import org.json.JSONException
 
 /**
  * We generate getters/setters/models, depending on the JSON model
@@ -175,29 +176,13 @@ class MusicReleases {
  }'
 }
 
-// Looky here, there's a null-value
-// "params": null
-/*
 @AndroidJsonized('{
-    "textList": {
-        "messages": [
-            {
-                "messageKey": "MESSAGE_KKAI106_04",
-                "messageText": "Meh, nan anananan booo boo.",
-                "messageType": "WARNING"
-            }
-        ],
-        "texts": [
-            {
-                "id": "mobileAppsConfig_clothingline",
-                "text": "VESTMENTS_DEFAULT",
-				"params": null,
-            }
-        ]
-    }
+	"i" : 1,
+	"b" : true,
+	"s" : "string",
+	"array" : [ 0, 1, 2 ]
 }')
 class WildernessResponse1 {}
-*/
 
 @AndroidJsonized('{ "class" : "looky here a reserved keyword" }')
 class WildernessResponse_Reserved_Keyword {}
@@ -246,30 +231,30 @@ class JsonizedTest {
 	@Test
 	public def testIntegerVectorJson()
 	{
-		assertTrue (new ManyIntegersParent(new JSONObject('{ "manyIntegers" : [ 0, 1, 2, 3, 4 ] }')).getManyIntegers.get(3) == 3)
+		assertTrue(new ManyIntegersParent(new JSONObject('{ "manyIntegers" : [ 0, 1, 2, 3, 4 ] }')).getManyIntegers.get(3).equals(Long.valueOf(3)))
 	}
 
 	@Test
 	public def testFloatVectorJson()
 	{
-		assertTrue (new ManyFloatsParent(new JSONObject('{ "manyFloats" : [ 0.0, 1.0, 2.0, 3, 4.0 ] }')).getManyFloats.get(3) == 3.0f) // float === double?
-
+		assertEquals(new ManyFloatsParent(new JSONObject('{ "manyFloats" : [ 0.0, 1.0, 2.0, 3, 4.0 ] }')).getManyFloats.get(3), Double.valueOf(3))
+		assertTrue(new ManyFloatsParent(new JSONObject('{ "manyFloats" : [ 0.0, 1.0, 2.0, 3.0, 4.0 ] }')).getManyFloats.get(3) == 3.0f)
 	}
 
 	@Test
 	public def testStringVectorJson()
 	{
-		assertTrue (new ManyStringsParent(new JSONObject('{ "manyStrings" : [ "0", "1", "2", "3" ] }')).getManyStrings.get(3) .equals ("3"))
+		assertTrue(new ManyStringsParent(new JSONObject('{ "manyStrings" : [ "0", "1", "2", "3" ] }')).getManyStrings.get(3) .equals("3"))
 
 	}
 
 	@Test
 	public def testObjectVectorJson()
 	{
-		assertTrue (new ManyObjectsWithStringsParent(new JSONObject('{ "manyObjectsWithStringsFirst" : [ { "aString" : "string" } ] }')).getManyObjectsWithStringsFirst.get(0).getAString.equals("string"))
+		assertTrue(new ManyObjectsWithStringsParent(new JSONObject('{ "manyObjectsWithStringsFirst" : [ { "aString" : "string" } ] }')).getManyObjectsWithStringsFirst.get(0).getAString.equals("string"))
 	}
 
-//	@Test // TODO fix the http call
+	//	@Test // TODO fix the http call
 	public def testChuckNorrisHttpJson()
 	{
 		var randomQuote = '{ "type": "success", "value": { "id": 417, "joke": "meh", "categories": [] } }'
@@ -287,6 +272,69 @@ class JsonizedTest {
 	@Test
 	public def testsFromTheWilderness()
 	{
-//		new WildernessResponse1()
+		val res0 = new WildernessResponse1(new JSONObject('{"i":null, "b":null, "s":null, "array":null}'))
+		assertEquals(res0.optI(0L), 0L)
+		assertEquals(res0.optB(true), true)
+		assertNull(res0.optArray(null))
+		assertNotEquals(String.format("value: %s", res0.optS('string')), res0.optS('string'), 'string') // wtf? "s":null resolves as a valid null
+
+		// missing value for attr 's'
+		val res2 = new WildernessResponse1(new JSONObject('{"i":null, "b":null, array":null}'))
+		assertEquals(String.format("value: %s", res2.optS('string')), res2.optS('string'), 'string')
+
+		val res1 = new WildernessResponse1(new JSONObject('{"i":0, "b":true, "s":"string", "array":[0,1,2]}'))
+		assertEquals(res1.optI, 0)
+		assertTrue(res1.optB)
+		assertEquals(res1.optS, "string")
+		assertNotNull(res1.optArray)
 	}
+
+	@Test
+	public def test_ProvideWrongTypes_primitive_array() {
+		val boolz = new ABooleanJz(new JSONObject('{ "aBoolean" : [] }'))
+		val longz = new ALongJz(new JSONObject('{ "anInteger" : [] }'))
+		val doublz = new ADoubleJz(new JSONObject('{ "aFloat" : [] }'))
+		val stringz = new AStringJz (new JSONObject('{ "aString" : [] }'))
+
+		try {
+			assertFalse("get", boolz.getABoolean)
+			fail
+		}catch(JSONException e) {
+			// intentionally empty
+		}
+		assertFalse("opt", boolz.optABoolean)
+		assertTrue(boolz.optABoolean(true))
+
+		try {
+			assertEquals(longz.anInteger, 0)
+			fail
+		}catch(JSONException e) {
+			// intentionally empty
+		}
+		assertEquals(longz.optAnInteger, 0)
+		assertEquals(longz.optAnInteger(-1), -1)
+
+		try {
+			assertEquals(doublz.getAFloat, 0, 0)
+			fail
+		}catch(JSONException e) {
+			// intentionally empty
+		}
+		//assertEquals(doublz.optAFloat, 0, 0)
+		assertEquals(doublz.optAFloat(-0.0f), -0.0f, 0)
+
+		try {
+			assertEquals(stringz.getAString, '[]')
+		}catch(JSONException e) {
+			fail
+		}
+		assertNotNull(stringz.optAString)
+		assertNotEquals(stringz.optAString('meh'), 'meh') // wtf?
+		assertEquals(String.format("actual value %s", stringz.optAString('meh')), stringz.optAString('meh'), '[]') // wtf? Totally ignored my default, because '[]' is a totally valid literal value
+	}
+
+	@Test
+	public def test_ProvideWrongTypes_compound_primitive() {
+ 		assertTrue(true) // TODO
+ 	}
 }

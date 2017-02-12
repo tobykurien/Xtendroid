@@ -7,6 +7,15 @@ buildscript {scriptHandler->
     }
 }
 
+allprojects {
+  repositories {
+    maven { url System.getenv('ANDROID_HOME') + "/extras/android/m2repository" }
+    mavenCentral()
+    mavenLocal()
+    jcenter()
+  }
+}
+
 apply plugin: 'org.xtext.xtend'
 
 dependencies {

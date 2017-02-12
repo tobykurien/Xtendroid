@@ -14,13 +14,14 @@ apply from: '../dependencies.gradle'
 dependencies {
   compile fileTree(dir: 'libs', include: ['*.jar'])
   compile(project.ext.lib.xtend)
+/*
   compile(project.ext.lib.android.support_v4)
   compile(project.ext.lib.android.appcompat_v7)
-  compile 'com.android.support:recyclerview-v7:23.1.1'
+*/
   compile project(':Xtendroid')
 
   // testing
-  androidTestCompile 'com.android.support:support-annotations:23.1.1'
+  androidTestCompile "com.android.support:support-annotations:${project.ext.android_sdk_support_ver}"
   androidTestCompile 'com.android.support.test:runner:0.4.1'
   androidTestCompile 'com.android.support.test:rules:0.4.1'
   androidTestCompile 'org.hamcrest:hamcrest-library:1.3'
@@ -81,11 +82,5 @@ android {
     lintOptions {
       abortOnError false
     }
-  }
-
-  packagingOptions {
-    // from xtendlib >=2.9.2
-    exclude 'META-INF/ECLIPSE_.RSA'
-    exclude 'META-INF/ECLIPSE_.SF'
   }
 }

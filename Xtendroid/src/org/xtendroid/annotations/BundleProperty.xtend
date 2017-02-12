@@ -198,9 +198,11 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
                body = '''
                «IF isDataSourceFragment»
                   «IF field.type.primitive || fieldInitializer != null»
-                     «field.type.name» «field.simpleName» = «prefix».get«mapTypeToMethodName.get(field.type.simpleName)»("«keyValue»"«IF mapTypeToNilValue.get(field.type.simpleName) != 'null'», «getterMethodDefaultName»()«ENDIF»);
+                     «field.type.name» «field.simpleName» = «getterMethodDefaultName»();
+                     if («prefix» != null)
+                        «field.simpleName» = «prefix».get«mapTypeToMethodName.get(field.type.simpleName)»("«keyValue»"«IF mapTypeToNilValue.get(field.type.simpleName) != 'null'», «getterMethodDefaultName»()«ENDIF»);
                      «IF mapTypeToNilValue.get(field.type.simpleName) == 'null'»
-                     	return «field.simpleName» == «mapTypeToNilValue.get(field.type.simpleName)» ? «field.simpleName» : «getterMethodDefaultName»();
+                     	return «field.simpleName» == «mapTypeToNilValue.get(field.type.simpleName)» ? «getterMethodDefaultName»() : «field.simpleName»;
                      «ELSE»
                      	return «field.simpleName»;
                      «ENDIF»
@@ -232,7 +234,7 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
             clazz.addMethod(getterMethodDefaultName) [
                visibility = Visibility.PUBLIC
                returnType = field.type
-               body = fieldInitializer
+               body = ['''return «field.simpleName»;''']
             ]
          } else if (field.type.primitive && isDataSourceActivity) {
             field.addError(
@@ -299,9 +301,6 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
 				«ENDIF»
             ''']
       ]
-
-      // remove this field so that code calls getters instead
-      field.remove
    }
 
    def String determinePrefix(extension TransformationContext context, MutableFieldDeclaration field,

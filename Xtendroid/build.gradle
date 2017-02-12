@@ -53,12 +53,12 @@ android {
     lintOptions {
       abortOnError false
     }
-
-    packagingOptions {
-      // from xtendlib >=2.9.2
-      exclude 'META-INF/ECLIPSE_.RSA'
-      exclude 'META-INF/ECLIPSE_.SF'
-    }
 }
 
+// either pass it as ./gradlew -PGROUP=... or use gradle.properties
+// along with the other parameters
+if (project.hasProperty('GROUP'))
+{
+    apply from: './maven-push.gradle'
+}
 

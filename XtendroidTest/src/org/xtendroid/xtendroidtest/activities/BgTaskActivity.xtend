@@ -10,7 +10,7 @@ import org.xtendroid.xtendroidtest.R
 import static extension org.xtendroid.utils.AsyncBuilder.*
 
 @AndroidActivity(R.layout.activity_main) class BgTaskActivity {
-   var tasks = new ArrayList<AsyncTask>
+   var tasks = new ArrayList<AsyncTask<?,?,?>>
    
    @OnCreate
    def init() {
@@ -35,13 +35,13 @@ import static extension org.xtendroid.utils.AsyncBuilder.*
       ].first [
          // This runs before the background task
          mainHello.text = "Running bg task..."
-      ].then [String result|
+      ].then [result|
          // this runs with the result of the background thread
          mainHello.text = result
-      ].onProgress [Object[] values|
+      ].onProgress [values|
          // this runs if progress is published in the background thread
          pd.progress = values.get(0) as Integer
-      ].onError [Exception error|
+      ].onError [error|
          // this runs if an error occurred anywhere else
          mainHello.text = '''Error! «error.class.name» «error.message»'''
       ].start("Param1") // don't forget to call start to kick-off the task

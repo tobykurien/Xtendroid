@@ -1,11 +1,13 @@
-package org.xtendroid.xtendroidtest.test
+package org.xtendroid.xtendroidtest.test.json
 
-import android.test.AndroidTestCase
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.List
 import org.json.JSONObject
 import org.xtendroid.json.AndroidJson
+import org.junit.Test
+import static org.junit.Assert.*
+import android.test.AndroidTestCase
 
 /**
  * 
@@ -148,25 +150,25 @@ class JsonTest extends AndroidTestCase {
 
 		// these fields should have been left alone
 		assertNull(response.ddt) //assertEquals(response.ddt, 0.01)
-		assertEquals(0.0, response.dt) //assertEquals(response.dt, 0.01)
+		assertEquals(0.0, response.dt, 0.0) //assertEquals(response.dt, 0.01)
 		assertEquals(0, response.iit)
-		
+
 		assertEquals(response.itisareservedkeyword, 1234)
 		assertEquals(response.lt, 2345)
 		assertTrue(response.bt)
 		assertEquals(response.doesNotExistInJson, 1l)
 
 		val arraysOfPrimitives = response.responseData.arraysOfPrimitives.get(0)
-		assertEquals(arraysOfPrimitives.ddta.get(0), 0.01)
-		assertEquals(arraysOfPrimitives.ddta.get(1), 0.02)
+		assertEquals(arraysOfPrimitives.ddta.get(0), 0.01, 0.0)
+		assertEquals(arraysOfPrimitives.ddta.get(1), 0.02, 0.0)
 		assertEquals(arraysOfPrimitives.lta.get(0), 2345)
 		assertEquals(arraysOfPrimitives.ita.get(0), 1234)
 		assertEquals(arraysOfPrimitives.bbta.get(0), true)
 
 		val listsOfPrimitives = response.responseData.listsOfPrimitives.get(0)
-		assertEquals(listsOfPrimitives.ddtl.head, 0.01)
-		assertEquals(listsOfPrimitives.ddtl.drop(1).head, 0.02)
-		assertEquals(listsOfPrimitives.iitl.head, 1234)
+		assertEquals(listsOfPrimitives.ddtl.head, 0.01, 0.0)
+		assertEquals(listsOfPrimitives.ddtl.drop(1).head, 0.02, 0.0)
+		assertEquals(Integer.valueOf(listsOfPrimitives.iitl.head), 1234)
 		assertEquals(listsOfPrimitives.lltl.head, 2345)
 		assertEquals(listsOfPrimitives.bbtl.head, true)
 
@@ -179,5 +181,48 @@ class JsonTest extends AndroidTestCase {
 		val format2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
 		assertEquals(zuluFormat.scalar.time, format2.parse("2011-11-11T12:34:56.789Z").time)
 		assertEquals(zuluFormat.array.get(0).time, format2.parse("2011-11-11T12:34:56.789Z").time)
+	}
+}
+
+@AndroidJson class DefaultsYo {
+	var int a = 0
+	var String b = "string"
+	var double c = 0.1234
+	var String x
+	var String y
+	var String z
+    var List<Integer> listOfInts    = #[ 0, 1, 2 ]
+    var List<String>  listOfStrings = #[ "a", "b", "c" ]
+}
+
+class TestDefaultAndroidJsonValues {
+	/**
+		x,y,z normal correct values
+		a -> null
+		b -> missing in action
+		c -> wrong type
+	*/
+	
+	@Test
+	def test_default_values() {
+		val input = '''
+		{
+		    "x" : "x"
+		    , "y" : "y"
+		    , "z" : "z"
+		    , "a" : null
+		    , "c" : 0.0
+		    , "listOfInts" : null
+		}
+		'''
+		val d = new DefaultsYo(new JSONObject(input))
+		assertEquals("x", d.x)
+		assertEquals("y", d.y)
+		assertEquals("z", d.z)
+		assertEquals(0, d.a)
+		assertEquals("string", d.b)
+		assertEquals(0.1234, d.c, 0.1234)
+		assertArrayEquals(#[ 0, 1, 2 ].toArray, d.listOfInts.toArray)
+		assertArrayEquals(#[ "a", "b", "c" ].toArray, d.listOfStrings.toArray)
 	}
 }

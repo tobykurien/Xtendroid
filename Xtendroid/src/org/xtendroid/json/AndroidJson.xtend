@@ -80,7 +80,7 @@ class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDec
 			field.addError(field.type + " is not supported for @AndroidJson.")
 
 		// The ctor is added if the raw JSON string container needs to be generated
-		if (!field.declaringType.declaredFields.exists[it.simpleName.equals(jsonObjectFieldName)]) {
+		if (!field.declaringType.declaredFields.exists[simpleName.equals(jsonObjectFieldName)]) {
 
 			// make a field for storing the JSONObject
 			field.declaringType.addField(jsonObjectFieldName) [
@@ -103,9 +103,9 @@ class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDec
 		val annotationValue = field.findAnnotation(AndroidJson.findTypeGlobally)?.getValue('value') as String
 
 		val jsonKey = if (!annotationValue.nullOrEmpty && !(field.type.name.startsWith("java.util.Date") ||
-				(field.type.equals(List.newTypeReference()) &&
-					field.type.actualTypeArguments.head.equals(Date.newTypeReference()))
-      ))
+							(field.type.equals(List.newTypeReference()) &&
+							field.type.actualTypeArguments.head.equals(Date.newTypeReference()))
+      					))
 				annotationValue
 			else
 				field.simpleName
@@ -134,49 +134,62 @@ class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDec
 			primarySourceElement = field.primarySourceElement
 			visibility = Visibility.PUBLIC
 			returnType = field.type
-			exceptions = #[JSONException.newTypeReference]
+			// if no initializer was declared (aka default value)
+			// get ready to catch an exception
+			val fieldInitializer = field.initializer
+			exceptions = #[ JSONException.newTypeReference ]
+
+			// scalar value primitive
 			if (supportedTypes.containsKey(field.type.name)) {
 
 				// parse the value if it hasn't already been, then return the stored result
-				body = '''
+				body = ['''
+					«IF field.initializer != null»if («jsonObjectFieldName».isNull("«jsonKey»")) return «field.simpleName»;«ENDIF»
 					if (!«field.simpleName»Loaded) {
-					   «field.simpleName» = «jsonObjectFieldName».get«supportedTypes.get(field.type.name)»("«jsonKey»");
-					   «field.simpleName»Loaded = true;
+						«field.simpleName» = «jsonObjectFieldName».get«supportedTypes.get(field.type.name)»("«jsonKey»");
+						«field.simpleName»Loaded = true;
 					}
 					return «field.simpleName»;
-				'''
-			} else if (field.type.name.startsWith('java.util.Date')) {
+				''']
+			} else if (field.type.name.startsWith('java.util.Date')) { // String to Date conversion
 				exceptions = #[ParseException.newTypeReference, JSONException.newTypeReference]
+
+				// array of Dates
 				if (field.type.array) {
 					body = '''
+						«IF field.initializer != null»if («jsonObjectFieldName».isNull("«jsonKey»")) return «field.simpleName»;«ENDIF»
 						if (!«field.simpleName»Loaded) {
 							final «JSONArray.newTypeReference» «field.simpleName»JsonArray = «jsonObjectFieldName».getJSONArray("«jsonKey»");
 							this.«field.simpleName» = new «Date.newTypeReference»[«field.simpleName»JsonArray.length()];
 							for (int i=0; i<«field.simpleName»JsonArray.length(); i++)
 							{
-								this.«field.simpleName»[i] = «ConcurrentDateFormatHashMap.newTypeReference.name».convertStringToDate("«dateFormat»", «field.
-							simpleName»JsonArray.getString(i));
+								this.«field.simpleName»[i] = «ConcurrentDateFormatHashMap.newTypeReference.name».convertStringToDate("«dateFormat»", «field.simpleName»JsonArray.getString(i));
 							}
 							«field.simpleName»Loaded = true;
 						}
 						return «field.simpleName»;
 					'''
-				} else // single object
+				} else // single Date
 				{
 					body = '''
+						«IF field.initializer != null»if («jsonObjectFieldName».isNull("«jsonKey»")) return «field.simpleName»;«ENDIF»
 						if (!«field.simpleName»Loaded) {
-						   «field.simpleName» = «ConcurrentDateFormatHashMap.newTypeReference.name».convertStringToDate("«dateFormat»", «jsonObjectFieldName».getString("«jsonKey»"));
-						   «field.simpleName»Loaded = true;
+							«field.simpleName» = «ConcurrentDateFormatHashMap.newTypeReference.name».convertStringToDate("«dateFormat»", «jsonObjectFieldName».getString("«jsonKey»"));
+							«field.simpleName»Loaded = true;
 						}
 						return «field.simpleName»;
 					'''
 				}
-			} else if (field.type.array) {
+			} else if (field.type.array) { // array of objects
 				val baseType = field.type.arrayComponentType
-				if (supportedTypes.containsKey(baseType.name)) {
+				if (supportedTypes.containsKey(baseType.name)) { // array of scalar primitives
 					body = [
 						'''
+							«IF field.initializer != null»if («jsonObjectFieldName».isNull("«jsonKey»")) return «field.simpleName»;
+							«ELSE»if («jsonObjectFieldName».isNull("«jsonKey»")) return null;
+							«ENDIF»
 							if (!«field.simpleName»Loaded) {
+							    ««« TODO determine if JSONArray.newTypeReference is beter, then refactor »»»
 								final «JSONArray.findTypeGlobally.qualifiedName» «field.simpleName»JsonArray = «jsonObjectFieldName».getJSONArray("«jsonKey»");
 								this.«field.simpleName» = new «baseType»[«field.simpleName»JsonArray.length()];
 								for (int i=0; i<«field.simpleName»JsonArray.length(); i++)
@@ -186,12 +199,16 @@ class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDec
 								«field.simpleName»Loaded = true;
 							}
 							return «field.simpleName»;
-							'''
+						'''
 					]
-				} else {
+				} else { // array of a custom type like itself, i.e. the type also has a ctor that accepts a JSONObject
 					body = [
 						'''
+							«IF field.initializer != null»if («jsonObjectFieldName».isNull("«jsonKey»")) return «field.simpleName»;
+							«ELSE»if («jsonObjectFieldName».isNull("«jsonKey»")) return null;
+							«ENDIF»
 							if (!«field.simpleName»Loaded) {
+							    ««« TODO determine if JSONArray.newTypeReference is beter, then refactor »»»
 								final «JSONArray.findTypeGlobally.qualifiedName» «field.simpleName»JsonArray = «jsonObjectFieldName».getJSONArray("«jsonKey»");
 								this.«field.simpleName» = new «baseType»[«field.simpleName»JsonArray.length()];
 								for (int i=0; i<«field.simpleName»JsonArray.length(); i++)
@@ -201,34 +218,41 @@ class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDec
 								«field.simpleName»Loaded = true;
 							}
 							return «field.simpleName»;
-							'''
+						'''
 					]
 
 				}
 
-			} else if (field.type.name.startsWith('java.util.List')) {
-				if (field.type.name.endsWith('Date>')) {
+			} else if (field.type.name.startsWith('java.util.List')) { // List<?> of objects
+				if (field.type.name.endsWith('Date>')) { // List<Date>
 					val baseTypeName = field.type.actualTypeArguments.head.name
 					body = [
 						'''
+							«IF field.initializer != null»if («jsonObjectFieldName».isNull("«jsonKey»")) return «field.simpleName»;
+							«ELSE»if («jsonObjectFieldName».isNull("«jsonKey»")) return null;
+							«ENDIF»
 							if (!«field.simpleName»Loaded) {
+							    ««« TODO determine if JSONArray.newTypeReference is beter, then refactor »»»
 								final «JSONArray.findTypeGlobally.qualifiedName» «field.simpleName»JsonArray = «jsonObjectFieldName».getJSONArray("«jsonKey»");
 								this.«field.simpleName» = new java.util.ArrayList<«baseTypeName»>();
 								for (int i=0; i<«field.simpleName»JsonArray.length(); i++)
 								{
-									((java.util.ArrayList<«baseTypeName»>) this.«field.simpleName»).add(«ConcurrentDateFormatHashMap.newTypeReference.
-								name».convertStringToDate("«dateFormat»", «field.simpleName»JsonArray.getString(i)));
+									((java.util.ArrayList<«baseTypeName»>) this.«field.simpleName»).add(«ConcurrentDateFormatHashMap.newTypeReference.name».convertStringToDate("«dateFormat»", «field.simpleName»JsonArray.getString(i)));
 								}
 								«field.simpleName»Loaded = true;
 							}
 							return «field.simpleName»;
-						''']
+						'''
+					]
 					exceptions = #[ParseException.newTypeReference, JSONException.newTypeReference]
-				} else if (field.type.actualTypeArguments.exists[a|supportedTypes.containsKey(a.name)]) {
-					val baseTypeName = field.type.actualTypeArguments.map[a|a.name].join()
+				} else if (field.type.actualTypeArguments.exists[supportedTypes.containsKey(name)]) { // List of primitives
+					val baseTypeName = field.type.actualTypeArguments.map[name].join
 					body = [
 						'''
+							«IF field.initializer != null»if («jsonObjectFieldName».isNull("«jsonKey»")) return «field.simpleName»;«ENDIF»
+							«««The implementer should return her own default for aggregate primitives»»»
 							if (!«field.simpleName»Loaded) {
+							    ««« TODO determine if JSONArray.newTypeReference is beter, then refactor »»»
 								final «JSONArray.findTypeGlobally.qualifiedName» «field.simpleName»JsonArray = «jsonObjectFieldName».getJSONArray("«jsonKey»");
 								this.«field.simpleName» = new java.util.ArrayList<«baseTypeName»>();
 								for (int i=0; i<«field.simpleName»JsonArray.length(); i++)
@@ -238,19 +262,20 @@ class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDec
 								«field.simpleName»Loaded = true;
 							}
 							return «field.simpleName»;
-							'''
+						'''
 					]
 				}
 			// TODO interrogate base type for the List generics param for a JSONObject param in the ctor, f.type.actualTypeArguments
 				// in this current implementation, it is over-optimistically assumed that there is a ctor that takes a JSONObject for this generic type type
-				else {
-
-					//				field.type.actualTypeArguments.head.type. // no way to interrogate yet
-					// custom type
+				else { // List of custom object just like itself
 					val baseTypeName = field.type.actualTypeArguments.head.name
 					body = [
 						'''
+							«IF field.initializer != null»if («jsonObjectFieldName».isNull("«jsonKey»")) return «field.simpleName»;
+							«ELSE»if («jsonObjectFieldName».isNull("«jsonKey»")) return null;
+							«ENDIF»
 							if (!«field.simpleName»Loaded) {
+							    ««« TODO determine if JSONArray.newTypeReference is beter, then refactor »»»
 								final «JSONArray.findTypeGlobally.qualifiedName» «field.simpleName»JsonArray = «jsonObjectFieldName».getJSONArray("«jsonKey»");
 								this.«field.simpleName» = new java.util.ArrayList<«baseTypeName»>();
 								for (int i=0; i<«field.simpleName»JsonArray.length(); i++)
@@ -260,20 +285,24 @@ class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDec
 								«field.simpleName»Loaded = true;
 							}
 							return «field.simpleName»;
-						''']
+						'''
+					]
 				}
 
-			} else if (field.declaringType.findDeclaredConstructor(JSONObject.newTypeReference()) != null) {
-
-				// if it's single POJO that has a single ctor with a single JSONObject parameter, create it
+			} else if (field.declaringType.findDeclaredConstructor(JSONObject.newTypeReference) != null) { // A json parser/container like itself
+				// TODO if it's single POJO that has a single ctor with a single JSONObject parameter, create it
 				body = [
 					'''
+						«IF field.initializer != null»if («jsonObjectFieldName».isNull("«jsonKey»")) return «field.simpleName»;
+						«ELSE»if («jsonObjectFieldName».isNull("«jsonKey»")) return null;
+						«ENDIF»
 						if (!«field.simpleName»Loaded) {
 						   «field.simpleName» = new «field.type.simpleName»(«jsonObjectFieldName».getJSONObject("«jsonKey»"));
 						   «field.simpleName»Loaded = true;
 						}
 						return «field.simpleName»;
-					''']
+					'''
+				]
 			} else {
 				field.addError(field.type + " is not supported for @AndroidJson")
 			}
