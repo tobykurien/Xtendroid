@@ -228,7 +228,7 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 				addParameter("args", Bundle.newTypeReference)
 				addAnnotation(Override.newAnnotationReference)
 				returnType = if (usingSupportCallbacks)
-					Loader.newTypeReference
+					"android.support.v4.content.Loader".newTypeReference
 				else
 					Loader.newTypeReference
 				visibility = Visibility.PUBLIC
@@ -245,7 +245,7 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 				addParameter("LOADER_ID", int.newTypeReference)
 				addParameter("args", Bundle.newTypeReference)
 				returnType = if (usingSupportCallbacks)
-					Loader.newTypeReference
+					"android.support.v4.content.Loader".newTypeReference
 				else
 					Loader.newTypeReference
 				visibility = Visibility.PRIVATE
