@@ -71,9 +71,9 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 		// check if you are using the correct types
 		// TODO rethink this check, if the user wants to shoot herself in the foot..., BgLoader is done with support
 		val usingSupportCallbacks = clazz.implementedInterfaces.exists[i|
-			LoaderManager.LoaderCallbacks.newTypeReference.isAssignableFrom(i)]
+			ClassUtils.isExtending(i, "android.support.v4.app.LoaderManager.LoaderCallbacks")]
 		val usingSupportLoaders = loaderFields.exists[f|
-			Loader.newTypeReference.isAssignableFrom(f.type)]
+			ClassUtils.isExtending(f.type, "android.support.v4.content.Loader")]
 		if (!usingSupportCallbacks && usingSupportLoaders || usingSupportCallbacks && !usingSupportLoaders) {
 			val warning = String.format(
 				"Don't mix support version and the standard version of Loaders (support:%s) and LoaderCallbacks (support:%s)",
@@ -125,7 +125,7 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 			// that is already set.
 			isTypeActivity = true
 		} else if (Fragment.newTypeReference.isAssignableFrom(clazz.extendedClass) ||
-			Fragment.newTypeReference.isAssignableFrom(clazz.extendedClass)) {
+				ClassUtils.isExtending(clazz, "android.support.v4.app.Fragment")) {
 			val onViewCreatedMethod = clazz.findDeclaredMethod('onViewCreated')
 			val onActivityCreatedMethod = clazz.findDeclaredMethod('onActivityCreated')
 			val onStartMethod = clazz.findDeclaredMethod('onStart')
