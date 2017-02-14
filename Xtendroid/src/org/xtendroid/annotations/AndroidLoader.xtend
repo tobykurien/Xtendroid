@@ -71,7 +71,7 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 		// check if you are using the correct types
 		// TODO rethink this check, if the user wants to shoot herself in the foot..., BgLoader is done with support
 		val usingSupportCallbacks = clazz.implementedInterfaces.exists[i|
-			ClassUtils.isExtending(i, "android.support.v4.app.LoaderManager.LoaderCallbacks")]
+			ClassUtils.isExtending(i, "android.support.v4.app.LoaderManager$LoaderCallbacks")]
 		val usingSupportLoaders = loaderFields.exists[f|
 			ClassUtils.isExtending(f.type, "android.support.v4.content.Loader")]
 		if (!usingSupportCallbacks && usingSupportLoaders || usingSupportCallbacks && !usingSupportLoaders) {
