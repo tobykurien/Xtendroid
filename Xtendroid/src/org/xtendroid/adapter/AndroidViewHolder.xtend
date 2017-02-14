@@ -11,6 +11,7 @@ import org.eclipse.xtend.lib.macro.declaration.Visibility
 import org.xtendroid.utils.AnnotationLayoutUtils
 
 import static extension org.xtendroid.utils.AnnotationLayoutUtils.*
+import org.xtendroid.utils.ClassUtils
 
 @Active(typeof(AndroidViewHolderProcessor))
 annotation AndroidViewHolder {
@@ -43,7 +44,7 @@ class AndroidViewHolderProcessor extends AbstractClassProcessor {
          f.type = View.newTypeReference
       ]
 
-      if (clazz.extendedClass.name.equals("android.support.v7.widget.RecyclerView$ViewHolder")) {
+      if (ClassUtils.isExtending(clazz, "android.support.v7.widget.RecyclerView$ViewHolder")) {
           // create constructor for RecyclerView.ViewHolder
           clazz.addConstructor [
               addParameter("view", View.newTypeReference)

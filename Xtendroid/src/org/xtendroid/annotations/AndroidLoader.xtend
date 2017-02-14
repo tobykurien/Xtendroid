@@ -1,11 +1,9 @@
 package org.xtendroid.annotations
 
 import android.app.Activity
+import android.app.Fragment
+import android.content.Loader
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentActivity
-import android.support.v4.app.LoaderManager
-import android.support.v4.content.Loader
 import android.view.View
 import java.lang.annotation.ElementType
 import java.lang.annotation.Target
@@ -16,6 +14,8 @@ import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
 import org.eclipse.xtend.lib.macro.declaration.Visibility
 
 import static extension org.xtendroid.utils.NamingUtils.*
+import android.app.LoaderManager
+import org.xtendroid.utils.ClassUtils
 
 /**
  * 
@@ -50,8 +50,8 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 		val mandatoryLoaderTypes = #['android.content.Loader', 'android.support.v4.content.Loader']
 		val loaderFields = clazz.declaredFields.filter[f|
 			!f.type.inferred /*&& f.initializer != null*/ && (
-			android.content.Loader.newTypeReference.isAssignableFrom(f.type) ||
-				Loader.newTypeReference.isAssignableFrom(f.type)
+			Loader.newTypeReference.isAssignableFrom(f.type) ||
+				ClassUtils.isExtending(f.type, "android.support.v4.content.Loader")
 		)]
 		// we also accept fields that are uninitialized, because this will result
 		// in broken first compilation that require a second build to complete
@@ -125,7 +125,7 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 			// that is already set.
 			isTypeActivity = true
 		} else if (Fragment.newTypeReference.isAssignableFrom(clazz.extendedClass) ||
-			android.app.Fragment.newTypeReference.isAssignableFrom(clazz.extendedClass)) {
+			Fragment.newTypeReference.isAssignableFrom(clazz.extendedClass)) {
 			val onViewCreatedMethod = clazz.findDeclaredMethod('onViewCreated')
 			val onActivityCreatedMethod = clazz.findDeclaredMethod('onActivityCreated')
 			val onStartMethod = clazz.findDeclaredMethod('onStart')
@@ -195,11 +195,11 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 			'''
 		}
 		
-		if (usingSupportCallbacks && isTypeActivity) {
-			if (!FragmentActivity.newTypeReference.isAssignableFrom(clazz.extendedClass))
-				clazz.addError(
-					"Your Activity type must extend android.support.v4.app.FragmentActivity, to use android.app.LoaderManager$LoaderCallbacks")
-		}
+//		if (usingSupportCallbacks && isTypeActivity) {
+//			if (!FragmentActivity.newTypeReference.isAssignableFrom(clazz.extendedClass))
+//				clazz.addError(
+//					"Your Activity type must extend android.support.v4.app.FragmentActivity, to use android.app.LoaderManager$LoaderCallbacks")
+//		}
 
 		// add initLoaders method
 		val String _initString = initString.toString
@@ -230,7 +230,7 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 				returnType = if (usingSupportCallbacks)
 					Loader.newTypeReference
 				else
-					android.content.Loader.newTypeReference
+					Loader.newTypeReference
 				visibility = Visibility.PUBLIC
 				body = [
 					'''
@@ -247,7 +247,7 @@ class AndroidLoaderProcessor extends AbstractClassProcessor {
 				returnType = if (usingSupportCallbacks)
 					Loader.newTypeReference
 				else
-					android.content.Loader.newTypeReference
+					Loader.newTypeReference
 				visibility = Visibility.PRIVATE
 				body = [
 					'''

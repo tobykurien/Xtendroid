@@ -1,6 +1,5 @@
 package org.xtendroid.annotations
 
-import android.support.v4.app.Fragment
 import android.view.View
 import org.eclipse.xtend.lib.macro.AbstractFieldProcessor
 import org.eclipse.xtend.lib.macro.Active
@@ -9,6 +8,8 @@ import org.eclipse.xtend.lib.macro.declaration.MutableFieldDeclaration
 import org.eclipse.xtend.lib.macro.declaration.Visibility
 
 import static extension org.xtendroid.utils.Utils.*
+import android.app.Fragment
+import org.xtendroid.utils.ClassUtils
 
 @Active(typeof(AndroidViewProcessor))
 annotation AndroidView {
@@ -21,10 +22,10 @@ class AndroidViewProcessor extends AbstractFieldProcessor {
       field.simpleName = "_" + fieldName
       
       val fragmentType = android.app.Fragment?.newTypeReference
-      val supportFragmentType = Fragment?.newTypeReference
+      //val supportFragmentType = Fragment?.newTypeReference
       
-      if (fragmentType != null && fragmentType.type.isAssignableFrom(field.declaringType) ||
-            supportFragmentType != null && supportFragmentType.type.isAssignableFrom(field.declaringType)) {
+      if (fragmentType != null && fragmentType.type.isAssignableFrom(field.declaringType)
+              || ClassUtils.isExtending(field.declaringType, "android.support.v4.app.Fragment")) {
          // for fragments, add a findViewById method
          var exists = field.declaringType.declaredMethods.exists[m| m.simpleName == "findViewById"]
          if (!exists) field.declaringType.addMethod("findViewById") [

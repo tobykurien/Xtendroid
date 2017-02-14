@@ -6,9 +6,9 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.os.Handler
-import android.support.v4.app.Fragment
-import android.support.v4.app.NotificationCompat
 import android.widget.Toast
+import android.app.Notification
+import android.app.Fragment
 
 /**
  * UI-based utilities for common UI tasks like toast, confirm, notification
@@ -38,10 +38,10 @@ class AlertUtils {
       var mNotificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE)
             as NotificationManager;
 
-      var mBuilder = new NotificationCompat.Builder(context)
+      var mBuilder = new Notification.Builder(context)
          .setSmallIcon(iconResId)
          .setContentTitle(context.getString(title))
-         .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
+         .setStyle(new Notification.BigTextStyle().bigText(message))
          .setContentText(message);
 
       mBuilder.setContentIntent(intent);

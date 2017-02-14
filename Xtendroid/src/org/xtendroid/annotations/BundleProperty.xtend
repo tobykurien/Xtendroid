@@ -13,6 +13,7 @@ import org.eclipse.xtend.lib.macro.declaration.MutableFieldDeclaration
 import org.eclipse.xtend.lib.macro.declaration.Visibility
 import android.os.Parcelable
 import org.eclipse.xtend.lib.macro.declaration.TypeReference
+import org.xtendroid.utils.ClassUtils
 
 @Active(BundlePropertyProcessor)
 @Target(ElementType.FIELD)
@@ -133,8 +134,8 @@ class BundlePropertyProcessor extends AbstractFieldProcessor {
       }
             
       val isDataSourceActivity = Activity.findTypeGlobally.isAssignableFrom(clazz)
-      val isDataSourceFragment = Fragment.findTypeGlobally.isAssignableFrom(clazz) ||
-         android.support.v4.app.Fragment.findTypeGlobally.isAssignableFrom(clazz) // TODO discuss if we should still support api level < 14
+      val isDataSourceFragment = Fragment.findTypeGlobally.isAssignableFrom(clazz)
+              || ClassUtils.isExtending(clazz, "android.support.v4.app.Fragment")
 
       //		val bundleField = clazz.declaredFields.findFirst[f|f.type.equals(Bundle.newTypeReference)
       //			&& (f.annotations.findFirst[a|a.equals(BundleProperty.newAnnotationReference)] == null)

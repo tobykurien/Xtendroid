@@ -1,8 +1,8 @@
 package org.xtendroid.utils
 
-import android.support.v4.content.AsyncTaskLoader
 import android.content.Context
 import android.app.Activity
+import android.content.AsyncTaskLoader
 
 /**
  * 
