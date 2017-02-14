@@ -316,6 +316,8 @@ The wiki has a [list of some projects that make use of Xtendroid][apps list], in
 Getting Started
 ===============
 
+[Watch this screencast][screencast] for getting started with Xtendroid in Android Studio.
+
 Setup [Eclipse][Xtend] or [Android Studio][android_studio] with the Xtend plugin.
 
 Clone the [XtendApp skeleton app][xtendapp] to jump-start your project. It is a pre-configured skeleton Xtendroid app for Android Studio 2+.
@@ -416,3 +418,4 @@ Some Xtend Gradle plugin gotchas:
 [android-groovy-support]: https://github.com/tobykurien/android-groovy-support 
 [webapps]: https://github.com/tobykurien/webapps
 [apps list]: https://github.com/tobykurien/Xtendroid/wiki/List-of-projects-using-Xtendroid
+[screencast]: https://www.youtube.com/watch?v=e00c28adN2g
