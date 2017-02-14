@@ -163,7 +163,7 @@ class AndroidJsonizedProcessor extends AbstractClassProcessor {
                         «_memberName».clear();
                     }
 
-                    for (int i=0; i<arr.size(); i++) {
+                    for (int i=0; i<arr.length(); i++) {
                         «IF basicType.isNotJSONObject(context)»
                             «_memberName».add(arr.opt«basicType.simpleName.toFirstUpper»(i));
                         «ELSE»
